@@ -74,7 +74,7 @@ export default function Register() {
     return (
         <div className="register-page">
             <main className="register-main">
-                {/* Left Side: Value Proposition & Branding */}
+                {/* Cột trái: Giá trị cốt lõi & Thương hiệu */}
                 <section className="register-sidebar">
                     <div className="sidebar-bg-wrapper">
                         <img
@@ -100,13 +100,13 @@ export default function Register() {
                             <div className="feature-cards">
                                 <div className="glass-card">
                                     <span className="material-symbols-outlined card-icon">verified_user</span>
-                                    <h3 className="card-title">Verified Listings</h3>
-                                    <p className="card-desc">Every property is hand-inspected for quality.</p>
+                                    <h3 className="card-title">Phòng đã xác thực</h3>
+                                    <p className="card-desc">Mọi bất động sản đều được kiểm định chất lượng thủ công.</p>
                                 </div>
                                 <div className="glass-card">
                                     <span className="material-symbols-outlined card-icon">electric_bolt</span>
-                                    <h3 className="card-title">Smart Matching</h3>
-                                    <p className="card-desc">Find the lifestyle that fits your goals.</p>
+                                    <h3 className="card-title">Kết nối thông minh</h3>
+                                    <p className="card-desc">Tìm kiếm phong cách sống phù hợp với mục tiêu của bạn.</p>
                                 </div>
                             </div>
                         </div>
@@ -116,17 +116,17 @@ export default function Register() {
                                 <div className="avatar dummy-avatar-1"></div>
                                 <div className="avatar dummy-avatar-2"></div>
                             </div>
-                            <span>Joined by 5,000+ students this semester</span>
+                            <span>Hơn 5,000+ sinh viên đã tham gia trong học kỳ này</span>
                         </div>
                     </div>
                 </section>
 
-                {/* Right Side: Registration Form */}
+                {/* Cột phải: Form đăng ký */}
                 <section className="register-form-section">
                     <div className="form-wrapper">
                         <div className="form-header">
-                            <h2 className="form-title">Create your account</h2>
-                            <p className="form-subtitle">Start your journey toward a curated sanctuary today.</p>
+                            <h2 className="form-title">Tạo tài khoản mới</h2>
+                            <p className="form-subtitle">Bắt đầu hành trình tìm kiếm không gian sống mơ ước ngay hôm nay.</p>
                         </div>
 
                         {/* HIỂN THỊ THÔNG BÁO LỖI / THÀNH CÔNG */}
@@ -142,26 +142,26 @@ export default function Register() {
                         )}
 
                         <form className="register-form" onSubmit={handleSubmit}>
-                            {/* User Role Toggle */}
+                            {/* Lựa chọn vai trò người dùng */}
                             <div className="role-toggle">
                                 <button
                                     type="button"
                                     className={`toggle-btn ${role === 'student' ? 'active' : ''}`}
                                     onClick={() => setRole('student')}
                                 >
-                                    Student
+                                    Sinh viên
                                 </button>
                                 <button
                                     type="button"
                                     className={`toggle-btn ${role === 'landlord' ? 'active' : ''}`}
                                     onClick={() => setRole('landlord')}
                                 >
-                                    Landlord
+                                    Chủ nhà
                                 </button>
                             </div>
 
                             <div className="form-grid">
-                                {/* Full Name */}
+                                {/* Họ và Tên */}
                                 <div className="input-group">
                                     <label className="input-label">Full Name</label>
                                     <input
@@ -205,7 +205,7 @@ export default function Register() {
 
                                     {/* University */}
                                     <div className="input-group">
-                                        <label className="input-label">University</label>
+                                        <label className="input-label">Trường đại học</label>
                                         <div className="select-wrapper">
                                             <select
                                                 className="text-input select-input"
@@ -225,7 +225,7 @@ export default function Register() {
                                     </div>
                                 </div>
 
-                                {/* Password */}
+                                {/* Mật khẩu */}
                                 <div className="input-group">
                                     <label className="input-label">Password</label>
                                     <input
@@ -239,7 +239,7 @@ export default function Register() {
                                     />
                                 </div>
 
-                                {/* Confirm Password */}
+                                {/* Xác nhận mật khẩu */}
                                 <div className="input-group">
                                     <label className="input-label">Confirm Password</label>
                                     <input
@@ -254,11 +254,11 @@ export default function Register() {
                                 </div>
                             </div>
 
-                            {/* Checkbox */}
+                            {/* Điều khoản */}
                             <div className="checkbox-group">
                                 <input type="checkbox" id="terms" className="checkbox-input" required />
                                 <label htmlFor="terms" className="checkbox-label">
-                                    I agree to the <a href="#!" className="link">Terms of Service</a> and <a href="#!" className="link">Privacy Policy</a>.
+                                    Tôi đồng ý với các <a href="#!" className="link">Điều khoản dịch vụ</a> và <a href="#!" className="link">Chính sách bảo mật</a>.
                                 </label>
                             </div>
 
@@ -273,14 +273,14 @@ export default function Register() {
                             </button>
 
                             <p className="login-prompt">
-                                Already have an account? <Link to="/login" className="link font-bold">Sign In</Link>
+                                Bạn đã có tài khoản? <Link to="/login" className="link font-bold">Đăng nhập ngay</Link>
                             </p>
                         </form>
                     </div>
                 </section>
             </main>
 
-            {/* Footer */}
+            {/* Chân trang */}
             <footer className="footer-container">
                 {/* ... (Giữ nguyên) ... */}
             </footer>
