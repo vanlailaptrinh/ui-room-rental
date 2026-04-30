@@ -1,0 +1,8 @@
+$kind: http-request
+url: http://localhost:8080/room-rental/api/posts/873cfd3d-637f-4635-9a7c-3dfc866fec3b
+method: DELETE
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIyMjEzMDI5OUBzdC5oY211YWYuZWR1LnZuIiwicm9sZSI6IkxBTkRMT1JEIiwidHlwZSI6IkFDQ0VTUyIsImlhdCI6MTc3NjEzNDExNiwiZXhwIjoxNzc2MTM3NzE2fQ.j_fB5pXhjcsD9LiI_XV2RtBgWWLtxi-alLTumenOgYy_FAU1Xvep86-estwkMlz4
+order: 4000

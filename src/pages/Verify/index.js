@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { verifyOtpApi, resendOtpApi } from '../../services/authService';
+// import { verifyOtpApi, resendOtpApi } from '../../services/authService';
+import AuthService from '../../services/authService';
+
 import './Verify.css';
 
 export default function Verify() {
@@ -82,7 +84,7 @@ export default function Verify() {
 
         try {
             // Gọi API xác thực
-            await verifyOtpApi(email, otpString);
+            await AuthService.verifyOtp(email, otpString);
 
             setSuccess('Verification successful! Redirecting...');
 
@@ -110,7 +112,7 @@ export default function Verify() {
 
         try {
             // 1. Gọi API yêu cầu gửi lại OTP
-            await resendOtpApi(email);
+            await AuthService.readOnly(email);
 
             // 2. Thông báo thành công
             setSuccess('Mã OTP mới đã được gửi đến email của bạn!');

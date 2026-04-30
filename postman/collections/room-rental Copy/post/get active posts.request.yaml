@@ -1,0 +1,4 @@
+$kind: http-request
+url: http://localhost:8080/room-rental/api/posts/active
+method: GET
+order: 8000

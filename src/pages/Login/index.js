@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { loginApi } from '../../services/authService';
+// import { loginApi } from '../../services/authService';
+import AuthService from '../../services/authService';
 import { useAuth } from '../../context/authContext';
 import './Login.css';
 
@@ -19,14 +20,20 @@ export default function Login() {
         setIsLoading(true);
 
         try {
-            const data = await loginApi(username, password);
-            console.log('Đăng nhập thành công:', data);
+            const responseData = await AuthService.login(username, password);
+            console.log('Đăng nhập thành công:', responseData);
 
-            // Dùng hàm login của Context thay vì tự set localStorage
-            const token = data.token || data.accessToken;
+            // Dữ liệu thực sự nằm trong field "data" của JSON trả về
+            const authInfo = responseData.data; 
+            
+            // Kiểm tra xem có nhận được token không
+            if (!authInfo || !authInfo.accessToken) {
+                throw new Error('Không nhận được token từ server');
+            }
 
-            // Tạm thời truyền username vào làm dữ liệu user để Header hiển thị
-            login({ username: username }, token);
+            // SỬA Ở ĐÂY: Truyền toàn bộ object authInfo vào context
+            // Context sẽ tự động lưu localStorage và tự giải mã token ra thông tin thật
+            login(authInfo);
 
             // Chuyển hướng về trang chủ
             navigate("/");
