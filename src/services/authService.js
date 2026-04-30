@@ -5,13 +5,27 @@ const ENDPOINT = '/auth';
 
 const AuthService = {
 
+    // login: async (username, password) => {
+    //     try {
+    //         const response = await api.post(`${ENDPOINT}/login`, { username, password });
+    //         return response.data;
+    //     } catch (error) {
+    //         console.error("Error during login:", error);
+    //         // Lấy message từ backend trả về (nếu có), nếu không dùng câu thông báo mặc định
+    //         throw new Error(error.response?.data?.message || 'Sai tài khoản hoặc mật khẩu!');
+    //     }
+    // },
+
     login: async (username, password) => {
         try {
-            const response = await api.post(`${ENDPOINT}/login`, { username, password });
+            // SỬA Ở ĐÂY: Đổi key thành 'email' thay vì 'username'
+            const response = await api.post(`${ENDPOINT}/login`, { 
+                email: username, 
+                password: password 
+            });
             return response.data;
         } catch (error) {
             console.error("Error during login:", error);
-            // Lấy message từ backend trả về (nếu có), nếu không dùng câu thông báo mặc định
             throw new Error(error.response?.data?.message || 'Sai tài khoản hoặc mật khẩu!');
         }
     },

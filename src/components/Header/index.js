@@ -67,12 +67,33 @@ function Header() {
                 </div>
 
                 {/* 3. Render giao diện có điều kiện dựa trên trạng thái user */}
-                <div className="header-auth-section">
+                {/* <div className="header-auth-section">
                     {user ? (
                         // Nếu ĐÃ đăng nhập
                         <div className="user-profile" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                             <span className="welcome-text">
                                 Chào, <strong>{user.username}</strong>
+                            </span>
+                            <button onClick={handleLogoutClick} className="btn-logout" style={{ cursor: 'pointer', padding: '6px 12px', borderRadius: '4px', border: '1px solid #ccc', backgroundColor: '#f8f9fa' }}>
+                                Đăng xuất
+                            </button>
+                        </div>
+                    ) : (
+                        // Nếu CHƯA đăng nhập
+                        <button onClick={handleLoginClick} className="btn-login">
+                            Đăng nhập
+                        </button>
+                    )}
+                </div> */}
+
+                    {/* 3. Render giao diện có điều kiện dựa trên trạng thái user */}
+                <div className="header-auth-section">
+                    {user ? (
+                        // Nếu ĐÃ đăng nhập
+                        <div className="user-profile" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                            <span className="welcome-text">
+                                {/* ĐÃ SỬA user.username THÀNH user.email Ở ĐÂY 👇 */}
+                                Chào, <strong>{user.email}</strong>
                             </span>
                             <button onClick={handleLogoutClick} className="btn-logout" style={{ cursor: 'pointer', padding: '6px 12px', borderRadius: '4px', border: '1px solid #ccc', backgroundColor: '#f8f9fa' }}>
                                 Đăng xuất

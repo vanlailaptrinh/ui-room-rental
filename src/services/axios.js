@@ -5,7 +5,10 @@ const instance = axios.create({
 });
 instance.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
-    if (token) {
+    
+    // Nếu có token VÀ đường dẫn không chứa chữ '/auth' (không phải login/register)
+    // thì mới đính kèm token vào Header
+    if (token && !config.url.includes('/auth')) {
         config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
