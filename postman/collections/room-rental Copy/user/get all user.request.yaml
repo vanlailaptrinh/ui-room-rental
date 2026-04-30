@@ -1,0 +1,8 @@
+$kind: http-request
+url: http://localhost:8080/room-rental/api/users
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbnJvb21yZW50YWxAZ21haWwuY29tIiwicm9sZSI6IkFETUlOIiwidHlwZSI6IkFDQ0VTUyIsImlhdCI6MTc3NTk4OTc1MiwiZXhwIjoxNzc1OTkzMzUyfQ.LAF1t6EqQlfuRmusKI6xyA3w6JNkjeWA-5aOv7cbYrx7AbKYAoE2rSmt0gM9qVJI
+order: 2000

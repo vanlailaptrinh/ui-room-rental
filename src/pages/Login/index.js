@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { loginApi } from '../../services/authService';
+// import { loginApi } from '../../services/authService';
+import AuthService from '../../services/authService';
 import { useAuth } from '../../context/authContext';
 import './Login.css';
 
@@ -19,7 +20,7 @@ export default function Login() {
         setIsLoading(true);
 
         try {
-            const data = await loginApi(username, password);
+            const data = await AuthService.login(username, password);
             console.log('Đăng nhập thành công:', data);
 
             // Dùng hàm login của Context thay vì tự set localStorage

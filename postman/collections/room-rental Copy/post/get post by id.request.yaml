@@ -1,0 +1,6 @@
+$kind: http-request
+url: http://localhost:8080/room-rental/api/posts/a4f59f0b-2c7f-46fe-85ef-cb289e3c1d43
+method: GET
+auth:
+  type: noauth
+order: 5000

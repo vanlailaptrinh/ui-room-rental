@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { registerApi } from '../../services/authService';
+// import { registerApi } from '../../services/authService';
+import AuthService from '../../services/authService';
 import './Register.css';
+import { AiFillThunderbolt } from 'react-icons/ai';
 
 export default function Register() {
     const navigate = useNavigate();
@@ -55,7 +57,7 @@ export default function Register() {
             };
 
             // 3. Gọi API
-            const data = await registerApi(payload);
+            const data = await AuthService.register(payload);
 
             setSuccess('Registration successful! Redirecting to login...'); // Đăng ký thành công
 
