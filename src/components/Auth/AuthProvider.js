@@ -1,49 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import { AuthContext } from '../../context/authContext'; // Import cái khung từ thư mục context
+import { AuthContext } from '../../context/authContext';
+import { getUserProfile } from '../../services/userService';
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // KIỂM TRA TRẠNG THÁI KHI MỞ TRANG (F5)
-    useEffect(() => {
-        const accessToken = localStorage.getItem('accessToken');
-        if (accessToken) {
-            try {
-                const decoded = jwtDecode(accessToken);
-                const currentTime = Date.now() / 1000;
+    const refreshUserProfile = async () => {
+        try {
+            const response = await getUserProfile();
+            const userData = response.data;
 
-                if (decoded.exp < currentTime) {
-                    logout();
-                } else {
-                    // Lấy email từ 'sub' và role như trong hình Postman bạn gửi
-                    setUser({ email: decoded.sub, role: decoded.role });
-                }
-            } catch (error) {
-                logout();
+            if (userData) {
+                setUser(prev => ({ ...prev, ...userData }));
             }
+        } catch (error) {
+            console.error("Không thể lấy thông tin chi tiết user:", error);
         }
-        setLoading(false);
+    };
+
+    useEffect(() => {
+        const initAuth = async () => {
+            const accessToken = localStorage.getItem('accessToken');
+            if (accessToken) {
+                try {
+                    const decoded = jwtDecode(accessToken);
+                    const currentTime = Date.now() / 1000;
+
+                    if (decoded.exp < currentTime) {
+                        logout();
+                    } else {
+                        setUser({ email: decoded.sub, role: decoded.role });
+
+                        await refreshUserProfile();
+                    }
+                } catch (error) {
+                    logout();
+                }
+            }
+            setLoading(false);
+        };
+
+        initAuth();
     }, []);
 
-    // HÀM ĐĂNG NHẬP: Xử lý lưu 2 token và giải mã role
-    const login = (authInfo) => {
-        // 1. Lưu 2 token vào Local Storage
+    const login = async (authInfo) => {
         localStorage.setItem('accessToken', authInfo.accessToken);
         localStorage.setItem('refreshToken', authInfo.refreshToken);
 
-        // 2. Giải mã token lấy thông tin
         const decoded = jwtDecode(authInfo.accessToken);
-        
-        // 3. Cập nhật state toàn cục
-        setUser({ 
-            email: decoded.sub, 
-            role: decoded.role 
-        });
+        setUser({ email: decoded.sub, role: decoded.role });
+
+        await refreshUserProfile();
     };
 
-    // HÀM ĐĂNG XUẤT
     const logout = () => {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
@@ -51,7 +62,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading, isAuthenticated: !!user }}>
+        <AuthContext.Provider value={{ user, login, logout, loading, isAuthenticated: !!user, refreshUserProfile }}>
             {!loading && children}
         </AuthContext.Provider>
     );

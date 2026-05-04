@@ -1,21 +1,93 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Profile.css';
 import { IconChevronRight } from '../../assets/Icons';
 import PropertyCard from "../../components/PropertyCard";
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/authContext';
+import { getUserProfile, updateProfile } from '../../services/userService';
 
 function Profile() {
-    // State quản lý tab đang được chọn. Mặc định là 'personal' (Thông tin cá nhân)
     const [activeTab, setActiveTab] = useState('personal');
+    const { user, logout, refreshUserProfile } = useAuth();
+    const navigate = useNavigate();
+    // State quản lý trạng thái loading khi bấm nút Lưu
+    const [isSaving, setIsSaving] = useState(false);
 
-    // Hàm xử lý khi bấm chuyển tab
+    // 1. Tạo state để lưu trữ dữ liệu form đang nhập
+    const [formData, setFormData] = useState({
+        fullName: '',
+        phone: '',
+        address: ''
+    });
+
+    // 2. Khi biến 'user' có dữ liệu (API load xong), cập nhật vào form ngay
+    useEffect(() => {
+        const fetchFullProfile = async () => {
+            try {
+                // Gọi API lấy dữ liệu từ Backend
+                const response = await getUserProfile();
+                const userData = response.data;
+
+                setFormData({
+                    fullName: userData.username || '',
+                    phone: userData.phone || '',
+                    address: userData.address || ''
+                });
+            } catch (error) {
+                console.error("Lỗi khi tải thông tin profile:", error);
+            }
+        };
+
+        fetchFullProfile();
+    }, []);
+
     const handleTabChange = (e, tabName) => {
-        e.preventDefault(); // Ngăn trình duyệt nhảy trang (reload hoặc nhảy thẻ a)
+        e.preventDefault();
         setActiveTab(tabName);
+    };
+
+    const handleLogoutClick = () => {
+        logout();
+        navigate('/login');
+    };
+
+    // 3. Hàm xử lý khi gõ chữ vào input
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    // 4. Hàm xử lý khi bấm "Lưu thay đổi"
+    const handleSaveChanges = async () => {
+        try {
+            setIsSaving(true);
+
+            const dataToSubmit = {
+                username: formData.fullName,
+                phone: formData.phone,
+                address: formData.address
+            };
+            console.log("Dữ liệu thực tế gửi đi:", dataToSubmit);
+
+            const response = await updateProfile(dataToSubmit);
+            console.log("Phản hồi từ BE:", response);
+            alert("Cập nhật thông tin thành công!");
+            await refreshUserProfile();
+
+
+        } catch (error) {
+            console.error("Lỗi khi cập nhật:", error);
+            alert("Có lỗi xảy ra khi cập nhật. Vui lòng thử lại!");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
         <main className="account-container">
-            {/* ================= SIDEBAR ================= */}
             <aside className="account-sidebar">
                 <div className="sidebar-header">
                     <span className="account-type">Tài khoản sinh viên</span>
@@ -45,7 +117,7 @@ function Profile() {
                     </a>
                     <a
                         href="#history"
-                        className={`nav-item ${activeTab === 'calendar' ? 'active' : ''}`}
+                        className={`nav-item ${activeTab === 'history' ? 'active' : ''}`}
                         onClick={(e) => handleTabChange(e, 'history')}
                     >
                         <span className="material-symbols-outlined">history</span>
@@ -66,12 +138,12 @@ function Profile() {
                 </nav>
 
                 <div className="sidebar-footer">
-                    <button className="btn-secondary-full">Đăng xuất</button>
+                    {/* Gắn hàm Đăng xuất vào đây */}
+                    <button onClick={handleLogoutClick} className="btn-secondary-full">Đăng xuất</button>
                 </div>
             </aside>
 
             <section className="account-content">
-
                 {activeTab === 'personal' && (
                     <div className="fade-in-animation">
                         <header className="content-header">
@@ -82,7 +154,10 @@ function Profile() {
                         <div className="account-card main-form">
                             <div className="avatar-section">
                                 <div className="avatar-wrapper">
-                                    <img src="https://i.pravatar.cc/150?u=an" alt="Avatar"/>
+                                    <img
+                                        src={user?.avatar || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=150"}
+                                        alt="Avatar"
+                                    />
                                     <button className="btn-edit-avatar">
                                         <span className="material-symbols-outlined">edit</span>
                                     </button>
@@ -96,25 +171,43 @@ function Profile() {
                             <div className="form-grid">
                                 <div className="input-group">
                                     <label>Họ và tên</label>
-                                    <input type="text" defaultValue="Nguyễn Văn An"/>
+                                    <input
+                                        type="text"
+                                        name="fullName"
+                                        value={formData.fullName}
+                                        onChange={handleInputChange}
+                                    />
                                 </div>
                                 <div className="input-group">
                                     <label>Email liên hệ</label>
-                                    <input type="email" defaultValue="an.nguyen@student.edu.vn"/>
+                                    {/* Email thường không cho sửa */}
+                                    <input type="email" value={user?.email || ''} readOnly className="readonly-input"/>
                                 </div>
                                 <div className="input-group">
                                     <label>Số điện thoại</label>
-                                    <input type="tel" defaultValue="090 1234 567"/>
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        value={formData.phone}
+                                        onChange={handleInputChange}
+                                    />
                                 </div>
                                 <div className="input-group">
                                     <label>Địa chỉ</label>
-                                    <input type="text" defaultValue="Đường số 6, linh trung, thủ đức, tp.HCM"/>
+                                    <input
+                                        type="text"
+                                        name="address"
+                                        value={formData.address}
+                                        onChange={handleInputChange}
+                                    />
                                 </div>
                             </div>
 
                             <div className="form-actions">
                                 <button className="btn-ghost">Hủy bỏ</button>
-                                <button className="btn-primary-lg">Lưu thay đổi</button>
+                                <button className="btn-primary-lg" onClick={handleSaveChanges} disabled={isSaving}>
+                                    {isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
+                                </button>
                             </div>
                         </div>
 

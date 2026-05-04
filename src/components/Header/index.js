@@ -7,7 +7,6 @@ import { useAuth } from '../../context/authContext';
 function Header() {
     const navigate = useNavigate();
 
-    // 2. Gọi user và hàm logout từ AuthContext
     const { user, logout } = useAuth();
 
     const handleLoginClick = () => {
@@ -16,8 +15,8 @@ function Header() {
 
     // Hàm xử lý đăng xuất
     const handleLogoutClick = () => {
-        logout(); // Xóa thông tin user và token trong Context & localStorage
-        navigate('/login'); // Chuyển hướng người dùng về lại trang đăng nhập (hoặc trang chủ '/')
+        logout();
+        navigate('/login');
     };
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -92,8 +91,7 @@ function Header() {
                         // Nếu ĐÃ đăng nhập
                         <div className="user-profile" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                             <span className="welcome-text">
-                                {/* ĐÃ SỬA user.username THÀNH user.email Ở ĐÂY 👇 */}
-                                Chào, <strong>{user.email}</strong>
+                                Chào, <strong>{user.username}</strong>
                             </span>
                             <button onClick={handleLogoutClick} className="btn-logout" style={{ cursor: 'pointer', padding: '6px 12px', borderRadius: '4px', border: '1px solid #ccc', backgroundColor: '#f8f9fa' }}>
                                 Đăng xuất
