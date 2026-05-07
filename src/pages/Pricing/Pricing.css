@@ -1,302 +1,405 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0');
-
-/* Variables */
-:root {
-    --primary: #4F46E5;
-    --primary-gradient: linear-gradient(135deg, #4F46E5, #3730A3);
-    --secondary: #0EA5E9;
-    --bg-main: #F9FAFB;
-    --bg-card: #FFFFFF;
-    --text-main: #111827;
-    --text-sub: #4B5563;
-    --text-light: #9CA3AF;
-    --border: #E5E7EB;
-    --radius-lg: 16px;
-    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-}
-
-.pricing-container {
-    font-family: 'Inter', sans-serif;
+/* Container chính */
+.nexus-pricing-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 100px 24px;
-    color: var(--text-main);
+    padding: 60px 20px;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #333;
 }
 
-/* --- HEADER & TOGGLE --- */
-.pricing-header {
+/* Header & Toggle */
+.nexus-pricing-header {
     text-align: center;
-    margin-bottom: 64px;
+    margin-bottom: 50px;
 }
 
-.pricing-header h1 {
-    font-size: 3.5rem;
-    font-weight: 800;
-    margin-bottom: 24px;
-    letter-spacing: -1px;
+.nexus-pricing-header h1 {
+    font-size: 36px;
+    color: #111827;
+    margin-bottom: 16px;
 }
 
-.pricing-header p {
-    font-size: 1.125rem;
-    color: var(--text-sub);
+.nexus-pricing-header p {
+    font-size: 16px;
+    color: #6b7280;
     max-width: 600px;
-    margin: 0 auto 40px;
+    margin: 0 auto 30px auto;
 }
 
-.toggle-wrapper {
+.nexus-pricing-toggle-wrapper {
     display: inline-flex;
-    background: #E2E8F0;
+    background-color: #f3f4f6;
     padding: 6px;
     border-radius: 50px;
 }
 
-.toggle-btn {
+.nexus-pricing-toggle-btn {
+    padding: 10px 24px;
     border: none;
     background: transparent;
-    padding: 10px 32px;
     border-radius: 50px;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text-sub);
+    font-size: 16px;
+    font-weight: 600;
+    color: #4b5563;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.toggle-btn.active {
-    background: var(--bg-card);
-    color: var(--primary);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+.nexus-pricing-toggle-btn.active {
+    background-color: #ffffff;
+    color: #0ea5e9; /* Màu xanh chủ đạo */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* --- PRICING GRID --- */
-.pricing-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 32px;
-    margin-bottom: 96px;
+/* Pricing Grid & Cards */
+.nexus-pricing-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: center;
+    margin-bottom: 80px;
 }
 
-.pricing-card {
-    background: var(--bg-card);
-    border-radius: var(--radius-lg);
-    padding: 32px;
+.nexus-pricing-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    width: 340px;
+    padding: 32px 24px;
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--border);
+    position: relative;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.pricing-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
+.nexus-pricing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
 }
 
-.pro-card {
-    position: relative;
-    border: 2px solid var(--primary);
-    box-shadow: var(--shadow-xl);
-    transform: scale(1.05);
-    z-index: 10;
-}
-
-.pro-card:hover {
-    transform: scale(1.05) translateY(-4px);
-}
-
-.popular-badge {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #E0F2FE;
-    color: #0C4A6E;
-    padding: 4px 24px;
-    border-radius: 50px;
-    font-size: 12px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.card-header { margin-bottom: 32px; }
-.card-header h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
-.card-header p { color: var(--text-sub); font-size: 0.875rem; height: 40px; }
-
-.card-price { margin-bottom: 32px; }
-.card-price .price { font-size: 2.5rem; font-weight: 800; }
-.card-price .period { color: var(--text-sub); font-size: 0.875rem; }
-
-.card-features {
-    list-style: none;
-    padding: 0;
-    margin-bottom: 40px;
-    flex-grow: 1;
-}
-
-.card-features li {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 0.875rem;
-    margin-bottom: 16px;
-    color: var(--text-sub);
-}
-
-.card-features li.disabled { opacity: 0.5; }
-.text-success { color: var(--secondary); font-variation-settings: 'FILL' 1; }
-
-.btn-outline, .btn-primary {
-    width: 100%;
-    padding: 16px;
-    border-radius: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    transition: transform 0.2s;
-}
-
-.btn-outline {
-    background: #F1F5F9;
-    color: #334155;
-}
-
-.btn-primary {
-    background: var(--primary-gradient);
-    color: white;
-    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
-}
-
-.btn-outline:hover, .btn-primary:hover {
+.nexus-pricing-pro-card {
+    border: 2px solid #0ea5e9;
+    box-shadow: 0 8px 20px rgba(14, 165, 233, 0.15);
     transform: scale(1.02);
 }
 
-/* --- TRUST SECTION --- */
-.trust-section {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 24px;
-    margin-bottom: 96px;
+.nexus-pricing-pro-card:hover {
+    transform: scale(1.02) translateY(-5px);
 }
 
-.trust-main {
-    position: relative;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    padding: 48px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    color: white;
-    min-height: 400px;
-    background: var(--primary);
-}
-
-.trust-bg {
+.nexus-pricing-popular-badge {
     position: absolute;
-    inset: 0;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0ea5e9;
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.nexus-pricing-card-header h3 {
+    margin: 0 0 8px 0;
+    font-size: 22px;
+    color: #111827;
+}
+
+.nexus-pricing-card-header p {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0;
+    min-height: 40px;
+}
+
+.nexus-pricing-card-price-box {
+    margin: 24px 0;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.nexus-pricing-price {
+    font-size: 36px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.nexus-pricing-period {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.nexus-pricing-card-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 32px 0;
+    flex-grow: 1;
+}
+
+.nexus-pricing-card-features li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    font-size: 15px;
+    color: #374151;
+}
+
+.nexus-pricing-icon-success {
+    color: #10b981;
+    font-size: 20px !important;
+}
+
+.nexus-pricing-disabled {
+    color: #9ca3af !important;
+}
+
+.nexus-pricing-disabled span {
+    color: #9ca3af;
+    font-size: 20px !important;
+}
+
+.nexus-pricing-btn-outline {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nexus-pricing-btn-outline:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.nexus-pricing-btn-primary {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: #0ea5e9;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nexus-pricing-btn-primary:hover {
+    background: #0284c7;
+}
+
+/* Trust Section */
+.nexus-pricing-trust-section {
+    margin-bottom: 80px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.nexus-pricing-trust-main {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 300px;
+}
+
+.nexus-pricing-trust-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0.4;
-    mix-blend-mode: overlay;
+    z-index: 1;
 }
 
-.trust-content { position: relative; z-index: 1; }
-.trust-content h2 { font-size: 1.875rem; font-weight: 700; margin-bottom: 16px; }
-.trust-content p { max-width: 500px; margin-bottom: 24px; opacity: 0.9; line-height: 1.6; }
+.nexus-pricing-trust-main::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(17, 24, 39, 0.9), rgba(17, 24, 39, 0.4));
+    z-index: 2;
+}
 
-.tags span {
+.nexus-pricing-trust-content {
+    position: relative;
+    z-index: 3;
+    padding: 40px;
+    color: #fff;
+    max-width: 600px;
+}
+
+.nexus-pricing-trust-content h2 {
+    font-size: 32px;
+    margin: 0 0 16px 0;
+}
+
+.nexus-pricing-trust-content p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #e5e7eb;
+    margin-bottom: 24px;
+}
+
+.nexus-pricing-tags span {
+    display: inline-block;
     background: rgba(255,255,255,0.2);
-    backdrop-filter: blur(8px);
-    padding: 8px 16px;
+    padding: 6px 14px;
     border-radius: 50px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-right: 12px;
+    font-size: 14px;
+    margin-right: 10px;
+    backdrop-filter: blur(4px);
 }
 
-.trust-stats {
-    background: #E0F2FE;
-    border-radius: var(--radius-lg);
-    padding: 32px;
+.nexus-pricing-trust-stats {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 24px;
+    flex-wrap: wrap;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
 }
 
-.stat-item {
+.nexus-pricing-stat-item {
+    flex: 1;
+    min-width: 250px;
     display: flex;
     align-items: center;
     gap: 16px;
+    padding: 30px;
+    border-right: 1px solid #e2e8f0;
 }
 
-.icon-circle {
+.nexus-pricing-stat-item:last-child {
+    border-right: none;
+}
+
+.nexus-pricing-icon-circle {
     width: 48px;
     height: 48px;
-    background: white;
+    background: #e0f2fe;
+    color: #0ea5e9;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--secondary);
 }
 
-.stat-item strong { font-size: 1rem; color: #0C4A6E; }
-.stat-item p { font-size: 0.75rem; color: #0C4A6E; opacity: 0.75; margin-top: 4px; }
+.nexus-pricing-stat-item strong {
+    display: block;
+    font-size: 18px;
+    color: #111827;
+}
 
-/* --- FAQ SECTION --- */
-.faq-section { max-width: 800px; margin: 0 auto; }
-.faq-section h2 { text-align: center; font-size: 1.875rem; font-weight: 700; margin-bottom: 48px; }
+.nexus-pricing-stat-item p {
+    margin: 4px 0 0 0;
+    font-size: 14px;
+    color: #6b7280;
+}
 
-.faq-list { display: flex; flex-direction: column; gap: 16px; }
+/* FAQ Section */
+.nexus-pricing-faq-section {
+    max-width: 800px;
+    margin: 0 auto;
+}
 
-.faq-item {
-    background: #F1F5F9;
+.nexus-pricing-faq-section h2 {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 40px;
+    color: #111827;
+}
+
+.nexus-pricing-faq-item {
+    border: 1px solid #e5e7eb;
     border-radius: 12px;
-    padding: 24px;
-    cursor: pointer;
-    transition: background 0.2s;
+    margin-bottom: 16px;
+    background: #fff;
+    overflow: hidden;
+    transition: all 0.3s;
 }
 
-.faq-item:hover { background: #E2E8F0; }
+.nexus-pricing-faq-item.open {
+    border-color: #0ea5e9;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1);
+}
 
-.faq-question {
+.nexus-pricing-faq-question {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-weight: 700;
-    color: var(--text-main);
+    padding: 20px;
+    cursor: pointer;
+    user-select: none;
 }
 
-.faq-answer {
+.nexus-pricing-faq-question h4 {
+    margin: 0;
+    font-size: 16px;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.nexus-pricing-faq-question span {
+    color: #6b7280;
+    transition: transform 0.3s;
+}
+
+.nexus-pricing-faq-item.open .nexus-pricing-faq-question span {
+    color: #0ea5e9;
+    transform: rotate(180deg);
+}
+
+.nexus-pricing-faq-answer {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease, margin-top 0.3s ease;
+    padding: 0 20px;
+    background: #f9fafb;
+    transition: max-height 0.3s ease, padding 0.3s ease;
 }
 
-.faq-answer p {
-    color: var(--text-sub);
-    font-size: 0.875rem;
+.nexus-pricing-faq-item.open .nexus-pricing-faq-answer {
+    max-height: 200px; /* Số lớn đủ để hiện nội dung */
+    padding: 20px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.nexus-pricing-faq-answer p {
+    margin: 0;
+    color: #4b5563;
+    font-size: 15px;
     line-height: 1.6;
 }
 
-.faq-item.open .faq-answer {
-    max-height: 200px;
-    margin-top: 16px;
-}
-
-/* --- RESPONSIVE --- */
-@media (max-width: 992px) {
-    .pricing-grid { grid-template-columns: 1fr; gap: 40px; }
-    .pro-card { transform: scale(1); }
-    .pro-card:hover { transform: translateY(-4px); }
-    .trust-section { grid-template-columns: 1fr; }
-}
-
+/* Responsive */
 @media (max-width: 768px) {
-    .pricing-header h1 { font-size: 2.5rem; }
-    .pricing-container { padding: 40px 16px; }
+    .nexus-pricing-card, .nexus-pricing-pro-card {
+        width: 100%;
+        max-width: 400px;
+        transform: none;
+    }
+
+    .nexus-pricing-pro-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .nexus-pricing-stat-item {
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .nexus-pricing-stat-item:last-child {
+        border-bottom: none;
+    }
 }
