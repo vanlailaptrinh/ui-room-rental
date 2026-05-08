@@ -1,4 +1,0 @@
-$kind: http-request
-url: http://localhost:8080/room-rental/api/users
-method: GET
-order: 2000

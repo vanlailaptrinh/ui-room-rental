@@ -1,4 +1,0 @@
-$kind: http-request
-url: http://localhost:8080/room-rental/api/amenities/ce78e12b-e45a-4139-b021-e7fde89e0a39
-method: GET
-order: 5000
