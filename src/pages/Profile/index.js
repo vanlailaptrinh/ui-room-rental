@@ -5,12 +5,15 @@ import PropertyCard from "../../components/PropertyCard";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
 import { getUserProfile, updateProfile } from '../../services/userService';
+import PostService from '../../services/postService';
 
 function Profile() {
     const [activeTab, setActiveTab] = useState('personal');
     const { user, logout, refreshUserProfile } = useAuth();
     const navigate = useNavigate();
     const [isSaving, setIsSaving] = useState(false);
+    const [viewHistory, setViewHistory] = useState([]);
+    const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
     const [formData, setFormData] = useState({
         username: '',
@@ -22,14 +25,10 @@ function Profile() {
         const fetchFullProfile = async () => {
             try {
                 const res = await getUserProfile();
-                // Log để kiểm tra thực tế BE trả về gì: res hay res.data?
-                console.log("Dữ liệu profile nhận được:", res);
-
-                // Giả sử res chính là data object từ axios instance của bạn
                 const userData = res.data || res;
 
                 setFormData({
-                    username: userData.username || userData.fullName || '', // Dự phòng cả 2 trường hợp
+                    username: userData.username || userData.fullName || '',
                     phone: userData.phone || ''
                 });
             } catch (error) {
@@ -38,6 +37,23 @@ function Profile() {
         };
         fetchFullProfile();
     }, []);
+    useEffect(() => {
+        if (activeTab === 'history') {
+            const fetchHistory = async () => {
+                try {
+                    setIsLoadingHistory(true);
+                    const response = await PostService.getPostHistory();
+                    console.log("Dữ liệu lịch sử chuẩn bị gán:", response.data);
+                    setViewHistory(response.data || []);
+                } catch (error) {
+                    console.error("Không thể tải lịch sử:", error);
+                } finally {
+                    setIsLoadingHistory(false);
+                }
+            };
+            fetchHistory();
+        }
+    }, [activeTab]);
 
     // 3. Hàm cập nhật state khi nhập liệu
     const handleInputChange = (e) => {
@@ -387,19 +403,31 @@ function Profile() {
                     </div>
                 )}
                 {activeTab === 'history' && (
-                    <div className="saved-section">
+                    <div className="saved-section fade-in-animation">
                         <div className="section-flex-header">
-                            <h2>Phòng đã lưu gần đây</h2>
+                            <h2>Lịch sử xem phòng</h2>
                             <button className="btn-text">
                                 Xem tất cả <IconChevronRight width="16"/>
                             </button>
                         </div>
 
-                        <div className="saved-grid">
-                            <PropertyCard/>
-                            <PropertyCard/>
-                            <PropertyCard/>
-                        </div>
+                        {isLoadingHistory ? (
+                            <div className="loading-spinner">Đang tải lịch sử...</div>
+                        ) : viewHistory && viewHistory.length > 0 ? (
+                            <div className="saved-grid">
+                                {viewHistory.map((item) => (
+                                    <PropertyCard
+                                        key={item.id}
+                                        data={item.post}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="empty-state">
+                                <span className="material-symbols-outlined" style={{fontSize: '48px', color: '#ccc'}}>history</span>
+                                <p>Bạn chưa xem phòng nào gần đây.</p>
+                            </div>
+                        )}
                     </div>
                 )}
                 {activeTab === 'favorite' && (

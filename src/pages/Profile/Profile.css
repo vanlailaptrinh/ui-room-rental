@@ -273,9 +273,6 @@
     cursor: pointer;
     padding: 0 16px;
 }
-.saved-section {
-    margin-top: 60px;
-}
 
 .section-flex-header {
     display: flex;
