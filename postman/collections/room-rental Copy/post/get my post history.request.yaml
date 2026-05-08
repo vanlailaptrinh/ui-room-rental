@@ -1,8 +1,0 @@
-$kind: http-request
-url: http://localhost:8080/room-rental/api/posts/my-history
-method: GET
-auth:
-  type: bearer
-  credentials:
-    token: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIyMjEzMDI5OUBzdC5oY211YWYuZWR1LnZuIiwicm9sZSI6IkxBTkRMT1JEIiwidHlwZSI6IkFDQ0VTUyIsImlhdCI6MTc3NjI0NTExNCwiZXhwIjoxNzc2MjQ4NzE0fQ.PqmRIbhSWxx3AbPwxv3ZU_qRFS9gehwO7cbK_zWXg8CtHaXsMN5uZqlgVizLMk_M
-order: 12000

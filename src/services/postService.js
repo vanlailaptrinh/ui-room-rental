@@ -22,6 +22,16 @@ const PostService = {
             console.error(`Error fetching post ${id}:`, error);
             throw error;
         }
+    },
+
+    getPostHistory: async () => {
+        try {
+            const response = await api.get(`${ENDPOINT}/history`);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching post history:", error);
+            throw error;
+        }
     }
 };
 

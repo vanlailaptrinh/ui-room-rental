@@ -12,7 +12,10 @@ instance.interceptors.request.use((config) => {
             token = token.slice(1, -1);
         }
 
-        if (!config.url.includes('/auth')) {
+        const excludePaths = ['/auth/login', '/auth/register', '/auth/verify-otp'];
+        const isExcluded = excludePaths.some(path => config.url.includes(path));
+
+        if (!isExcluded) {
             config.headers.Authorization = `Bearer ${token}`;
         }
     }

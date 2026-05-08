@@ -1,4 +1,0 @@
-$kind: http-request
-url: http://localhost:8080/room-rental/api/vouchers/db35ddf1-4b7c-43de-b879-4fc396060b64
-method: DELETE
-order: 4000

@@ -5,41 +5,93 @@ import PropertyCard from "../../components/PropertyCard";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
 import { getUserProfile, updateProfile } from '../../services/userService';
+import PostService from '../../services/postService';
 
 function Profile() {
     const [activeTab, setActiveTab] = useState('personal');
     const { user, logout, refreshUserProfile } = useAuth();
     const navigate = useNavigate();
-    // State quản lý trạng thái loading khi bấm nút Lưu
     const [isSaving, setIsSaving] = useState(false);
+    const [viewHistory, setViewHistory] = useState([]);
+    const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
-    // 1. Tạo state để lưu trữ dữ liệu form đang nhập
     const [formData, setFormData] = useState({
-        fullName: '',
-        phone: '',
-        address: ''
+        username: '',
+        phone: ''
     });
 
-    // 2. Khi biến 'user' có dữ liệu (API load xong), cập nhật vào form ngay
+    // 2. Load dữ liệu khởi tạo
     useEffect(() => {
         const fetchFullProfile = async () => {
             try {
-                // Gọi API lấy dữ liệu từ Backend
-                const response = await getUserProfile();
-                const userData = response.data;
+                const res = await getUserProfile();
+                const userData = res.data || res;
 
                 setFormData({
-                    fullName: userData.username || '',
-                    phone: userData.phone || '',
-                    address: userData.address || ''
+                    username: userData.username || userData.fullName || '',
+                    phone: userData.phone || ''
                 });
             } catch (error) {
-                console.error("Lỗi khi tải thông tin profile:", error);
+                console.error("Lỗi khi tải profile:", error);
             }
         };
-
         fetchFullProfile();
     }, []);
+    useEffect(() => {
+        if (activeTab === 'history') {
+            const fetchHistory = async () => {
+                try {
+                    setIsLoadingHistory(true);
+                    const response = await PostService.getPostHistory();
+                    console.log("Dữ liệu lịch sử chuẩn bị gán:", response.data);
+                    setViewHistory(response.data || []);
+                } catch (error) {
+                    console.error("Không thể tải lịch sử:", error);
+                } finally {
+                    setIsLoadingHistory(false);
+                }
+            };
+            fetchHistory();
+        }
+    }, [activeTab]);
+
+    // 3. Hàm cập nhật state khi nhập liệu
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    // 4. Hàm xử lý lưu
+    const handleSaveChanges = async () => {
+        try {
+            setIsSaving(true);
+
+            // Tạo đối tượng FormData giống hệt cách Postman gửi
+            const data = new FormData();
+            data.append('username', formData.username);
+            data.append('phone', formData.phone);
+
+            // Nếu bạn có xử lý ảnh avatar thì append vào đây,
+            // hiện tại nếu không có thì để trống hoặc không append.
+            // data.append('avatar', fileInput.files[0]);
+
+            console.log("Đang gửi dữ liệu kiểu FormData...");
+            const response = await updateProfile(data);
+
+            if (response.code === 200) {
+                alert("Cập nhật thành công!");
+                await refreshUserProfile();
+            }
+        } catch (error) {
+            console.error("Lỗi cập nhật:", error);
+            alert("Cập nhật thất bại!");
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const handleTabChange = (e, tabName) => {
         e.preventDefault();
@@ -49,41 +101,6 @@ function Profile() {
     const handleLogoutClick = () => {
         logout();
         navigate('/login');
-    };
-
-    // 3. Hàm xử lý khi gõ chữ vào input
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-
-    // 4. Hàm xử lý khi bấm "Lưu thay đổi"
-    const handleSaveChanges = async () => {
-        try {
-            setIsSaving(true);
-
-            const dataToSubmit = {
-                username: formData.fullName,
-                phone: formData.phone,
-                address: formData.address
-            };
-            console.log("Dữ liệu thực tế gửi đi:", dataToSubmit);
-
-            const response = await updateProfile(dataToSubmit);
-            console.log("Phản hồi từ BE:", response);
-            alert("Cập nhật thông tin thành công!");
-            await refreshUserProfile();
-
-
-        } catch (error) {
-            console.error("Lỗi khi cập nhật:", error);
-            alert("Có lỗi xảy ra khi cập nhật. Vui lòng thử lại!");
-        } finally {
-            setIsSaving(false);
-        }
     };
 
     return (
@@ -148,7 +165,6 @@ function Profile() {
                     <div className="fade-in-animation">
                         <header className="content-header">
                             <h1>Thông tin tài khoản</h1>
-                            <p>Cập nhật thông tin cá nhân và quản lý tài khoản của bạn.</p>
                         </header>
 
                         <div className="account-card main-form">
@@ -164,7 +180,7 @@ function Profile() {
                                 </div>
                                 <div className="avatar-text">
                                     <h3>Ảnh đại diện</h3>
-                                    <p>PNG, JPG tối đa 5MB. Khuyên dùng ảnh vuông.</p>
+                                    <p>PNG, JPG tối đa 5MB.</p>
                                 </div>
                             </div>
 
@@ -173,38 +189,29 @@ function Profile() {
                                     <label>Họ và tên</label>
                                     <input
                                         type="text"
-                                        name="fullName"
-                                        value={formData.fullName}
+                                        name="username" // KHỚP VỚI STATE
+                                        value={formData.username}
                                         onChange={handleInputChange}
                                     />
                                 </div>
                                 <div className="input-group">
                                     <label>Email liên hệ</label>
-                                    {/* Email thường không cho sửa */}
                                     <input type="email" value={user?.email || ''} readOnly className="readonly-input"/>
                                 </div>
                                 <div className="input-group">
                                     <label>Số điện thoại</label>
                                     <input
                                         type="tel"
-                                        name="phone"
+                                        name="phone" // KHỚP VỚI STATE
                                         value={formData.phone}
                                         onChange={handleInputChange}
                                     />
                                 </div>
-                                <div className="input-group">
-                                    <label>Địa chỉ</label>
-                                    <input
-                                        type="text"
-                                        name="address"
-                                        value={formData.address}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
+                                {/* ĐÃ XÓA INPUT ADDRESS TẠI ĐÂY */}
                             </div>
 
                             <div className="form-actions">
-                                <button className="btn-ghost">Hủy bỏ</button>
+                                <button className="btn-ghost" onClick={() => window.location.reload()}>Hủy bỏ</button>
                                 <button className="btn-primary-lg" onClick={handleSaveChanges} disabled={isSaving}>
                                     {isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
                                 </button>
@@ -396,19 +403,31 @@ function Profile() {
                     </div>
                 )}
                 {activeTab === 'history' && (
-                    <div className="saved-section">
+                    <div className="saved-section fade-in-animation">
                         <div className="section-flex-header">
-                            <h2>Phòng đã lưu gần đây</h2>
+                            <h2>Lịch sử xem phòng</h2>
                             <button className="btn-text">
                                 Xem tất cả <IconChevronRight width="16"/>
                             </button>
                         </div>
 
-                        <div className="saved-grid">
-                            <PropertyCard/>
-                            <PropertyCard/>
-                            <PropertyCard/>
-                        </div>
+                        {isLoadingHistory ? (
+                            <div className="loading-spinner">Đang tải lịch sử...</div>
+                        ) : viewHistory && viewHistory.length > 0 ? (
+                            <div className="saved-grid">
+                                {viewHistory.map((item) => (
+                                    <PropertyCard
+                                        key={item.id}
+                                        data={item.post}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="empty-state">
+                                <span className="material-symbols-outlined" style={{fontSize: '48px', color: '#ccc'}}>history</span>
+                                <p>Bạn chưa xem phòng nào gần đây.</p>
+                            </div>
+                        )}
                     </div>
                 )}
                 {activeTab === 'favorite' && (
