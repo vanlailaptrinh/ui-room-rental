@@ -9,9 +9,9 @@ export const getUserProfile = async () => {
         throw error;
     }
 };
-export const updateProfile = async (userData) => {
+export const updateProfile = async (formDataPayload) => {
     try {
-        const response = await axios.put(`${ENDPOINT}/profile`, userData);
+        const response = await axios.put(`${ENDPOINT}/profile`, formDataPayload);
         return response.data;
     } catch (error) {
         throw error;
