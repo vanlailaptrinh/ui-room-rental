@@ -403,3 +403,105 @@
         border-bottom: none;
     }
 }
+/* Overlay làm mờ nền */
+.nexus-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+/* Khung Popup */
+.nexus-confirm-modal {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 450px;
+    position: relative;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.modal-pkg-info {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.voucher-section h4 {
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.voucher-select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.total-payment {
+    border-top: 2px dashed #eee;
+    padding-top: 15px;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.final {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #1a73e8;
+}
+
+.discount-text {
+    color: #d32f2f;
+}
+
+.btn-confirm-payment {
+    width: 100%;
+    padding: 15px;
+    background: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.btn-confirm-payment:hover {
+    background: #1557b0;
+}

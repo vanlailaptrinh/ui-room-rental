@@ -1,15 +1,15 @@
 import axios from '../services/axios'
 
-const packageService = {
-    getPackages: async () => {
-        try {
-            const response = await axios.get('/packages');
-            return response.data;
-        } catch (error) {
-            console.error("Lỗi khi gọi API danh sách gói:", error);
-            throw error;
-        }
-    }
+// Thêm từ khóa export trước từng hàm
+export const getPackages = async () => {
+    const response = await axios.get('/packages');
+    return response.data;
 };
 
+export const getActiveVouchers = async () => {
+    const response = await axios.get('/vouchers/active');
+    return response.data;
+};
+
+const packageService = { getPackages, getActiveVouchers };
 export default packageService;

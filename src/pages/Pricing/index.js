@@ -4,38 +4,70 @@ import './Pricing.css';
 
 function PricingPage() {
     const [packages, setPackages] = useState([]);
+    const [vouchers, setVouchers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const [selectedPkg, setSelectedPkg] = useState(null);
+    const [selectedVoucher, setSelectedVoucher] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+
     const [activeTab, setActiveTab] = useState('POSTING');
     const [activeFaq, setActiveFaq] = useState(null);
-
     useEffect(() => {
-        const fetchPackages = async () => {
+        const fetchData = async () => {
             try {
                 setLoading(true);
-                const result = await packageService.getPackages();
-                if (result.code === 200) {
-                    setPackages(result.data);
-                } else {
-                    setError("Không thể tải dữ liệu từ máy chủ.");
+                const [pkgRes, voucherRes] = await Promise.all([
+                    packageService.getPackages(),
+                    packageService.getActiveVouchers()
+                ]);
+
+                if (pkgRes.code === 200) {
+                    setPackages(pkgRes.data || []);
+                }
+
+                if (voucherRes && voucherRes.code === 200) {
+                    // ĐẢM BẢO data TRẢ VỀ LÀ MẢNG
+                    setVouchers(voucherRes.data || []);
                 }
             } catch (err) {
-                setError("Đã có lỗi xảy ra khi kết nối đến API.");
+                console.error("Lỗi fetch data:", err);
+                setError("Không thể kết nối đến hệ thống.");
             } finally {
                 setLoading(false);
             }
         };
-
-        fetchPackages();
+        fetchData();
     }, []);
 
-    const toggleFaq = (index) => {
-        setActiveFaq(activeFaq === index ? null : index);
+    const handleSelectPlan = (pkg) => {
+        setSelectedPkg(pkg);
+        setSelectedVoucher(null);
+        setShowModal(true);
     };
 
-    const handleSelectPlan = (planName, tier) => {
-        alert(`Bạn đang chọn ${planName} - Hạng ${tier}.`);
+    const calculateFinalPrice = () => {
+        if (!selectedPkg) return 0;
+        let price = selectedPkg.price || 0;
+
+        if (selectedVoucher) {
+            // Tính số tiền giảm dựa trên %
+            let discount = (price * (selectedVoucher.discountPercentage || 0)) / 100;
+
+            // Nếu số tiền giảm vượt quá mức tối đa cho phép
+            if (selectedVoucher.maxDiscountAmount && discount > selectedVoucher.maxDiscountAmount) {
+                discount = selectedVoucher.maxDiscountAmount;
+            }
+
+            price = Math.max(0, price - discount);
+        }
+        return price;
+    };
+
+    const displayPackages = packages.filter(pkg => pkg.type?.value === activeTab);
+    const toggleFaq = (index) => {
+        setActiveFaq(activeFaq === index ? null : index);
     };
 
     const faqs = [
@@ -43,12 +75,77 @@ function PricingPage() {
         { q: "Tin đăng của tôi sẽ hiển thị trong bao lâu?", a: "Tùy thuộc vào gói bạn chọn (5, 10, 15 hoặc 30 ngày)." }
     ];
 
-    const displayPackages = packages.filter(pkg => pkg.type.value === activeTab);
-
     if (loading) return <div className="nexus-pricing-loading">Đang tải bảng giá...</div>;
     if (error) return <div className="nexus-pricing-error">{error}</div>;
     return (
         <main className="nexus-pricing-container">
+            {showModal && selectedPkg && (
+                <div className="nexus-modal-overlay">
+                    <div className="nexus-confirm-modal">
+                        <button className="close-modal" onClick={() => setShowModal(false)}>&times;</button>
+
+                        <h2>Xác nhận gói dịch vụ</h2>
+
+                        <div className="modal-pkg-info">
+                            <div className="info-row">
+                                <span>Gói đã chọn:</span>
+                                <strong>{selectedPkg.name} ({selectedPkg.tier?.value})</strong>
+                            </div>
+                            <div className="info-row">
+                                <span>Thời gian:</span>
+                                <strong>{selectedPkg.activeDays} ngày</strong>
+                            </div>
+                            <div className="info-row">
+                                <span>Giá gốc:</span>
+                                <strong>{selectedPkg.price?.toLocaleString()}đ</strong>
+                            </div>
+                        </div>
+
+                        <div className="voucher-section">
+                            <h4>Chọn Voucher giảm giá</h4>
+                            <select
+                                className="voucher-select"
+                                value={selectedVoucher?.id || ""}
+                                onChange={(e) => {
+                                    const v = vouchers.find(v => v.id === e.target.value);
+                                    setSelectedVoucher(v || null);
+                                }}
+                            >
+                                <option value="">-- Không sử dụng voucher --</option>
+                                {vouchers && vouchers.length > 0 ? (
+                                    vouchers.map(v => (
+                                        <option key={v.id} value={v.id}>
+                                            Mã: ...{v.id.slice(-6).toUpperCase()} (Giảm {v.discountPercentage}% - Tối đa {v.maxDiscountAmount?.toLocaleString()}đ)
+                                        </option>
+                                    ))
+                                ) : (
+                                    <option disabled>Không có mã giảm giá nào khả dụng</option>
+                                )}
+                            </select>
+                        </div>
+
+                        <div className="total-payment">
+                            <div className="total-row">
+                                <span>Số tiền được giảm:</span>
+                                <span className="discount-text">
+            {/* Tính toán hiển thị số tiền giảm thực tế */}
+                                    -{selectedPkg && selectedVoucher
+                                    ? Math.min((selectedPkg.price * selectedVoucher.discountPercentage) / 100, selectedVoucher.maxDiscountAmount).toLocaleString()
+                                    : 0}đ
+        </span>
+                            </div>
+                            <div className="total-row final">
+                                <span>Tổng thanh toán:</span>
+                                <span className="final-price">{calculateFinalPrice().toLocaleString()}đ</span>
+                            </div>
+                        </div>
+
+                        <button className="btn-confirm-payment">
+                            Thanh toán ngay
+                        </button>
+                    </div>
+                </div>
+            )}
             {/* Hero & Toggle Section */}
             <header className="nexus-pricing-header">
                 <h1>Bảng giá dịch vụ</h1>
@@ -111,7 +208,7 @@ function PricingPage() {
 
                             <button
                                 className={isPro ? 'nexus-pricing-btn-primary' : 'nexus-pricing-btn-outline'}
-                                onClick={() => handleSelectPlan(pkg.name, pkg.tier.value)}
+                                onClick={() => handleSelectPlan(pkg)}
                             >
                                 Chọn gói này
                             </button>
