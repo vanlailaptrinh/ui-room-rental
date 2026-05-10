@@ -11,5 +11,8 @@ export const getActiveVouchers = async () => {
     return response.data;
 };
 
-const packageService = { getPackages, getActiveVouchers };
+const packageService = {
+    getPackages,
+    getActiveVouchers
+};
 export default packageService;
