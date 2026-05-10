@@ -214,6 +214,228 @@
     /* Đảm bảo căn chỉnh lại khối logo và nút */
     .brand-and-nav {
         gap: 0;
-        align-items: center; /* Thêm căn giữa dọc để icon và chữ cân đối */
+        align-items: center;
     }
+}
+
+/* ============================================
+   USER AVATAR DROPDOWN
+   ============================================ */
+
+.header-auth-section {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-right: 24px;
+}
+
+/* Wrapper giữ ref để detect click outside */
+.user-dropdown-wrapper {
+    position: relative;
+}
+
+/* Nút Avatar */
+.user-avatar-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 50px;
+    padding: 6px 14px 6px 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.user-avatar-btn:hover {
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+}
+
+/* Vòng tròn chữ cái */
+.avatar-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a73e8, #6c63ff);
+    color: white;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.avatar-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.avatar-chevron {
+    font-size: 12px;
+    color: #6b7280;
+    transition: transform 0.2s;
+    display: inline-block;
+}
+
+.avatar-chevron.open {
+    transform: rotate(180deg);
+}
+
+/* Panel dropdown */
+.user-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 280px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    z-index: 9999;
+    overflow: hidden;
+    animation: dropdownFadeIn 0.18s ease;
+}
+
+@keyframes dropdownFadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Header bên trong dropdown */
+.dropdown-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 16px;
+    background: #f9fafb;
+}
+
+.dropdown-avatar-large {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a73e8, #6c63ff);
+    color: white;
+    font-size: 16px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dropdown-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 2px;
+}
+
+.dropdown-email {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 4px;
+    word-break: break-all;
+}
+
+.dropdown-role-badge {
+    font-size: 11px;
+    font-weight: 700;
+    background: #e0e7ff;
+    color: #4f46e5;
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+
+/* Đường kẻ phân cách */
+.dropdown-divider {
+    height: 1px;
+    background: #f3f4f6;
+    margin: 4px 0;
+}
+
+/* Label nhóm section */
+.dropdown-section-label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #9ca3af;
+    padding: 8px 16px 4px;
+}
+
+/* Item chung */
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    text-decoration: none;
+    transition: background 0.15s;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+}
+
+.dropdown-item:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.di-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* Lịch hẹn — highlight đặc biệt */
+.dropdown-item-highlight {
+    color: #1a73e8;
+    font-weight: 700;
+}
+
+.dropdown-item-highlight:hover {
+    background: #eff6ff;
+}
+
+/* Dashboard chủ trọ */
+.dropdown-item-landlord {
+    color: #7c3aed;
+    font-weight: 700;
+}
+
+.dropdown-item-landlord:hover {
+    background: #f5f3ff;
+}
+
+/* Đăng xuất */
+.dropdown-item-logout {
+    color: #ef4444;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.dropdown-item-logout:hover {
+    background: #fef2f2;
+}
+
+/* Responsive: ẩn avatar-name trên mobile */
+@media (max-width: 768px) {
+    .avatar-name { display: none; }
+    .user-dropdown-menu { right: -10px; width: 260px; }
+    .header-auth-section { margin-right: 8px; }
 }

@@ -1,97 +1,255 @@
+/* ═══════════════════════════════════════════
+   FAVORITES PAGE — STYLES
+   ═══════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 .favorites-page {
-    max-width: 1280px;
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 96px 60px;
-    min-height: 80vh;
+    padding: 40px 24px 80px;
+    font-family: 'Inter', sans-serif;
 }
 
+/* ── Header ── */
 .favorites-header {
-    margin-bottom: 40px;
-    border-bottom: 1px solid #e5e7eb;
-    padding-bottom: 24px;
+    margin-bottom: 32px;
 }
 
-.header-title {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 8px;
-}
-
-.header-title h1 {
-    font-size: 32px;
+.favorites-header h1 {
+    font-size: 26px;
     font-weight: 800;
     color: #111827;
-    margin: 0;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
 }
 
 .header-subtitle {
     color: #6b7280;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-size: 14px;
 }
 
-/* Grid hiển thị danh sách Card */
-.favorites-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 32px;
-}
+.header-subtitle strong { color: #111827; }
 
-/* Trạng thái trống */
-.empty-favorites {
+/* ── Loading ── */
+.fav-loading {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    gap: 14px;
+    padding: 80px 20px;
+    color: #6b7280;
+}
+
+.fav-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #ef4444;
+    border-radius: 50%;
+    animation: favSpin 0.8s linear infinite;
+}
+
+@keyframes favSpin { to { transform: rotate(360deg); } }
+
+/* ── Empty ── */
+.empty-favorites {
     text-align: center;
-    padding: 80px 0;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 24px;
+    border: 2px dashed #fecaca;
 }
 
 .empty-icon {
-    font-size: 64px;
-    margin-bottom: 24px;
-    opacity: 0.2;
+    font-size: 60px;
+    margin-bottom: 16px;
 }
 
 .empty-favorites h2 {
-    font-size: 24px;
+    font-size: 22px;
+    font-weight: 700;
     color: #111827;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .empty-favorites p {
     color: #6b7280;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
+    font-size: 15px;
 }
 
 .btn-go-home {
-    padding: 14px 32px;
-    background: #1A73E8;
+    padding: 12px 28px;
+    background: #ef4444;
     color: white;
     border: none;
     border-radius: 12px;
+    font-size: 15px;
     font-weight: 700;
     cursor: pointer;
-    transition: 0.3s;
+    transition: background 0.2s, transform 0.1s;
 }
 
 .btn-go-home:hover {
-    background: #1557b0;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+    background: #dc2626;
+    transform: translateY(-1px);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .favorites-page {
-        padding: 100px 16px 40px;
-    }
+/* ── Grid ── */
+.fav-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}
 
-    .header-title h1 {
-        font-size: 24px;
-    }
+/* ── Card ── */
+.fav-card {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: box-shadow 0.2s, transform 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.fav-card:hover {
+    box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+    transform: translateY(-3px);
+}
+
+/* Card image */
+.fav-card-img {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.fav-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.fav-card:hover .fav-card-img img {
+    transform: scale(1.05);
+}
+
+/* Status badge trên ảnh */
+.fav-status-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    backdrop-filter: blur(4px);
+}
+
+.fav-status-badge.active  { background: rgba(220,252,231,0.9); color: #166534; }
+.fav-status-badge.rented  { background: rgba(254,226,226,0.9); color: #991b1b; }
+
+/* Card body */
+.fav-card-body {
+    padding: 18px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.fav-card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+    cursor: pointer;
+    line-height: 1.4;
+    transition: color 0.2s;
+}
+
+.fav-card-title:hover { color: #ef4444; }
+
+.fav-card-address {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.fav-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 2px;
+}
+
+.fav-price {
+    font-size: 18px;
+    font-weight: 800;
+    color: #ef4444;
+}
+
+.fav-price small {
+    font-size: 12px;
+    font-weight: 500;
+    color: #9ca3af;
+}
+
+.fav-area {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+/* Actions */
+.fav-card-actions {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.btn-fav-view {
+    padding: 10px;
+    background: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-fav-view:hover { background: #1557b0; }
+
+.btn-fav-remove {
+    padding: 10px 14px;
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1.5px solid #fecaca;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-fav-remove:hover:not(:disabled) {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+
+.btn-fav-remove:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+    .fav-grid { grid-template-columns: 1fr; }
+    .favorites-page { padding: 24px 16px 60px; }
 }

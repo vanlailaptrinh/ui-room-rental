@@ -6,6 +6,9 @@ import {
     IconChevronRight, IconShare
 } from '../../assets/Icons';
 import api from '../../services/axios';
+import BookingService from '../../services/bookingService';
+import FavoriteService from '../../services/favoriteService';
+import { useAuth } from '../../context/authContext';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -18,10 +21,18 @@ L.Icon.Default.mergeOptions({
 
 function Detail() {
     const { id } = useParams();
+    const { user } = useAuth();
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isBookingOpen, setIsBookingOpen] = useState(false);
+    const [bookingDate, setBookingDate] = useState('');
+    const [bookingTime, setBookingTime] = useState('10:00');
+    const [bookingLoading, setBookingLoading] = useState(false);
+    const [bookingResult, setBookingResult] = useState(null);
+    // Favorite state
+    const [isFav, setIsFav] = useState(false);
+    const [favLoading, setFavLoading] = useState(false);
 
     useEffect(() => {
         const fetchPostDetail = async () => {
@@ -40,8 +51,37 @@ function Detail() {
                 setLoading(false);
             }
         };
-        if (id && id !== ":1") fetchPostDetail(); // Chặn gọi API nếu ID vẫn là ":1"
+        if (id && id !== ":1") fetchPostDetail();
     }, [id]);
+
+    // Check favorite status sau khi có post và user
+    useEffect(() => {
+        if (!user || !id || id === ':1') return;
+        FavoriteService.checkFavorite(id)
+            .then(isFavorited => setIsFav(isFavorited))
+            .catch(() => {}); // silent — không login vẫn ok
+    }, [id, user]);
+
+    // Toggle yêu thích
+    const handleToggleFavorite = async () => {
+        if (!user) { alert('Vui lòng đăng nhập để lưu yêu thích!'); return; }
+        if (favLoading) return;
+        try {
+            setFavLoading(true);
+            if (isFav) {
+                await FavoriteService.removeFavorite(id);
+                setIsFav(false);
+            } else {
+                await FavoriteService.addFavorite(id);
+                setIsFav(true);
+            }
+        } catch (err) {
+            console.error('Toggle favorite error:', err);
+            alert(err?.response?.data?.message || 'Không thể cập nhật yêu thích.');
+        } finally {
+            setFavLoading(false);
+        }
+    };
 
     // Xử lý ảnh từ mảng post.images trực tiếp
     const images = post?.images?.length > 0 ? post.images : ["https://picsum.photos/800/500"];
@@ -169,7 +209,15 @@ function Detail() {
                             <button className="btn-primary" onClick={() => setIsBookingOpen(true)}>Đặt lịch ngay</button>
 
                             <div className="action-buttons">
-                                <button className="btn-outline"><IconFavorite /> Yêu thích</button>
+                                <button
+                                    className={`btn-outline btn-favorite ${isFav ? 'favorited' : ''}`}
+                                    onClick={handleToggleFavorite}
+                                    disabled={favLoading}
+                                    title={isFav ? 'Bỏ yêu thích' : 'Thêm yêu thích'}
+                                >
+                                    <IconFavorite style={{ color: isFav ? '#ef4444' : undefined }} />
+                                    {favLoading ? '...' : isFav ? 'Đã lưu' : 'Yêu thích'}
+                                </button>
                                 <button className="btn-outline"><IconShare /> Chia sẻ</button>
                             </div>
                         </div>
@@ -190,13 +238,69 @@ function Detail() {
             {isBookingOpen && (
                 <div className="booking-overlay" onClick={handleOverlayClick}>
                     <div className="booking-modal">
-                        <button className="close-modal" onClick={() => setIsBookingOpen(false)}>&times;</button>
-                        <h3>Đặt lịch xem phòng</h3>
-                        <p>Hệ thống sẽ gửi yêu cầu xem phòng <strong>{post.title}</strong> đến chủ nhà.</p>
-                        <form className="booking-form" onSubmit={(e) => { e.preventDefault(); alert('Đã gửi yêu cầu!'); setIsBookingOpen(false); }}>
-                            <input type="date" required className="form-input" min={new Date().toISOString().split('T')[0]} />
-                            <button type="submit" className="btn-submit">Xác nhận</button>
-                        </form>
+                        <button className="close-modal" onClick={() => { setIsBookingOpen(false); setBookingResult(null); }}>&times;</button>
+                        <h3>📅 Đặt lịch xem phòng</h3>
+
+                        {bookingResult ? (
+                            <div className={`booking-result ${bookingResult.success ? 'result-success' : 'result-error'}`}>
+                                <span className="result-icon">{bookingResult.success ? '✅' : '❌'}</span>
+                                <p>{bookingResult.message}</p>
+                                {bookingResult.success ? (
+                                    <button className="btn-submit" onClick={() => { setIsBookingOpen(false); setBookingResult(null); }}>Đóng</button>
+                                ) : (
+                                    <button className="btn-submit" onClick={() => setBookingResult(null)}>Thử lại</button>
+                                )}
+                            </div>
+                        ) : (
+                            <>
+                                <p className="modal-desc">Gửi yêu cầu xem phòng <strong>{post.title}</strong> đến chủ nhà. Chủ nhà sẽ duyệt và xác nhận lịch hẹn.</p>
+                                <form
+                                    className="booking-form"
+                                    onSubmit={async (e) => {
+                                        e.preventDefault();
+                                        if (!bookingDate) return;
+                                        try {
+                                            setBookingLoading(true);
+                                            // Ghép date + time thành ISO LocalDateTime
+                                            const isoDateTime = `${bookingDate}T${bookingTime}:00`;
+                                            await BookingService.createBooking({
+                                                postId: post.id,
+                                                bookingTime: isoDateTime,
+                                            });
+                                            setBookingResult({ success: true, message: 'Đặt lịch thành công! Chủ nhà sẽ liên hệ xác nhận sớm.' });
+                                        } catch (err) {
+                                            const msg = err?.response?.data?.message || 'Đặt lịch thất bại. Vui lòng thử lại.';
+                                            setBookingResult({ success: false, message: msg });
+                                        } finally {
+                                            setBookingLoading(false);
+                                        }
+                                    }}
+                                >
+                                    <label className="form-label">Ngày xem phòng</label>
+                                    <input
+                                        type="date"
+                                        required
+                                        className="form-input"
+                                        value={bookingDate}
+                                        onChange={e => setBookingDate(e.target.value)}
+                                        min={new Date().toISOString().split('T')[0]}
+                                    />
+                                    <label className="form-label">Giờ xem phòng</label>
+                                    <select
+                                        className="form-input"
+                                        value={bookingTime}
+                                        onChange={e => setBookingTime(e.target.value)}
+                                    >
+                                        {['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00','18:00'].map(t => (
+                                            <option key={t} value={t}>{t}</option>
+                                        ))}
+                                    </select>
+                                    <button type="submit" className="btn-submit" disabled={bookingLoading}>
+                                        {bookingLoading ? 'Đang gửi...' : 'Xác nhận đặt lịch'}
+                                    </button>
+                                </form>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

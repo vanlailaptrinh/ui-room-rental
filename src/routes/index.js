@@ -19,6 +19,7 @@ import Blacklist from "../pages/Blacklist";
 import FinancialManagement from "../pages/Finance";
 import PostManagement from "../pages/PostManagement";
 import VoucherManagement from "../pages/VoucherManagement";
+import MyBookings from "../pages/MyBookings";
 
 
 // Import trang Admin Dashboard cũ
@@ -68,6 +69,7 @@ function AppRoutes() {
                 <Route path="/post" element={<PostRoom />} />
                 <Route path="/landlord" element={<LandlordDashboard />} />
                 <Route path="/pricing" element={<Pricing />} />
+                <Route path="/my-bookings" element={<MyBookings />} />
             </Route>
 
             {/* 4. Điều hướng mặc định */}
