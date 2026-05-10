@@ -1,0 +1,97 @@
+/* Prefix: payment-callback- */
+
+.payment-callback-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    background-color: #f9f9f9; /* Màu nền riêng cho trang này */
+}
+
+.payment-callback-card {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 450px;
+    width: 90%;
+}
+
+/* Spinner - Đang xử lý */
+.payment-callback-spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #3498db;
+    border-radius: 50%;
+    animation: payment-callback-spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes payment-callback-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Icon trạng thái */
+.payment-callback-icon {
+    font-size: 70px;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.payment-callback-icon-success { color: #27ae60; }
+.payment-callback-icon-error { color: #e74c3c; }
+
+/* Text */
+.payment-callback-title {
+    margin-bottom: 12px;
+    color: #2c3e50;
+    font-size: 24px;
+}
+
+.payment-callback-desc {
+    color: #7f8c8d;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    font-size: 16px;
+}
+
+/* Group nút bấm */
+.payment-callback-btn-group {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.payment-callback-btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+    font-size: 15px;
+}
+
+.payment-callback-btn-primary {
+    background-color: #3498db;
+    color: white;
+}
+
+.payment-callback-btn-primary:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+.payment-callback-btn-outline {
+    background-color: #f1f2f6;
+    color: #57606f;
+}
+
+.payment-callback-btn-outline:hover {
+    background-color: #dfe4ea;
+}

@@ -19,6 +19,7 @@ import Blacklist from "../pages/Blacklist";
 import FinancialManagement from "../pages/Finance";
 import PostManagement from "../pages/PostManagement";
 import VoucherManagement from "../pages/VoucherManagement";
+import PaymentCallback from "../pages/PaymentCallback"
 import MyBookings from "../pages/MyBookings";
 
 
@@ -37,6 +38,7 @@ function AppRoutes() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/register" element={<Register />} />
             <Route path="/chat" element={<Chat />} />
+            <Route path="/payment-callback" element={<PaymentCallback />} />
 
             {/* 2. Nhóm Dashboard/Cá nhân: Tự có Sidebar riêng */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />

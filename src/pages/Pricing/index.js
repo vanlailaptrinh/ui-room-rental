@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import packageService from '../../services/packageService';
+import orderService from "../../services/orderService";
+import paymentService from "../../services/paymentService"
 import './Pricing.css';
 
 function PricingPage() {
@@ -68,6 +70,38 @@ function PricingPage() {
     const displayPackages = packages.filter(pkg => pkg.type?.value === activeTab);
     const toggleFaq = (index) => {
         setActiveFaq(activeFaq === index ? null : index);
+    };
+
+    const handlePayment = async () => {
+        setLoading(true);
+        try {
+            const finalPrice = calculateFinalPrice();
+            const orderPayload = {
+                packageId: selectedPkg.id,
+                voucherId: selectedVoucher ? selectedVoucher.id : null,
+                totalPrice: finalPrice
+            };
+
+            const orderRes = await orderService.createOrder(orderPayload);
+            const orderId = orderRes?.data?.id || orderRes?.id;
+
+            if (orderId) {
+                const resData = await paymentService.createPaymentUrl(orderId);
+
+                if (resData && resData.code === 200) {
+                    window.location.href = resData.data;
+                } else {
+                    alert(resData.message || 'Không lấy được URL thanh toán');
+                }
+            } else {
+                alert(orderRes?.message || 'Khởi tạo đơn hàng thất bại, vui lòng thử lại!');
+            }
+        } catch (error) {
+            console.error('Lỗi thanh toán:', error);
+            alert(error.response?.data?.message || "Có lỗi xảy ra tại hệ thống thanh toán");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const faqs = [
@@ -140,7 +174,7 @@ function PricingPage() {
                             </div>
                         </div>
 
-                        <button className="btn-confirm-payment">
+                        <button className="btn-confirm-payment" onClick={handlePayment}>
                             Thanh toán ngay
                         </button>
                     </div>
