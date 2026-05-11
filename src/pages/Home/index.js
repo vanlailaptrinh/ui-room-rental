@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Home.css';
-import {Link} from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 function Home() {
-    return (
+    const navigate = useNavigate();
+    const [province, setProvince] = useState("Chọn tỉnh thành");
+    const [budget, setBudget] = useState("Chọn giá");
+
+    const handleSearch = () => {
+        navigate(`/postlist?province=${encodeURIComponent(province)}&price=${encodeURIComponent(budget)}`
+    )};
+        return (
         /* Thêm class bao quanh để định danh toàn bộ trang Home */
         <main className="home-page-wrapper home-main">
             {/* 1. SECTION HERO */}
@@ -25,25 +32,35 @@ function Home() {
                             <div className="home-field-group home-border-right">
                                 <label>Khu vực</label>
                                 <div className="home-input-with-icon">
-                                    <select>
-                                        <option>TP.HCM</option>
+                                    <select value={province} onChange={(e) => setProvince(e.target.value)}>
+                                        <option>-- Chọn tỉnh thành --</option>
+                                        <option>Hà Nội</option>
+                                        <option>TP. Hồ Chi Minh</option>
                                         <option>Bình Dương</option>
                                         <option>Cần Thơ</option>
+                                        <option>Huế</option>
+                                        <option>Đà Nẵng</option>
+                                        <option>Đồng Nai</option>
+                                        <option>Khánh Hòa</option>
+                                        <option>Long An</option>
+                                        <option>Hải Phòng</option>
                                     </select>
                                 </div>
                             </div>
                             <div className="home-field-group">
                                 <label>Ngân sách</label>
                                 <div className="home-input-with-icon">
-                                    <select>
-                                        <option>Dưới 5 triệu</option>
-                                        <option>5 - 10 triệu</option>
-                                        <option>Trên 10 triệu</option>
+                                    <select value={budget} onChange={(e) => setBudget(e.target.value)}>
+                                        <option>-- Chọn giá --</option>
+                                        <option>Dưới 2 triệu</option>
+                                        <option>2 - 3 triệu</option>
+                                        <option>3 - 5 triệu</option>
+                                        <option>Trên 5 triệu</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
-                        <button className="home-btn-search-main">Tìm kiếm ngay</button>
+                        <button className="home-btn-search-main" onClick={handleSearch}>Tìm kiếm ngay</button>
                     </div>
                 </div>
             </section>

@@ -5,14 +5,44 @@ import PropertyCard from '../../components/PropertyCard';
 import Pagination from "../../components/Pagination";
 import { IconChevronRight } from '../../assets/Icons';
 import PostService from '../../services/postService';
+import { useLocation } from 'react-router-dom';
+
+export const provinceMap = {
+    "TP. Hồ Chí Minh": "hồ chí minh",
+    "TP.HCM": "hồ chí minh",
+    "Thành phố Hồ Chí Minh": "hồ chí minh",
+    "Hồ Chí Minh": "hồ chí minh",
+    "Hà Nội": "hà nội",
+    "Đà Nẵng": "đà nẵng",
+    "Bình Dương": "bình dương",
+    "Cần Thơ": "cần thơ",
+    "Huế": "huế",
+    "Khánh Hòa": "khánh hòa",
+    "Đồng Nai": "đồng nai",
+    "Long An": "long an",
+    "Hải Phòng": "hải phòng",
+    "Quảng Ninh": "quảng ninh"
+};
+
+export const normalizeProvince = (value) => {
+    if (!value) return "";
+    const key = value.trim();
+    return provinceMap[key] || key.toLowerCase();
+};
 
 function PostList() {
     const [posts, setPosts] = useState([]);                 // Dữ liệu gốc từ API
     const [filteredPosts, setFilteredPosts] = useState([]); // Dữ liệu sau khi lọc & sort
     const [loading, setLoading] = useState(true);
+    const location = useLocation();
 
+    const queryParams = new URLSearchParams(location.search);
+    const provinceParam = queryParams.get("province");
+    const priceParam = queryParams.get("price");
+    const searchTerm = queryParams.get('search') || '';
     // State cho Lọc
     const [filters, setFilters] = useState({
+        province: null,
         price: null,
         area: null,
         amenities: []
@@ -37,7 +67,9 @@ function PostList() {
         const fetchPosts = async () => {
             try {
                 setLoading(true);
-                const response = await PostService.getActivePosts();
+                const response = await PostService.getActivePosts({
+                    search: searchTerm
+                });
                 if (response && response.data) {
                     setPosts(response.data);
                     setFilteredPosts(response.data);
@@ -49,29 +81,65 @@ function PostList() {
             }
         };
         fetchPosts();
-    }, []);
+    }, [searchTerm]);
 
-    // 2. Logic Lọc và Sắp xếp (Client-side)
+    useEffect(() => {
+        let initialFilters = { province: null, price: null, area: null, amenities: [] };
+
+        if (provinceParam) {
+            initialFilters.province = provinceParam;
+        }
+
+        if (priceParam) {
+            switch (priceParam) {
+                case "Dưới 2 triệu":
+                    initialFilters.price = { label: "Dưới 2tr", min: 0, max: 2000000 };
+                    break;
+                case "2 - 3 triệu":
+                    initialFilters.price = { label: "2tr - 3tr", min: 2000000, max: 3000000 };
+                    break;
+                case "3 - 5 triệu":
+                    initialFilters.price = { label: "3tr - 5tr", min: 3000000, max: 5000000 };
+                    break;
+                case "Trên 5 triệu":
+                    initialFilters.price = { label: "Trên 5tr", min: 5000000, max: 100000000 };
+                    break;
+                default:
+                    break;
+            }
+        }
+        setFilters(initialFilters);
+    }, [provinceParam, priceParam]);
+
     useEffect(() => {
         let data = [...posts];
 
-        // Lọc theo khoảng giá
-        if (filters.price) {
-            data = data.filter(p => p.price >= filters.price.min && p.price <= filters.price.max);
-        }
+        if (filters.province || filters.price || filters.area || filters.amenities.length > 0) {
+            data = data.filter(p => {
+                const provinceNorm = normalizeProvince(filters.province);
+                const addrNorm = normalizeProvince(p.address);
 
-        // Lọc theo diện tích
-        if (filters.area) {
-            data = data.filter(p => p.area >= filters.area.min && p.area <= filters.area.max);
-        }
+                const matchProvince = filters.province
+                    ? normalizeProvince(p.address).includes(normalizeProvince(filters.province))
+                    : false;
 
-        // Lọc theo mảng tiện ích
-        if (filters.amenities.length > 0) {
-            data = data.filter(p =>
-                filters.amenities.every(amenityName =>
-                    p.amenities?.some(a => a.name === amenityName)
-                )
-            );
+                const matchPrice = filters.price
+                    ? p.price >= filters.price.min && p.price <= filters.price.max
+                    : false;
+
+                const matchArea = filters.area
+                    ? p.area >= filters.area.min && p.area <= filters.area.max
+                    : false;
+
+                const matchAmenities = filters.amenities.length > 0
+                    ? filters.amenities.some(amenityName =>
+                        p.amenities?.some(a => a.name === amenityName)
+                    )
+                    : false;
+
+                // OR logic: chỉ cần một điều kiện đúng
+                return matchProvince || matchPrice || matchArea || matchAmenities;
+            });
         }
 
         // Sắp xếp dữ liệu
@@ -83,7 +151,7 @@ function PostList() {
                 data.sort((a, b) => b.price - a.price);
                 break;
             case 'newest':
-                data.sort((a, b) => b.id.localeCompare(a.id));
+                data.sort((a, b) => Number(b.id) - Number(a.id));
                 break;
             case 'popular':
                 data.sort((a, b) => (b.views || 0) - (a.views || 0));
@@ -93,7 +161,7 @@ function PostList() {
         }
 
         setFilteredPosts(data);
-        setCurrentPage(1); // Luôn về trang 1 khi lọc hoặc sort thay đổi
+        setCurrentPage(1);
     }, [filters, posts, sortType]);
 
     // 3. Các hàm điều khiển
@@ -117,7 +185,9 @@ function PostList() {
 
                 <div className="room-header-toolbar">
                     <div className="header-title-group">
-                        <h1 className="text-4xl font-extrabold">Kết quả tìm kiếm</h1>
+                        <h1 className="text-4xl font-extrabold">
+                            {searchTerm ? `Kết quả cho: "${searchTerm}"` : "Tất cả phòng"}
+                        </h1>
                         <p className="results-count">Hiển thị {filteredPosts.length} bài đăng được chọn lọc</p>
                     </div>
 
@@ -138,9 +208,11 @@ function PostList() {
 
             <div className="room-layout-grid">
                 <Sidebar
+                    filters={filters}
                     onFilterChange={handleFilterChange}
                     onReset={handleReset}
                 />
+
 
                 <section className="room-listing-section">
                     {loading ? (
