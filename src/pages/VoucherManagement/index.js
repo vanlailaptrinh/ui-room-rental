@@ -12,7 +12,7 @@ const Sidebar = () => {
                     <span className="material-symbols-outlined">dashboard</span>
                     <span>Bảng điều khiển</span>
                 </a>
-                <a href="#" className="nav-item active">
+                <a href="/admin/voucher" className="nav-item active">
                     <span className="material-symbols-outlined">confirmation_number</span>
                     <span>Quản lý Voucher</span>
                 </a>

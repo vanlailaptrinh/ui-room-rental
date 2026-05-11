@@ -47,62 +47,146 @@
     line-height: 1.6;
 }
 
-/* Search Bar */
 .home-search-bar-container {
-    background: var(--home-white);
-    padding: 12px;
-    border-radius: 24px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
     display: flex;
-    gap: 12px;
-    max-width: 1000px;
+    align-items: center;
+    background-color: #ffffff;
+    border-radius: 9999px; /* Khung bo tròn viên thuốc */
+    padding: 8px 8px 8px 32px; /* Cách lề trái nhiều hơn, lề phải bám sát nút */
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05); /* Bóng mờ sang trọng */
+    width: 100%;
+    max-width: 800px; /* Độ rộng tối đa */
     margin: 0 auto;
-    position: relative;
-    z-index: 10;
+    border: 1px solid #F3F4F6;
 }
 
-.home-search-fields { display: flex; flex: 1; }
+.home-search-fields {
+    display: flex;
+    flex: 1;
+    align-items: center;
+}
 
-.home-field-group { flex: 1; padding: 0 20px; text-align: left; }
+.home-field-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 4px 20px;
+    cursor: pointer;
+    border-radius: 30px;
+    transition: background-color 0.2s ease;
+}
 
-.home-border-right { border-right: 1px solid var(--home-border-color); }
+.home-field-group:hover {
+    background-color: #F9FAFB;
+}
+
+.home-border-right {
+    border-right: 1px solid #E5E7EB;
+    border-radius: 0; /* Xóa bo tròn ở điểm giao nhau để đường thẳng đẹp hơn */
+}
 
 .home-field-group label {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
-    color: var(--home-text-sub);
+    color: #6B7280;
+    margin-bottom: 2px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
 }
 
 .home-input-with-icon {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 6px;
-}
-
-.home-input-with-icon input,
-.home-input-with-icon select {
-    border: none;
-    outline: none;
-    font-weight: 600;
-    font-size: 15px;
     width: 100%;
-    background: transparent;
 }
 
+.home-input-with-icon select {
+    width: 100%;
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+    background-color: transparent;
+    padding: 0;
+    padding-right: 20px; /* Tạo khoảng trống cho icon mũi tên */
+    cursor: pointer;
+
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%236b7280%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 11px auto;
+}
+
+.home-input-with-icon select:focus,
+.home-input-with-icon select:active,
+.home-input-with-icon select:focus-visible {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+}
+
+/* 6. Nút Tìm kiếm */
 .home-btn-search-main {
-    background: var(--home-primary);
-    color: white;
+    background-color: #1A73E8;
+    color: #ffffff;
     border: none;
-    padding: 16px 32px;
-    border-radius: 16px;
+    border-radius: 9999px;
+    padding: 14px 32px;
+    font-size: 15px;
     font-weight: 700;
     cursor: pointer;
-    transition: 0.3s;
+    transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
-.home-btn-search-main:hover { transform: scale(1.02); background: #1557b0; }
+.home-btn-search-main:hover {
+    background-color: #1557B0;
+    box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+    transform: translateY(-1px);
+}
+
+.home-btn-search-main:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+    .home-search-bar-container {
+        flex-direction: column; /* Đẩy các thẻ xếp dọc */
+        border-radius: 24px; /* Chuyển thành khối vuông bo góc */
+        padding: 16px;
+        gap: 16px;
+    }
+
+    .home-search-fields {
+        flex-direction: column;
+        width: 100%;
+        gap: 8px;
+    }
+
+    .home-field-group {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 12px;
+        background-color: #F9FAFB; /* Nền xám cho dễ nhìn trên mobile */
+    }
+
+    .home-border-right {
+        border-right: none; /* Bỏ gạch dọc */
+    }
+
+    .home-btn-search-main {
+        width: 100%;
+        padding: 16px;
+        font-size: 16px;
+    }
+}
 
 /* 2. Bento Grid & Headers */
 .home-section-container { max-width: 1200px; margin: 80px auto; padding: 0 24px; }

@@ -2,7 +2,7 @@
 .header-container {
     margin: 0;
     padding: 0 24px;
-    height: 72px;
+    height: 84px;
     display: flex;
     align-items: center;
     position: fixed;
@@ -13,15 +13,16 @@
     z-index: 1000;
     background-color: #F3F4F6;
 }
+
 /* --- Khối bên trái: Logo & Menu --- */
 .brand-and-nav {
     display: flex;
     align-items: center;
-    gap: 100px;
+    gap: 80px;
 }
 
 .header-logo {
-    font-size: 22px;
+    font-size: 28px;
     font-weight: 800;
     color: #111827;
     text-decoration: none;
@@ -35,40 +36,58 @@
     gap: 32px;
 }
 
-.search-container {
+.header-search-container {
     display: flex;
     align-items: center;
-    background-color: #fff;
+    background-color: #E5E7EB;
     border-radius: 9999px;
-    padding: 0 16px;
+    padding: 0 24px 0 20px;
+    transition: all 0.2s ease;
+    height: 54px;
+
+    width: 100%;
+    max-width: 650px;
+
+    margin: 0 auto;
+    gap: 12px;
     border: 1px solid transparent;
-    transition: all 0.3s ease;
-    height: 40px;
-    width: 280px;
-    margin-left: auto;
-    margin-right: 100px;
 }
 
-.search-container:focus-within {
+.search-icon {
+    font-size: 22px;
+    color: #6b7280;
+    flex-shrink: 0;
+
+    position: static !important;
+    margin: 0 !important;
+    transform: none !important;
+}
+
+.header-search-container:focus-within {
     background-color: #ffffff;
     border-color: #1a73e8;
     box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1);
 }
 
-.search-icon-svg {
-    color: #6b7280;
-    font-size: 14px;
-    margin-right: 10px;
-}
-
-.search-input {
-    background: transparent;
-    border: none;
-    outline: none;
-    font-size: 14px;
+.header-search-input {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    font-size: 15px;
     color: #111827;
     width: 100%;
     font-weight: 500;
+    padding: 0;
+}
+
+.header-search-input:focus,
+.header-search-input:focus-visible,
+.header-search-input:active {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
 }
 
 /* --- Khối bên phải: Nút bấm --- */
@@ -83,7 +102,6 @@
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
-    margin-right: 48px;
 }
 
 .btn-login:hover {
@@ -92,7 +110,7 @@
 
 /* Các link menu */
 .nav-link, .nav-link-active {
-    font-size: 16.5px;
+    font-size: 18px;
     font-weight: 600;
     text-decoration: none;
     color: #6b7280;
@@ -104,7 +122,7 @@
 
 /* --- NÚT MENU MOBILE --- */
 .mobile-menu-btn {
-    display: none; /* Mặc định ẨN trên màn hình lớn */
+    display: none;
     background: transparent;
     border: none;
     cursor: pointer;
@@ -123,50 +141,44 @@
    RESPONSIVE CHO HEADER (MEDIA QUERIES)
 ========================================= */
 
-/* --- LAPTOT/TABLET NGANG (Dưới 1200px) --- */
 @media screen and (max-width: 1200px) {
     .brand-and-nav {
-        gap: 40px; /* Giảm khoảng cách giữa Logo và Menu */
+        gap: 40px;
     }
     .search-container {
-        margin-right: 40px; /* Giảm khoảng cách từ Search đến Nút Login */
-    }
-    .btn-login {
-        margin-right: 0; /* Bỏ lề phải thừa ở cuối */
+        margin-right: 20px;
     }
 }
 
-/* --- TABLET (Dưới 1024px) --- */
 @media screen and (max-width: 1024px) {
     .brand-and-nav {
         gap: 24px;
     }
     .header-nav-links {
-        gap: 16px; /* Các link menu gần nhau hơn */
+        gap: 16px;
     }
     .nav-link, .nav-link-active {
-        font-size: 15px; /* Thu nhỏ chữ menu 1 chút */
+        font-size: 15px;
     }
     .search-container {
-        width: 200px; /* Thu nhỏ độ dài thanh tìm kiếm */
-        margin-right: 24px;
+        width: 200px;
+        margin-right: 16px;
     }
 }
 
-/* --- MOBILE & TABLET NHỎ (Dưới 768px) --- */
 @media screen and (max-width: 768px) {
     .header-container {
         padding: 0 16px;
         justify-content: space-between;
     }
 
-    /* Ẩn thanh tìm kiếm dài */
     .search-container {
         display: none;
     }
 
     .brand-and-nav {
         gap: 0;
+        align-items: center;
     }
 
     .header-logo {
@@ -179,7 +191,6 @@
         margin-right: 0;
     }
 
-    /* Thiết lập Menu mặc định ẩn và nằm dọc dưới Header */
     .header-nav-links {
         display: none;
         position: absolute;
@@ -196,25 +207,18 @@
         z-index: 999;
     }
 
-    /* Hiển thị Menu khi có class .open */
     .header-nav-links.open {
         display: flex;
     }
 
-    /* Chỉnh lại font size cho link trên mobile dễ bấm hơn */
     .nav-link, .nav-link-active {
         font-size: 16px;
         width: 100%;
         display: block;
     }
+
     .mobile-menu-btn {
         display: flex;
-    }
-
-    /* Đảm bảo căn chỉnh lại khối logo và nút */
-    .brand-and-nav {
-        gap: 0;
-        align-items: center;
     }
 }
 
@@ -226,15 +230,12 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    margin-right: 24px;
 }
 
-/* Wrapper giữ ref để detect click outside */
 .user-dropdown-wrapper {
     position: relative;
 }
 
-/* Nút Avatar */
 .user-avatar-btn {
     display: flex;
     align-items: center;
@@ -253,7 +254,6 @@
     box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
 }
 
-/* Vòng tròn chữ cái */
 .avatar-circle {
     width: 32px;
     height: 32px;
@@ -289,7 +289,6 @@
     transform: rotate(180deg);
 }
 
-/* Panel dropdown */
 .user-dropdown-menu {
     position: absolute;
     top: calc(100% + 10px);
@@ -309,7 +308,6 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Header bên trong dropdown */
 .dropdown-header {
     display: flex;
     align-items: center;
@@ -355,14 +353,12 @@
     border-radius: 20px;
 }
 
-/* Đường kẻ phân cách */
 .dropdown-divider {
     height: 1px;
     background: #f3f4f6;
     margin: 4px 0;
 }
 
-/* Label nhóm section */
 .dropdown-section-label {
     font-size: 10px;
     font-weight: 800;
@@ -372,7 +368,6 @@
     padding: 8px 16px 4px;
 }
 
-/* Item chung */
 .dropdown-item {
     display: flex;
     align-items: center;
@@ -402,7 +397,6 @@
     flex-shrink: 0;
 }
 
-/* Lịch hẹn — highlight đặc biệt */
 .dropdown-item-highlight {
     color: #1a73e8;
     font-weight: 700;
@@ -412,7 +406,6 @@
     background: #eff6ff;
 }
 
-/* Dashboard chủ trọ */
 .dropdown-item-landlord {
     color: #7c3aed;
     font-weight: 700;
@@ -422,7 +415,6 @@
     background: #f5f3ff;
 }
 
-/* Đăng xuất */
 .dropdown-item-logout {
     color: #ef4444;
     font-weight: 600;
@@ -433,9 +425,7 @@
     background: #fef2f2;
 }
 
-/* Responsive: ẩn avatar-name trên mobile */
 @media (max-width: 768px) {
     .avatar-name { display: none; }
     .user-dropdown-menu { right: -10px; width: 260px; }
-    .header-auth-section { margin-right: 8px; }
 }
