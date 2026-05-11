@@ -6,6 +6,7 @@ import NotificationBell from '../NotificationBell';
 
 function Header() {
     const navigate = useNavigate();
+    const [searchQuery, setSearchQuery] = useState('');
     const { user, logout } = useAuth();
 
     const [isMenuOpen,     setIsMenuOpen]     = useState(false);
@@ -38,6 +39,15 @@ function Header() {
         ? user.username.slice(0, 2).toUpperCase()
         : (user?.email?.slice(0, 2).toUpperCase() || 'U');
 
+    // Hàm xử lý tìm kiếm
+    const handleSearch = (e) => {
+        if (e.key === 'Enter' || e.type === 'click') {
+            if (searchQuery.trim()) {
+                navigate(`/postlist?search=${encodeURIComponent(searchQuery.trim())}`);
+                setIsMenuOpen(false);
+            }
+        }
+    };
     return (
         <nav className="header-nav">
             <div className="header-container">
@@ -61,8 +71,21 @@ function Header() {
 
                 {/* ── Giữa: Thanh tìm kiếm ── */}
                 <div className="header-search-container">
-                    <span className="material-symbols-outlined search-icon">search</span>
-                    <input className="header-search-input" placeholder="Tìm phòng..." type="text" />
+                    <span
+                        className="material-symbols-outlined search-icon"
+                        onClick={handleSearch}
+                        style={{ cursor: 'pointer' }}
+                    >
+                        search
+                    </span>
+                    <input
+                        className="header-search-input"
+                        placeholder="Tìm phòng..."
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={handleSearch}
+                    />
                 </div>
 
                 {/* ── Chuông thông báo (chỉ khi đã đăng nhập) ── */}

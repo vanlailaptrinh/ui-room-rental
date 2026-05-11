@@ -33,27 +33,30 @@
     gap: 8px;
 }
 
+/* Trạng thái mặc định của nút */
 .chip-btn {
     padding: 8px 14px;
     border-radius: 10px;
+    font-size: 14px;
     border: 1px solid #e5e7eb;
     background: #ffffff;
     color: #44474e;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.chip-btn:hover {
-    border-color: #1A73E8;
-    color: #1A73E8;
+/* Khi nút đang được CHỌN (Giữ nguyên cho đến khi reset hoặc chọn cái khác) */
+.chip-btn.active {
+    background-color: #1A73E8 !important;
+    color: #ffffff !important;
+    border-color: #1A73E8 !important;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(26, 115, 232, 0.3);
 }
 
-.chip-btn.active {
-    background: #1A73E8;
-    color: #ffffff;
-    border-color: #1A73E8;
+/* Hiệu ứng Hover khi nút ĐÃ active (làm đậm hơn một chút) */
+.chip-btn.active:hover {
+    background-color: #1557b0 !important;
+    box-shadow: 0 6px 12px rgba(26, 115, 232, 0.4);
 }
 
 .amenity-list {
@@ -200,4 +203,52 @@
 
 .show-more-text:hover {
     text-decoration: underline;
+}
+.province-select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    cursor: pointer;
+    appearance: none; /* Xóa icon mặc định của trình duyệt */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    transition: border-color 0.2s;
+}
+
+.province-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.province-select option {
+    padding: 10px;
+}
+/* Khi select có giá trị (không phải rỗng) */
+.province-select:not([value=""]) {
+    border-color: #1A73E8;
+    background-color: rgba(26, 115, 232, 0.05);
+    font-weight: 600;
+    color: #1A73E8;
+}
+
+/* Hiệu ứng hover cho dropdown */
+.province-select:hover {
+    border-color: #1A73E8;
+}
+/* Container của item tiện ích khi có input được checked */
+.amenity-item:has(input:checked) {
+    color: #1A73E8;
+    font-weight: 600;
+}
+
+/* Thêm hiệu ứng hover nhẹ cho dòng tiện ích */
+.amenity-item:hover {
+    color: #1A73E8;
 }

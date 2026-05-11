@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import './Sidebar.css';
 import { IconVerified, IconChevronRight } from '../../assets/Icons';
-import AmenityService from '../../services/amenityService'; // Import service mới
+import AmenityService from '../../services/amenityService';
 
-function Sidebar({ onFilterChange, onReset }) {
+function Sidebar({filters, onFilterChange, onReset }) {
     const [selectedPrice, setSelectedPrice] = useState(null);
     const [selectedArea, setSelectedArea] = useState(null);
     const [selectedAmenities, setSelectedAmenities] = useState([]);
     const [isExpanded, setIsExpanded] = useState(false);
+    const [selectedProvince, setSelectedProvince] = useState("");
 
     // State lưu danh sách tiện ích lấy từ API
     const [dbAmenities, setDbAmenities] = useState([]);
+
+    const provinces = [
+        "Hà Nội", "TP. Hồ Chí Minh", "Đà Nẵng", "Bình Dương", "Đồng Nai",
+        "Cần Thơ", "Hải Phòng", "Long An", "Quảng Ninh", "Huế", "Khánh Hòa"
+    ].sort();
 
     // Lấy danh sách tiện ích từ Backend khi component mount
     useEffect(() => {
@@ -27,18 +33,31 @@ function Sidebar({ onFilterChange, onReset }) {
         fetchAmenities();
     }, []);
 
+    useEffect(() => {
+        if (filters.province) setSelectedProvince(filters.province);
+        if (filters.price) setSelectedPrice(filters.price);
+        if (filters.area) setSelectedArea(filters.area);
+    }, [filters]);
+
     const priceOptions = [
-        { label: 'Dưới 1tr', min: 0, max: 1000000 },
-        { label: '1tr - 2tr', min: 1000000, max: 2000000 },
-        { label: '2tr - 5tr', min: 2000000, max: 5000000 },
+        { label: 'Dưới 2tr', min: 0, max: 2000000 },
+        { label: '2tr - 3tr', min: 2000000, max: 3000000 },
+        { label: '3tr - 5tr', min: 3000000, max: 5000000 },
         { label: 'Trên 5tr', min: 5000000, max: 100000000 },
     ];
 
     const areaOptions = [
         { label: 'Dưới 20m²', min: 0, max: 20 },
         { label: '20m² - 30m²', min: 20, max: 30 },
-        { label: 'Trên 30m²', min: 30, max: 500 },
+        { label: '30m² - 50m²', min: 30, max: 50 },
+        { label: 'Trên 50m²', min: 50, max: 500 },
     ];
+
+    const handleProvinceChange = (e) => {
+        const value = e.target.value;
+        setSelectedProvince(value);
+        onFilterChange('province', value);
+    };
 
     const handleSelect = (type, value, setter) => {
         const newValue = value === (type === 'price' ? selectedPrice : selectedArea) ? null : value;
@@ -56,6 +75,7 @@ function Sidebar({ onFilterChange, onReset }) {
     };
 
     const handleReset = () => {
+        setSelectedProvince("");
         setSelectedPrice(null);
         setSelectedArea(null);
         setSelectedAmenities([]);
@@ -65,13 +85,28 @@ function Sidebar({ onFilterChange, onReset }) {
     return (
         <aside className="room-sidebar">
             <div className="filter-card">
+
+                <div className="filter-section">
+                    <h3 className="filter-title">Tỉnh thành</h3>
+                    <select
+                        className="province-select"
+                        value={selectedProvince}
+                        onChange={handleProvinceChange}
+                    >
+                        <option value="">-- Chọn tỉnh thành --</option>
+                        {provinces.map((p) => (
+                            <option key={p} value={p}>{p}</option>
+                        ))}
+                    </select>
+                </div>
                 {/* Khoảng giá */}
                 <div className="filter-section">
                     <h3 className="filter-title">Khoảng giá</h3>
                     <div className="chip-group">
                         {priceOptions.map((opt) => (
                             <button key={opt.label}
-                                    className={`chip-btn ${selectedPrice === opt ? 'active' : ''}`}
+                                // So sánh label thay vì so sánh cả object
+                                    className={`chip-btn ${selectedPrice?.label === opt.label ? 'active' : ''}`}
                                     onClick={() => handleSelect('price', opt, setSelectedPrice)}>
                                 {opt.label}
                             </button>
@@ -85,7 +120,8 @@ function Sidebar({ onFilterChange, onReset }) {
                     <div className="chip-group">
                         {areaOptions.map((opt) => (
                             <button key={opt.label}
-                                    className={`chip-btn ${selectedArea === opt ? 'active' : ''}`}
+                                // So sánh label thay vì so sánh cả object
+                                    className={`chip-btn ${selectedArea?.label === opt.label ? 'active' : ''}`}
                                     onClick={() => handleSelect('area', opt, setSelectedArea)}>
                                 {opt.label}
                             </button>
