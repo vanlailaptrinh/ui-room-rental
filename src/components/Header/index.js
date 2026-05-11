@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import './Header.css';
-import { IconSearch } from "../../assets/Icons";
 import { useAuth } from '../../context/authContext';
 import NotificationBell from '../NotificationBell';
 
@@ -57,15 +56,13 @@ function Header() {
                         <NavLink to="/postlist" className={({ isActive }) => isActive ? "nav-link-active" : "nav-link"}>Phòng</NavLink>
                         <NavLink to="/pricing"  className={({ isActive }) => isActive ? "nav-link-active" : "nav-link"}>Gói Tin</NavLink>
                         <NavLink to="/uudai"    className={({ isActive }) => isActive ? "nav-link-active" : "nav-link"}>Ưu Đãi</NavLink>
-                        <NavLink to="/blog"     className={({ isActive }) => isActive ? "nav-link-active" : "nav-link"}>Blog</NavLink>
-                        <NavLink to="/lienhe"   className={({ isActive }) => isActive ? "nav-link-active" : "nav-link"}>Liên Hệ</NavLink>
                     </div>
                 </div>
 
                 {/* ── Giữa: Thanh tìm kiếm ── */}
-                <div className="search-container">
-                    <IconSearch className="search-icon-svg" />
-                    <input className="search-input" placeholder="Tìm phòng..." type="text" />
+                <div className="header-search-container">
+                    <span className="material-symbols-outlined search-icon">search</span>
+                    <input className="header-search-input" placeholder="Tìm phòng..." type="text" />
                 </div>
 
                 {/* ── Chuông thông báo (chỉ khi đã đăng nhập) ── */}
