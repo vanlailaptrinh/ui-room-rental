@@ -377,3 +377,135 @@ button {
         padding: 20px;
     }
 }
+
+/* ─── BOOKING SPECIFIC ADDITIONS ─── */
+
+/* Count badge trên heading */
+.ld-count-badge {
+    background: #e0e7ff;
+    color: #4f46e5;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-left: 8px;
+}
+
+/* Loading */
+.ld-loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 40px 0;
+    color: #6b7280;
+    justify-content: center;
+}
+
+.ld-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #4f46e5;
+    border-radius: 50%;
+    animation: ldSpin 0.8s linear infinite;
+}
+
+@keyframes ldSpin { to { transform: rotate(360deg); } }
+
+/* Error */
+.ld-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 40px 0;
+    color: #ef4444;
+    font-weight: 600;
+}
+
+/* Empty */
+.ld-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 48px 0;
+    color: #9ca3af;
+    font-size: 15px;
+}
+
+.ld-empty span { font-size: 40px; }
+
+/* Status badge */
+.ld-status-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.sb-pending   { background: #fef3c7; color: #92400e; }
+.sb-approved  { background: #dcfce7; color: #166534; }
+.sb-rejected  { background: #fee2e2; color: #991b1b; }
+.sb-cancelled { background: #f3f4f6; color: #4b5563; }
+
+/* Item left border theo status */
+.ld-item-pending   { border-left: 3px solid #f59e0b; }
+.ld-item-approved  { border-left: 3px solid #22c55e; }
+.ld-item-rejected  { border-left: 3px solid #ef4444; opacity: 0.75; }
+.ld-item-cancelled { border-left: 3px solid #9ca3af; opacity: 0.65; }
+
+/* Approve button */
+.btn-approve {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1.5px solid #bbf7d0;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-approve:hover:not(:disabled) {
+    background: #16a34a;
+    color: white;
+    border-color: #16a34a;
+}
+
+.btn-approve:disabled,
+.btn-danger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Outline small */
+.btn-outline-small {
+    padding: 8px 16px;
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13px;
+    margin-left: auto;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-outline-small:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* history */
+.history-list { display: flex; flex-direction: column; gap: 10px; }
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--text-sub);
+}
