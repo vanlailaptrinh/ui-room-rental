@@ -1,511 +1,654 @@
-/* --- HỆ THỐNG BIẾN (VARIABLES) --- */
-:root {
-    --primary: #1A73E8;
-    --primary-hover: #1557b0;
-    --primary-light: #eef2ff;
-    --success: #22c55e;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --bg-body: #f3f4f6;
-    --bg-card: #ffffff;
-    --text-main: #111827;
-    --text-sub: #6b7280;
-    --border: #e5e7eb;
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    --radius-lg: 20px;
-    --sidebar-width: 280px;
-}
-
-/* --- RESET CƠ BẢN --- */
+/* --- reset & base --- */
 * {
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
 }
 
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f0f2f5; /* Nền xám nhạt đặc trưng admin */
+    color: #262626;
+}
+
+/* --- Layout Container --- */
 .landlord-container {
     display: flex;
     min-height: 100vh;
-    margin-top: 72px;
-    gap: 30px; /* Thêm gap để tạo khoảng cách an toàn giữa Sidebar và Main */
 }
 
-/* --- SIDEBAR (THANH ĐIỀU HƯỚNG) --- */
+/* --- Sidebar --- */
 .landlord-sidebar {
-    width: var(--sidebar-width);
-    min-width: var(--sidebar-width); /* Đảm bảo sidebar không bị ép nhỏ lại */
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 32px 20px;
+    width: 260px;
+    background: #001529; /* Màu tối sang trọng */
+    color: #ffffff;
     display: flex;
     flex-direction: column;
-
-    /* Thay fixed bằng sticky để trải nghiệm cuộn mượt mà và không lỗi layout */
-    position: sticky;
-    top: 100px;
-
-    height: fit-content; /* Ôm vừa vặn nội dung menu thay vì cố định 70vh */
-    margin-top: 50px;
-    margin-left: 50px;
-    margin-bottom: 50px;
+    position: fixed;
+    height: 100vh;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    z-index: 100;
 }
 
-.logo {
-    font-size: 26px;
-    font-weight: 900;
-    color: var(--primary);
-    padding: 0 12px;
-    margin-bottom: 48px;
-    letter-spacing: -0.5px;
-}
-
-.nav-menu {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.nav-item {
-    padding: 14px 16px;
-    border-radius: 12px;
-    color: var(--text-sub);
-    font-weight: 600;
-    font-size: 15px;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.nav-item:hover {
-    background: var(--primary-light);
-    color: var(--primary);
-}
-
-.nav-item.active {
-    background: var(--primary);
-    color: white;
-    box-shadow: 0 4px 12px rgba(26, 115, 232, 0.25);
-}
-
-/* --- NỘI DUNG CHÍNH --- */
-.landlord-main {
-    flex: 1;
-    /* Đã xóa margin-left: var(--sidebar-width) vì dùng flexbox tự đẩy */
-    padding: 50px 60px 50px 0; /* Bỏ padding trái vì đã có gap ở container */
-}
-
-.main-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 40px;
-}
-
-.main-header h1 {
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: -1px;
-}
-
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    background: white;
-    padding: 8px 16px;
-    border-radius: 50px;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
-}
-
-.badge-verified {
-    font-size: 12px;
+.landlord-logo {
+    height: 64px;
+    line-height: 64px;
+    padding: 0 24px;
+    font-size: 20px;
     font-weight: 700;
-    color: var(--success);
-    background: #dcfce7;
-    padding: 4px 12px;
-    border-radius: 20px;
-}
-
-.avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-/* --- CARD SYSTEM --- */
-.card {
-    background: var(--bg-card);
-    border-radius: var(--radius-lg);
-    padding: 30px;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
-    margin-bottom: 24px;
-}
-
-.card h3 {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* --- DANH SÁCH LỊCH HẸN --- */
-.appointment-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.appointment-item {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 20px;
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.appointment-item:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--primary);
-}
-
-.date-tag {
-    background: var(--primary-light);
-    color: var(--primary);
-    padding: 10px;
-    border-radius: 12px;
-    text-align: center;
-    font-weight: 800;
-    min-width: 55px;
-    line-height: 1.2;
-}
-
-.date-tag span {
-    font-size: 11px;
+    color: #1890ff;
+    background: #002140;
     text-transform: uppercase;
-    opacity: 0.7;
+    letter-spacing: 1px;
+    cursor: pointer;
 }
 
-.apt-details {
+.landlord-nav-menu {
     flex: 1;
+    padding: 16px 0;
 }
 
-.apt-details h4 {
-    font-size: 16px;
-    margin-bottom: 4px;
-}
-
-.apt-details p {
-    color: var(--text-sub);
+.landlord-nav-item {
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.65);
+    transition: all 0.3s;
     font-size: 14px;
 }
 
-.status-badge {
-    background: #f3f4f6;
-    padding: 2px 10px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
+.landlord-nav-item:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
 }
 
-/* --- DANH SÁCH TIN ĐĂNG --- */
-.listing-item {
+.landlord-active {
+    background-color: #1890ff !important;
+    color: #ffffff !important;
+}
+
+/* --- Main Content Area --- */
+.landlord-main {
+    flex: 1;
+    margin-left: 260px; /* Bằng độ rộng sidebar */
     display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 16px 0;
-    border-bottom: 1px solid var(--border);
+    flex-direction: column;
 }
 
-.listing-item:last-child { border-bottom: none; }
-
-.listing-item img {
-    width: 110px;
-    height: 75px;
-    border-radius: 12px;
-    object-fit: cover;
-}
-
-.listing-info h4 {
-    font-size: 16px;
-    margin-bottom: 4px;
-}
-
-/* --- GÓI ĐẨY TIN --- */
-.ad-package-box {
-    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
-}
-
-.package-info {
+/* --- Header (Admin Style) --- */
+.landlord-main-header {
+    height: 64px;
+    background: #ffffff;
     display: flex;
     justify-content: space-between;
-    margin-bottom: 12px;
+    align-items: center;
+    padding: 0 24px;
+    box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 90;
 }
 
-.package-info span.warning {
-    color: var(--danger);
-    font-weight: 700;
-    animation: pulse 2s infinite;
+.landlord-main-header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #000000d9;
+    margin: 0;
 }
 
-.progress-bar-bg {
-    height: 10px;
-    background: #e5e7eb;
-    border-radius: 20px;
-    margin-bottom: 24px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: var(--primary);
-    border-radius: 20px;
-    transition: width 0.8s ease-out;
-}
-
-/* --- HỆ THỐNG NÚT BẤM (BUTTONS) --- */
-button {
+.landlord-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
     cursor: pointer;
-    font-family: inherit;
-    transition: all 0.2s;
+    transition: background 0.3s;
 }
 
-.btn-primary-outline {
-    width: 100%;
-    padding: 14px;
-    border: 2px solid var(--primary);
-    background: transparent;
-    color: var(--primary);
-    border-radius: 14px;
-    font-weight: 700;
+.landlord-user-info:hover {
+    background: #f5f5f5;
 }
 
-.btn-primary-outline:hover {
-    background: var(--primary);
-    color: white;
-}
-
-.btn-danger {
-    background: #fef2f2;
-    color: var(--danger);
-    border: none;
-    padding: 8px 16px;
-    border-radius: 10px;
-    font-weight: 700;
-}
-
-.btn-danger:hover {
-    background: var(--danger);
-    color: white;
-}
-
-.btn-text {
-    background: transparent;
-    border: none;
-    color: var(--primary);
-    font-weight: 700;
-    padding: 8px 12px;
-}
-
-.btn-primary-small {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 10px;
-    font-weight: 700;
-}
-
-/* --- TIỆN ÍCH KHÁC --- */
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: 1fr 380px;
-    gap: 30px;
-    align-items: start;
-}
-
-.report-item {
-    background: #fffafb;
-    border: 1px solid #fee2e2;
-    padding: 20px;
-    border-radius: 16px;
-}
-
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.6; }
-    100% { opacity: 1; }
-}
-
-/* --- RESPONSIVE --- */
-@media (max-width: 1024px) {
-    .landlord-container {
-        flex-direction: column;
-    }
-
-    .landlord-sidebar {
-        position: static;
-        width: calc(100% - 100px);
-        margin: 20px 50px;
-        height: auto;
-    }
-
-    .landlord-main {
-        padding: 0 50px 50px 50px;
-    }
-
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-}
-@media (max-width: 768px) {
-    .landlord-sidebar, .landlord-main {
-        width: 100%;
-        margin: 20px 0;
-        padding: 20px;
-    }
-}
-
-/* ─── BOOKING SPECIFIC ADDITIONS ─── */
-
-/* Count badge trên heading */
-.ld-count-badge {
-    background: #e0e7ff;
-    color: #4f46e5;
+.landlord-badge-verified {
+    background: #f6ffed;
+    color: #52c41a;
+    border: 1px solid #b7eb8f;
+    padding: 2px 8px;
+    border-radius: 4px;
     font-size: 12px;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 20px;
+    font-weight: 500;
+}
+
+.landlord-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #d9d9d9;
+}
+
+/* --- Content Area --- */
+.landlord-content-area {
+    padding: 24px;
+}
+
+/* --- Cards --- */
+.landlord-card {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.landlord-card h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 16px;
+    font-weight: 600;
+    border-left: 4px solid #1890ff;
+    padding-left: 12px;
+}
+
+.landlord-full-width {
+    width: 100%;
+}
+
+/* --- Lists & Items --- */
+.landlord-appointment-list, .landlord-listing-table {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.landlord-appointment-item, .landlord-listing-item {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background: #fafafa;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.landlord-appointment-item:hover {
+    background: #ffffff;
+    border-color: #1890ff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* --- Components --- */
+.landlord-date-tag {
+    background: #ffffff;
+    border: 1px solid #d9d9d9;
+    padding: 8px;
+    border-radius: 4px;
+    text-align: center;
+    min-width: 60px;
+    font-weight: bold;
+    color: #1890ff;
+}
+
+.landlord-date-tag span {
+    display: block;
+    font-size: 11px;
+    color: #8c8c8c;
+    text-transform: uppercase;
+}
+
+.landlord-apt-details {
+    flex: 1;
+    margin-left: 20px;
+}
+
+.landlord-apt-details h4 {
+    margin: 0 0 4px 0;
+    font-size: 15px;
+}
+
+.landlord-apt-details p {
+    margin: 0;
+    font-size: 13px;
+    color: #595959;
+}
+
+/* --- Buttons --- */
+.landlord-btn-approve, .landlord-btn-primary-small {
+    background: #1890ff;
+    color: #fff;
+    border: 1px solid #1890ff;
+    padding: 5px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.landlord-btn-approve:hover {
+    background: #40a9ff;
+}
+
+.landlord-btn-danger {
+    background: #fff;
+    color: #ff4d4f;
+    border: 1px solid #ff4d4f;
+    padding: 5px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
     margin-left: 8px;
 }
 
-/* Loading */
-.ld-loading {
+.landlord-btn-danger:hover {
+    background: #ff4d4f;
+    color: #fff;
+}
+
+/* --- Status Badges --- */
+.landlord-ld-status-badge {
+    padding: 2px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+}
+
+.landlord-sb-pending { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+.landlord-sb-approved { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+.landlord-sb-rejected { background: #fff1f0; color: #f5222d; border: 1px solid #ffa39e; }
+
+/* --- Dashboard Grid (Cho tab thanh toán/báo cáo) --- */
+.landlord-dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+/* --- Empty state & Loading --- */
+.landlord-ld-empty, .landlord-ld-loading {
+    text-align: center;
+    padding: 40px;
+    color: #8c8c8c;
+}
+/* --- Dashboard Stats Grid --- */
+.landlord-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.landlord-stat-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 40px 0;
-    color: #6b7280;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    border: 1px solid #f0f0f0;
+}
+
+.landlord-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
     justify-content: center;
+    font-size: 24px;
+    margin-right: 16px;
 }
 
-.ld-spinner {
-    width: 28px;
-    height: 28px;
-    border: 3px solid #e5e7eb;
-    border-top-color: #4f46e5;
-    border-radius: 50%;
-    animation: ldSpin 0.8s linear infinite;
+.landlord-stat-label {
+    font-size: 13px;
+    color: #8c8c8c;
+    display: block;
 }
 
-@keyframes ldSpin { to { transform: rotate(360deg); } }
+.landlord-stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 4px 0 0 0;
+    color: #262626;
+}
 
-/* Error */
-.ld-error {
+/* --- Message List --- */
+.landlord-message-item {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s;
+}
+
+.landlord-message-item:last-child {
+    border-bottom: none;
+}
+
+.landlord-message-item:hover {
+    background: #fafafa;
+}
+
+.landlord-message-content {
+    flex: 1;
+    margin-left: 16px;
+}
+
+.landlord-message-user {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.landlord-message-time {
+    font-size: 12px;
+    color: #bfbfbf;
+}
+
+.landlord-message-content p {
+    margin: 0;
+    font-size: 13px;
+    color: #595959;
+}
+
+/* Nút text nhẹ nhàng trong admin */
+.landlord-btn-text {
+    background: none;
+    border: none;
+    color: #1890ff;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.landlord-btn-text:hover {
+    text-decoration: underline;
+}
+/* --- Giao diện Gói Tin --- */
+
+.landlord-subtabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #d9d9d9;
+}
+
+.landlord-subtabs button {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #8c8c8c;
+    position: relative;
+}
+
+.landlord-subtabs button.active {
+    color: #1890ff;
+}
+
+.landlord-subtabs button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #1890ff;
+}
+
+/* Pricing Section */
+.landlord-pricing-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.landlord-pricing-header h2 {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.landlord-toggle-group {
+    display: inline-flex;
+    background: #f0f2f5;
+    padding: 4px;
+    border-radius: 20px;
+    margin-top: 20px;
+}
+
+.landlord-toggle-group button {
+    border: none;
+    padding: 8px 24px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+    background: transparent;
+    font-weight: 500;
+}
+
+.landlord-toggle-group button.active {
+    background: #fff;
+    color: #1890ff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Pricing Cards Grid */
+.landlord-pricing-grid {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.landlord-pricing-card {
+    background: #fff;
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    padding: 30px;
+    width: 320px;
+    position: relative;
+    transition: 0.3s;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    padding: 40px 0;
-    color: #ef4444;
-    font-weight: 600;
 }
 
-/* Empty */
-.ld-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    padding: 48px 0;
-    color: #9ca3af;
+.landlord-pricing-card.featured {
+    border: 2px solid #00adef;
+}
+
+.featured-badge {
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: #00adef;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.landlord-pricing-card h4 {
+    font-size: 20px;
+    margin: 0 0 10px 0;
+}
+
+.pkg-desc {
+    color: #8c8c8c;
+    font-size: 14px;
+    margin-bottom: 30px;
+}
+
+.pkg-price {
+    margin-bottom: 30px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 20px;
+}
+
+.pkg-price .amount {
+    font-size: 32px;
+    font-weight: 700;
+    color: #000;
+}
+
+.pkg-price .period {
+    color: #8c8c8c;
+}
+
+.pkg-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 30px 0;
+    flex: 1;
+}
+
+.pkg-features li {
+    margin-bottom: 12px;
     font-size: 15px;
 }
 
-.ld-empty span { font-size: 40px; }
-
-/* Status badge */
-.ld-status-badge {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 20px;
-}
-
-.sb-pending   { background: #fef3c7; color: #92400e; }
-.sb-approved  { background: #dcfce7; color: #166534; }
-.sb-rejected  { background: #fee2e2; color: #991b1b; }
-.sb-cancelled { background: #f3f4f6; color: #4b5563; }
-
-/* Item left border theo status */
-.ld-item-pending   { border-left: 3px solid #f59e0b; }
-.ld-item-approved  { border-left: 3px solid #22c55e; }
-.ld-item-rejected  { border-left: 3px solid #ef4444; opacity: 0.75; }
-.ld-item-cancelled { border-left: 3px solid #9ca3af; opacity: 0.65; }
-
-/* Approve button */
-.btn-approve {
-    background: #f0fdf4;
-    color: #16a34a;
-    border: 1.5px solid #bbf7d0;
-    padding: 8px 16px;
-    border-radius: 10px;
-    font-weight: 700;
-    font-size: 13px;
+.landlord-btn-buy {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #d9d9d9;
+    background: #fff;
     cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-approve:hover:not(:disabled) {
-    background: #16a34a;
-    color: white;
-    border-color: #16a34a;
-}
-
-.btn-approve:disabled,
-.btn-danger:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Outline small */
-.btn-outline-small {
-    padding: 8px 16px;
-    background: white;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
     font-weight: 600;
-    font-size: 13px;
-    margin-left: auto;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
+    transition: 0.3s;
 }
 
-.btn-outline-small:hover {
-    border-color: var(--primary);
-    color: var(--primary);
+.featured .landlord-btn-buy {
+    background: #00adef;
+    color: #fff;
+    border-color: #00adef;
 }
 
-/* history */
-.history-list { display: flex; flex-direction: column; gap: 10px; }
-.history-item {
+.landlord-btn-buy:hover {
+    opacity: 0.8;
+    transform: translateY(-2px);
+}
+/* --- Table Section --- */
+.landlord-section-header {
     display: flex;
     justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border);
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.landlord-section-header .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.landlord-table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.landlord-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.landlord-table th {
+    background: #fafafa;
+    color: #595959;
+    font-weight: 600;
     font-size: 14px;
-    color: var(--text-sub);
+    padding: 16px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.landlord-table td {
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+    font-size: 14px;
+}
+
+.landlord-table tr:hover td {
+    background-color: #fafafa;
+}
+
+/* --- Cell Specifics --- */
+.landlord-table-img img {
+    width: 80px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.landlord-table-info .title {
+    font-weight: 600;
+    color: #1890ff;
+    margin-bottom: 4px;
+}
+
+.landlord-table-info .address {
+    font-size: 12px;
+    color: #8c8c8c;
+}
+
+.landlord-table-price {
+    font-weight: 700;
+    color: #f5222d; /* Màu đỏ cho giá để gây chú ý */
+}
+
+.landlord-table-date {
+    color: #595959;
+    font-size: 13px;
+}
+
+/* Status Dot */
+.landlord-status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.landlord-status-dot::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.landlord-status-dot.active::before { background-color: #52c41a; box-shadow: 0 0 5px #52c41a; }
+.landlord-status-dot.inactive::before { background-color: #bfbfbf; }
+
+/* Actions Buttons */
+.landlord-table-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.btn-action {
+    background: #fff;
+    border: 1px solid #d9d9d9;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-action:hover {
+    border-color: #1890ff;
+    background-color: #e6f7ff;
+}
+
+.btn-action.delete:hover {
+    border-color: #ff4d4f;
+    background-color: #fff1f0;
+}
+
+.btn-action.push:hover {
+    border-color: #faad14;
+    background-color: #fffbe6;
 }

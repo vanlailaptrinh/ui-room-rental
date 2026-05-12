@@ -39,6 +39,7 @@ function AppRoutes() {
             <Route path="/register" element={<Register />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/payment-callback" element={<PaymentCallback />} />
+            <Route path="/landlord" element={<LandlordDashboard />} />
 
             {/* 2. Nhóm Dashboard/Cá nhân: Tự có Sidebar riêng */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -69,7 +70,6 @@ function AppRoutes() {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/favorites" element={<Favorites />} />
                 <Route path="/post" element={<PostRoom />} />
-                <Route path="/landlord" element={<LandlordDashboard />} />
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/my-bookings" element={<MyBookings />} />
             </Route>

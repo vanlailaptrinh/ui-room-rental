@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import './Header.css';
 import { useAuth } from '../../context/authContext';
@@ -35,9 +35,19 @@ function Header() {
     const isLandlord = role.includes('LANDLORD') || role.includes('ADMIN');
 
     // Chữ cái đại diện cho avatar
-    const initials = user?.username
-        ? user.username.slice(0, 2).toUpperCase()
-        : (user?.email?.slice(0, 2).toUpperCase() || 'U');
+    const initials = useMemo(() => {
+        const name = user?.fullName || user?.username || user?.email || 'User';
+        const parts = name.trim().split(/\s+/);
+
+        if (parts.length === 1) {
+            return parts[0].slice(0, 2).toUpperCase();
+        }
+        // Lấy chữ cái đầu của từ đầu tiên và từ cuối cùng
+        const firstChar = parts[0][0];
+        const lastChar = parts[parts.length - 1][0];
+
+        return (firstChar + lastChar).toUpperCase();
+    }, [user]);
 
     // Hàm xử lý tìm kiếm
     const handleSearch = (e) => {
@@ -64,7 +74,6 @@ function Header() {
 
                     <div className={`header-nav-links ${isMenuOpen ? 'open' : ''}`}>
                         <NavLink to="/postlist" className={({ isActive }) => isActive ? "nav-link-active" : "nav-link"}>Phòng</NavLink>
-                        <NavLink to="/pricing"  className={({ isActive }) => isActive ? "nav-link-active" : "nav-link"}>Gói Tin</NavLink>
                         <NavLink to="/uudai"    className={({ isActive }) => isActive ? "nav-link-active" : "nav-link"}>Ưu Đãi</NavLink>
                     </div>
                 </div>
@@ -162,6 +171,9 @@ function Header() {
                                             </Link>
                                             <Link to="/post" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
                                                 <span className="di-icon">📝</span> Đăng tin phòng
+                                            </Link>
+                                            <Link to="/pricing" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
+                                                <span className="di-icon">💳</span> Gói Tin
                                             </Link>
                                         </>
                                     )}

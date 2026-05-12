@@ -227,17 +227,17 @@ function PricingPage() {
                                     <span className="material-symbols-outlined nexus-pricing-icon-success">check_circle</span>
                                     Hiển thị: <strong>{pkg.activeDays} ngày</strong>
                                 </li>
-                                {isPro ? (
-                                    <>
-                                        <li><span className="material-symbols-outlined nexus-pricing-icon-success">check_circle</span> Huy hiệu xác minh</li>
-                                        <li><span className="material-symbols-outlined nexus-pricing-icon-success">check_circle</span> Ưu tiên tìm kiếm</li>
-                                    </>
-                                ) : (
-                                    <>
-                                        <li className="nexus-pricing-disabled"><span className="material-symbols-outlined">cancel</span> Huy hiệu xác minh</li>
-                                        <li className="nexus-pricing-disabled"><span className="material-symbols-outlined">cancel</span> Ưu tiên tìm kiếm</li>
-                                    </>
-                                )}
+                                {/*{isPro ? (*/}
+                                {/*    <>*/}
+                                {/*        <li><span className="material-symbols-outlined nexus-pricing-icon-success">check_circle</span> Huy hiệu xác minh</li>*/}
+                                {/*        <li><span className="material-symbols-outlined nexus-pricing-icon-success">check_circle</span> Ưu tiên tìm kiếm</li>*/}
+                                {/*    </>*/}
+                                {/*) : (*/}
+                                {/*    <>*/}
+                                {/*        <li className="nexus-pricing-disabled"><span className="material-symbols-outlined">cancel</span> Huy hiệu xác minh</li>*/}
+                                {/*        <li className="nexus-pricing-disabled"><span className="material-symbols-outlined">cancel</span> Ưu tiên tìm kiếm</li>*/}
+                                {/*    </>*/}
+                                {/*)}*/}
                             </ul>
 
                             <button

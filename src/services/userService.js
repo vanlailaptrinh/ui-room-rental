@@ -9,6 +9,14 @@ export const getUserProfile = async () => {
         throw error;
     }
 };
+export const getUserById = async (userId) => {
+    try {
+        const response = await axios.get(`${ENDPOINT}/${userId}`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
 export const updateProfile = async (formDataPayload) => {
     try {
         const response = await axios.put(`${ENDPOINT}/profile`, formDataPayload);
