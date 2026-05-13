@@ -1,4 +1,3 @@
-/* Khai báo các màu sắc dùng chung cho trang Login */
 :root {
   --primary: #005bbf;
   --primary-container: #1a73e8;
@@ -13,14 +12,23 @@
   --on-surface: #191c23;
   --on-surface-variant: #414754;
   --outline-variant: #c1c6d6;
-  
   --font-headline: 'Manrope', sans-serif;
   --font-body: 'Inter', sans-serif;
 }
 
-/* =========================================
-   Bố cục chính (Main Layout)
-   ========================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
 .login-container {
   display: flex;
   min-height: 100vh;
@@ -28,13 +36,9 @@
   font-family: var(--font-body);
   color: var(--on-surface);
   -webkit-font-smoothing: antialiased;
-  overflow-y: auto; 
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
-/* =========================================
-   Bên trái: Hình ảnh & Branding (Sidebar)
-   ========================================= */
 .login-sidebar {
   display: none;
   width: 50%;
@@ -56,22 +60,31 @@
   height: 100%;
   object-fit: cover;
   opacity: 0.9;
+  transform: scale(1.03);
 }
 
 .sidebar-gradient-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top right, rgba(0, 91, 191, 0.6), transparent, transparent);
+
+  background:
+    linear-gradient(
+      to top right,
+      rgba(0, 91, 191, 0.7),
+      rgba(0, 0, 0, 0.2),
+      transparent
+    );
 }
 
 .sidebar-content {
   position: relative;
   z-index: 10;
-  padding: 2rem; /* Ép nhỏ padding từ 3rem xuống 2rem */
+  width: 100%;
+  height: 100%;
+  padding: 2rem 2.5rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%;
 }
 
 .brand-header {
@@ -81,7 +94,7 @@
 }
 
 .brand-logo {
-  font-size: 1.25rem; /* Ép nhỏ logo */
+  font-size: 1.4rem;
   font-weight: 800;
   font-family: var(--font-headline);
   letter-spacing: -0.025em;
@@ -89,39 +102,40 @@
 }
 
 .brand-text {
-  max-width: 28rem;
+  max-width: 30rem;
 }
 
 .badge {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
+  padding: 0.35rem 0.9rem;
   border-radius: 9999px;
-  background-color: var(--secondary-container);
+  background-color: rgba(104, 250, 221, 0.95);
   color: var(--on-secondary-container);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  backdrop-filter: blur(10px);
 }
 
 .hero-title {
-  font-size: 2rem; /* Ép nhỏ title */
+  font-size: clamp(2rem, 4vw, 3.5rem);
   font-family: var(--font-headline);
-  font-weight: 700;
+  font-weight: 800;
   color: #ffffff;
-  line-height: 1.25;
-  margin-bottom: 0.75rem;
+  line-height: 1.15;
+  margin-bottom: 1rem;
 }
 
 .hero-description {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
-  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1rem;
+  line-height: 1.7;
 }
 
 .stats-container {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .stat-item {
@@ -130,157 +144,55 @@
 }
 
 .stat-number {
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 800;
   color: #ffffff;
 }
 
 .stat-label {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
 }
 
-/* =========================================
-   Bên phải: Form Đăng nhập
-   ========================================= */
 .login-form-section {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem; /* Bớt khoảng trống rìa ngoài cùng */
   background-color: var(--surface-bright);
 }
 
 @media (min-width: 1024px) {
   .login-form-section {
     width: 50%;
-    padding: 1.5rem;
   }
 }
 
 .form-wrapper {
-  width: 100%;
-  max-width: 400px; /* Nhỏ lại chút nữa */
-}
-
-.form-header {
-  margin-bottom: 1rem; /* Ép từ 1.5rem xuống 1rem */
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(193, 198, 214, 0.2);
+  border-radius: 1.5rem;
+  padding: 1rem;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.06);
 }
 
 .title {
-  font-size: 1.35rem; /* Ép từ 1.5rem */
+  font-size: 1.8rem;
   font-family: var(--font-headline);
-  font-weight: 700;
+  font-weight: 800;
   color: var(--on-surface);
-  margin-bottom: 0.25rem;
 }
 
 .subtitle {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: var(--on-surface-variant);
 }
 
-/* Chọn Vai trò (Role Selection) */
-.role-selection {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem; /* Ép gap */
-  margin-bottom: 1rem; /* Ép từ 1.5rem */
-}
-
-.role-label {
-  position: relative;
-  cursor: pointer;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-.role-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem; /* Ép padding thẻ card */
-  border-radius: 0.5rem;
-  background-color: var(--surface-container-low);
-  border: 2px solid transparent;
-  transition: all 0.2s;
-}
-
-.role-label input:checked + .role-card {
-  border-color: var(--primary);
-  background-color: rgba(216, 226, 255, 0.3);
-}
-
-.role-label input:checked + .role-card .icon-host {
-  color: var(--primary);
-}
-
-.icon-student {
-  color: var(--primary);
-  margin-bottom: 0.15rem;
-  font-size: 1.25rem;
-}
-
-.icon-host {
-  color: var(--on-surface-variant);
-  margin-bottom: 0.15rem;
-  font-size: 1.25rem;
-}
-
-.role-text {
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-/* Nút Đăng nhập Mạng xã hội */
-.social-logins {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.btn-social {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem; /* Ép padding dọc */
-  border-radius: 0.5rem;
-  background-color: var(--surface-container-lowest);
-  border: 1px solid rgba(193, 198, 214, 0.2);
-  transition: all 0.2s;
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  color: inherit;
-}
-
-.btn-social:hover {
-  background-color: var(--surface-container-low);
-}
-
-.social-icon {
-  width: 1.15rem;
-  height: 1.15rem;
-}
-
-/* Dòng Kẻ "Hoặc" */
 .divider-container {
   position: relative;
-  margin-bottom: 1rem;
+  margin-top: 0.5rem;
   text-align: center;
 }
 
@@ -302,41 +214,50 @@
   padding: 0 0.75rem;
   font-size: 0.8rem;
   color: var(--on-surface-variant);
-  font-weight: 500;
 }
 
-/* Form Input */
+.error-box {
+  color: #dc3545;
+  background-color: #f8d7da;
+  padding: 0.85rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 0.875rem; /* Ép khoảng cách các ô input */
+  gap: 0.75rem;
+}
+
+.form-group {
+  width: 100%;
 }
 
 .input-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.25rem;
+  align-items: center;
+  margin-bottom: 0.35rem;
 }
 
 .input-label {
   display: block;
-  font-size: 0.8rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.82rem;
   font-weight: 700;
   font-family: var(--font-headline);
   color: var(--on-surface);
-  margin-bottom: 0.25rem;
-}
-
-.input-header .input-label {
-  margin-bottom: 0;
 }
 
 .forgot-link {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--primary);
-  transition: color 0.2s;
   text-decoration: none;
+  transition: color 0.2s;
 }
 
 .forgot-link:hover {
@@ -345,13 +266,13 @@
 
 .input-field {
   width: 100%;
-  padding: 0.65rem 1rem; /* Ép padding dọc */
-  border-radius: 0.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.9rem;
   background-color: var(--surface-container-highest);
-  border: none;
+  border: 1px solid transparent;
   color: var(--on-surface);
-  transition: all 0.2s;
-  box-sizing: border-box;
+  transition: all 0.25s ease;
+  font-size: 0.92rem;
 }
 
 .input-field::placeholder {
@@ -360,7 +281,10 @@
 
 .input-field:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 91, 191, 0.2);
+  background-color: #ffffff;
+  border-color: rgba(0, 91, 191, 0.2);
+  box-shadow:
+    0 0 0 4px rgba(0, 91, 191, 0.12);
 }
 
 .checkbox-group {
@@ -369,59 +293,97 @@
 }
 
 .checkbox-input {
-  width: 0.875rem;
-  height: 0.875rem;
+  width: 0.95rem;
+  height: 0.95rem;
   accent-color: var(--primary);
-  background-color: var(--surface-container-highest);
-  border: none;
-  border-radius: 0.25rem;
   cursor: pointer;
 }
 
 .checkbox-label {
-  margin-left: 0.5rem;
-  font-size: 0.8rem;
+  margin-top: 0.3rem;
+  font-size: 0.82rem;
   color: var(--on-surface-variant);
   cursor: pointer;
 }
 
 .btn-submit {
   width: 100%;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  background: linear-gradient(to right, var(--primary), var(--primary-container));
+  padding: 0.9rem 1.5rem;
+  border-radius: 1rem;
+  background:
+    linear-gradient(
+      to right,
+      var(--primary),
+      var(--primary-container)
+    );
   color: #ffffff;
   font-weight: 700;
+  font-size: 0.95rem;
   border: none;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 10px 15px -3px rgba(0, 91, 191, 0.1);
+  transition: all 0.25s ease;
+  box-shadow:
+    0 10px 20px rgba(0, 91, 191, 0.15);
 }
 
 .btn-submit:hover {
-  transform: scale(1.02);
+  transform: translateY(-2px);
+  box-shadow:
+    0 15px 25px rgba(0, 91, 191, 0.22);
 }
 
 .btn-submit:active {
   transform: scale(0.98);
 }
 
-/* Footer & Badge */
-.form-footer {
+.social-logins {
+  display: flex;
+  justify-content: center;
   margin-top: 1rem;
-  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.btn-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.5rem;
+  min-width: 200px;
+  border-radius: 1rem;
+  background-color: var(--surface-container-lowest);
+  border: 1px solid rgba(193, 198, 214, 0.35);
+  transition: all 0.25s ease;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: inherit;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.btn-social:hover {
+  background-color: var(--surface-container-low);
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.social-icon {
+  width: 1.2rem;
+  height: 1.2rem;
 }
 
 .footer-text {
   color: var(--on-surface-variant);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
 }
 
 .register-link {
   color: var(--primary);
   font-weight: 700;
   text-decoration: none;
-  margin-left: 0.25rem;
+  margin-left: 0.3rem;
 }
 
 .register-link:hover {
@@ -429,30 +391,79 @@
 }
 
 .trust-badges {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   padding-top: 1rem;
   border-top: 1px solid rgba(193, 198, 214, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.25rem;
-  filter: grayscale(100%);
-  opacity: 0.6;
+  gap: 1.5rem;
+  opacity: 0.7;
 }
 
 .badge-item {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.35rem;
 }
 
 .badge-icon {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 .badge-text {
-  font-size: 0.6rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 1024px) {
+  .login-sidebar {
+    display: none;
+  }
+
+  .login-form-section {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  html,
+  body,
+  #root {
+    overflow-y: auto;
+  }
+
+  .login-container {
+    min-height: 100dvh;
+  }
+
+  .login-form-section {
+    padding: 1rem;
+  }
+
+  .form-wrapper {
+    max-width: 100%;
+    padding: 1.5rem;
+    border-radius: 1.25rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.82rem;
+  }
+
+  .btn-social {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .trust-badges {
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
 }

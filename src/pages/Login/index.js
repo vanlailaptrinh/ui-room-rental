@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-// import { loginApi } from '../../services/authService';
 import AuthService from '../../services/authService';
 import { useAuth } from '../../context/authContext';
 import './Login.css';
@@ -22,33 +21,20 @@ export default function Login() {
         try {
             const responseData = await AuthService.login(username, password);
             console.log('Đăng nhập thành công:', responseData);
-
-            // Dữ liệu thực sự nằm trong field "data" của JSON trả về
             const authInfo = responseData.data; 
             
             // Kiểm tra xem có nhận được token không
             if (!authInfo || !authInfo.accessToken) {
                 throw new Error('Không nhận được token từ server');
             }
-
-            // SỬA Ở ĐÂY: Truyền toàn bộ object authInfo vào context
-            // Context sẽ tự động lưu localStorage và tự giải mã token ra thông tin thật
             login(authInfo);
-
-            // Chuyển hướng về trang chủ
             navigate("/");
         } catch (err) {
-            // ==========================================
-            // XỬ LÝ LỖI: TÀI KHOẢN CHƯA XÁC THỰC
-            // ==========================================
             const errorMessage = err.message || '';
 
-            // Bạn có thể đổi chữ "xác thực" thành câu lỗi chính xác mà Backend của bạn trả về
             if (errorMessage.toLowerCase().includes('xác thực') || errorMessage.toLowerCase().includes('verified')) {
-                // Tự động chuyển hướng sang trang OTP và mang theo username/email
                 navigate('/verify-otp', { state: { email: username } });
             } else {
-                // Các lỗi khác như sai pass, sai tài khoản
                 setError(errorMessage || 'Sai tài khoản hoặc mật khẩu!');
             }
         } finally {
@@ -98,51 +84,6 @@ export default function Login() {
                     <div className="form-header">
                         <h2 className="title">Chào mừng trở lại</h2>
                         <p className="subtitle">Vui lòng đăng nhập để tiếp tục khám phá các lựa chọn tốt nhất.</p>
-                    </div>
-
-                    {/* Role Selection */}
-                    <div className="role-selection">
-                        <label className="role-label">
-                            <input defaultChecked className="sr-only" name="role" type="radio" value="student" />
-                            <div className="role-card">
-                                <span className="material-symbols-outlined icon-student">school</span>
-                                <span className="role-text">Sinh viên</span>
-                            </div>
-                        </label>
-                        <label className="role-label">
-                            <input className="sr-only" name="role" type="radio" value="host" />
-                            <div className="role-card">
-                                <span className="material-symbols-outlined icon-host">real_estate_agent</span>
-                                <span className="role-text">Chủ nhà</span>
-                            </div>
-                        </label>
-                    </div>
-
-                    {/* Social Logins */}
-                    <div className="social-logins">
-                        <button type="button" className="btn-social">
-                            <svg className="social-icon" viewBox="0 0 24 24">
-                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
-                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
-                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path>
-                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
-                            </svg>
-                            Google
-                        </button>
-                        <button type="button" className="btn-social">
-                            <svg className="social-icon" fill="#1877F2" viewBox="0 0 24 24">
-                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path>
-                            </svg>
-                            Facebook
-                        </button>
-                    </div>
-
-                    {/* Divider */}
-                    <div className="divider-container">
-                        <div className="divider-line-wrapper">
-                            <div className="divider-line"></div>
-                        </div>
-                        <span className="divider-text">Hoặc bằng tài khoản</span>
                     </div>
 
                     {/* Khu vực hiển thị thông báo lỗi */}
@@ -195,9 +136,27 @@ export default function Login() {
                         </button>
                     </form>
 
-                    {/* ========================================== */}
-                    {/* THÊM LỐI ĐI THỦ CÔNG CHO NGƯỜI CHƯA XÁC THỰC */}
-                    {/* ========================================== */}
+                    {/* Divider */}
+                    <div className="divider-container">
+                        <div className="divider-line-wrapper">
+                            <div className="divider-line"></div>
+                        </div>
+                        <span className="divider-text">Hoặc bằng tài khoản</span>
+                    </div>
+
+                                        {/* Social Logins */}
+                    <div className="social-logins">
+                        <button type="button" className="btn-social">
+                            <svg className="social-icon" viewBox="0 0 24 24">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path>
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+                            </svg>
+                            Google
+                        </button>
+                    </div>
+
                     <div className="form-footer" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <p className="footer-text">
                             Chưa xác thực tài khoản?
@@ -210,7 +169,7 @@ export default function Login() {
                     </div>
 
                     {/* Trust Badge */}
-                    <div className="trust-badges" style={{ marginTop: '20px' }}>
+                    <div className="trust-badges" style={{ marginTop: '30px' }}>
                         <div className="badge-item">
                             <span className="material-symbols-outlined badge-icon">verified_user</span>
                             <span className="badge-text">Secure Login</span>
