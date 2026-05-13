@@ -16,19 +16,6 @@
   --font-body: 'Inter', sans-serif;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  height: 100%;
-  overflow: hidden;
-}
-
 .login-container {
   display: flex;
   min-height: 100vh;
