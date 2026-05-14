@@ -22,8 +22,6 @@ import VoucherManagement from "../pages/VoucherManagement";
 import PaymentCallback from "../pages/PaymentCallback"
 import MyBookings from "../pages/MyBookings";
 
-
-// Import trang Admin Dashboard cũ
 import AdminDashboard from '../pages/AdminDashboard';
 
 // ĐÃ SỬA: Import trang Thống kê từ thư mục mới bạn vừa tạo

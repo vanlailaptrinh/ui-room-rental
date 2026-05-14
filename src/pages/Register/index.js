@@ -13,7 +13,7 @@ export default function Register() {
         password: '',
         confirmPassword: ''
     });
-
+    
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +46,11 @@ export default function Register() {
             await AuthService.register(payload);
             setSuccess('Đăng ký thành công!');
             setTimeout(() => {
-                navigate('/verify');
+                navigate('/verify', {
+                    state: {
+                        email: formData.email
+                    }
+                });
             }, 1500);
         } catch (err) {
             setError(err.message || 'Đăng ký thất bại!');
