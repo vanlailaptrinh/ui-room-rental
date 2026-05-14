@@ -19,118 +19,36 @@ import {
 import { useAuth } from '../context/authContext';
 
 function AppRoutes() {
-
-    const { user } = useAuth();
-
+    const { user, loading } = useAuth();
     const location = useLocation();
 
     const role = user?.role;
 
-    const getAccessibleRoutes = () => {
+    const getRoutes = () => [
+        ...publicRoutes,
+        ...(!role ? guestRoutes : []),
+        ...(role === 'USER' ? userRoutes : []),
+        ...(role === 'LANDLORD' ? [...userRoutes, ...landlordRoutes] : []),
+        ...(role === 'ADMIN' ? [...userRoutes, ...landlordRoutes, ...adminRoutes] : [])
+    ];
 
-        /*
-            PUBLIC
-            Ai cũng vào được
-        */
+    const routes = getRoutes();
 
-        let routes = [...publicRoutes];
+    if (loading) return null;
 
-        /*
-            CHƯA LOGIN
-            => được vào guest routes
-        */
-
-        if (!role) {
-            routes.push(...guestRoutes);
-        }
-
-        /*
-            USER
-        */
-
-        if (role === 'USER') {
-            routes.push(...userRoutes);
-        }
-
-        /*
-            LANDLORD
-            kế thừa USER
-        */
-
-        if (role === 'LANDLORD') {
-
-            routes.push(...userRoutes);
-
-            routes.push(...landlordRoutes);
-        }
-
-        /*
-            ADMIN
-            có toàn quyền
-        */
-
-        if (role === 'ADMIN') {
-
-            routes.push(...userRoutes);
-
-            routes.push(...landlordRoutes);
-
-            routes.push(...adminRoutes);
-        }
-
-        return routes;
-    };
-
-    const accessibleRoutes = getAccessibleRoutes();
-
-    /*
-        CHECK PERMISSION
-    */
-
-    const isAllowed = accessibleRoutes.some(route =>
-        matchPath(
-            {
-                path: route.path,
-                end: false
-            },
-            location.pathname
-        )
+    const isAllowed = routes.some(route =>
+        matchPath({ path: route.path, end: true }, location.pathname)
     );
 
-    /*
-        KHÔNG CÓ QUYỀN
-    */
-
     if (!isAllowed) {
-
-        /*
-            Nếu đã login mà cố vào guest route
-            => đá về home
-        */
-
-        return (
-            <Navigate
-                to="/"
-                replace
-            />
-        );
+        return <Navigate to="/" replace />;
     }
 
     return (
         <Routes>
-
-            {accessibleRoutes.map((route, index) => {
-
+            {routes.map((route, index) => {
                 const Page = route.component;
-
-                /*
-                    DEFAULT LAYOUT = Fragment
-                */
-
-                const Layout =
-                    route.layout === undefined
-                        ? Fragment
-                        : route.layout;
+                const Layout = route.layout || React.Fragment;
 
                 return (
                     <Route
@@ -145,16 +63,7 @@ function AppRoutes() {
                 );
             })}
 
-            <Route
-                path="*"
-                element={
-                    <Navigate
-                        to="/"
-                        replace
-                    />
-                }
-            />
-
+            <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     );
 }

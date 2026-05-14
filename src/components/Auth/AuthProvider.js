@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    // Lấy full profile nền (background)
     const refreshUserProfile = useCallback(async () => {
         try {
             const response = await getUserProfile();
@@ -57,7 +58,11 @@ export const AuthProvider = ({ children }) => {
                     email: decoded.sub,
                     role: decoded.role,
                 });
+
+                // Render app luôn
                 setLoading(false);
+
+                // Fetch profile nền (lazy)
                 refreshUserProfile();
             } catch (error) {
                 console.error('Token không hợp lệ:', error);
@@ -75,22 +80,15 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('accessToken', authInfo.accessToken);
         localStorage.setItem('refreshToken', authInfo.refreshToken);
 
-        try {
-            const decoded = jwtDecode(authInfo.accessToken);
+        const decoded = jwtDecode(authInfo.accessToken);
 
-            // Set basic user trước
-            setUser({
-                email: decoded.sub,
-                role: decoded.role,
-            });
+        setUser({
+            email: decoded.sub,
+            role: decoded.role,
+        });
 
-            // Load profile nền
-            refreshUserProfile();
-        } catch (error) {
-            console.error('Lỗi decode token:', error);
-            logout();
-        }
-    }, [logout, refreshUserProfile]);
+        await refreshUserProfile();
+    }, [refreshUserProfile]);
 
     const value = useMemo(() => ({
         user,

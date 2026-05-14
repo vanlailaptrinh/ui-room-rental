@@ -25,18 +25,23 @@ export default function Login() {
             if (!authInfo || !authInfo.accessToken) {
                 throw new Error('Không nhận được token từ server');
             }
-            login(authInfo);
-            const decoded = jwtDecode(
-                authInfo.accessToken
-            );
+            await login(authInfo);
+            const decoded = jwtDecode(authInfo.accessToken);
             const role = decoded.role;
 
-            if (role === 'ADMIN') {
-                navigate(config.routes.adminDashboard);
-            } else if (role === 'LANDLORD') {
-                navigate(config.routes.landlordDashboard);
-            } else {
-                navigate(config.routes.home);
+            console.log(role)
+
+            switch (role) {
+                case 'ADMIN':
+                    navigate(config.routes.adminDashboard);
+                    break;
+
+                case 'LANDLORD':
+                    navigate(config.routes.landlordDashboard);
+                    break;
+
+                default:
+                    navigate(config.routes.home);
             }
 
         } catch (err) {
