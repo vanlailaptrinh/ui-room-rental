@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter } from "react-router-dom";
-import AppRoutes from "./routes";
+import AppRoutes from './routes/AppRoutes';
 import { AuthProvider } from './components/Auth/AuthProvider';
 import { NotificationProvider } from './context/notificationContext';
 import GlobalToastContainer from './components/NotificationBell/GlobalToastContainer';
