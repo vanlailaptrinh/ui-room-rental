@@ -300,7 +300,7 @@ export default function Verify() {
 
                         </form>
 
-                                                {/* OTP EXPIRE */}
+                        {/* OTP EXPIRE */}
                         <div className="expire-box">
 
                             <span>
