@@ -1,6 +1,6 @@
-import { Fragment } from 'react';
-
 import MainLayout from '../layouts/MainLayout';
+
+import config from '../config';
 
 import Home from '../pages/Home';
 import PostList from '../pages/PostList';
@@ -32,72 +32,68 @@ import PaymentCallback from '../pages/PaymentCallback';
 
 export const publicRoutes = [
     {
-        path: '/',
+        path: config.routes.home,
         component: Home,
         layout: MainLayout
     },
     {
-        path: '/postlist',
+        path: config.routes.postList,
         component: PostList,
         layout: MainLayout
     },
     {
-        path: '/detail/:id',
+        path: config.routes.detail,
         component: Detail,
         layout: MainLayout
     },
     {
-        path: '/pricing',
+        path: config.routes.pricing,
         component: Pricing,
         layout: MainLayout
-    },
-    {
-        path: '/payment-callback',
-        component: PaymentCallback
     }
 ];
 
 export const guestRoutes = [
     {
-        path: '/login',
+        path: config.routes.login,
         component: Login
     },
     {
-        path: '/register',
+        path: config.routes.register,
         component: Register
     },
     {
-        path: '/verify',
+        path: config.routes.verify,
         component: Verify
     },
     {
-        path: '/forgot-password',
+        path: config.routes.forgotPassword,
         component: ForgotPassword
     },
     {
-        path: '/reset-password',
+        path: config.routes.resetPassword,
         component: ResetPassword
     }
 ];
 
 export const userRoutes = [
     {
-        path: '/profile',
+        path: config.routes.profile,
         component: Profile,
         layout: MainLayout
     },
     {
-        path: '/favorites',
+        path: config.routes.favorites,
         component: Favorites,
         layout: MainLayout
     },
     {
-        path: '/chat',
+        path: config.routes.chat,
         component: Chat,
         layout: MainLayout
     },
     {
-        path: '/my-bookings',
+        path: config.routes.myBookings,
         component: MyBookings,
         layout: MainLayout
     }
@@ -105,43 +101,47 @@ export const userRoutes = [
 
 export const landlordRoutes = [
     {
-        path: '/post',
+        path: config.routes.post,
         component: PostRoom,
         layout: MainLayout
     },
     {
-        path: '/landlord',
+        path: config.routes.landlordDashboard,
         component: LandlordDashboard
+    },
+    {
+        path: config.routes.paymentCallback,
+        component: PaymentCallback
     }
 ];
 
 export const adminRoutes = [
     {
-        path: '/admin/dashboard',
+        path: config.routes.adminDashboard,
         component: AdminDashboard
     },
     {
-        path: '/admin/statistics',
+        path: config.routes.adminStatistics,
         component: SystemStatistics
     },
     {
-        path: '/admin/account-management',
+        path: config.routes.adminAccountManagement,
         component: AccountManagement
     },
     {
-        path: '/admin/blacklist',
+        path: config.routes.adminBlacklist,
         component: Blacklist
     },
     {
-        path: '/admin/finance',
+        path: config.routes.adminFinance,
         component: FinancialManagement
     },
     {
-        path: '/admin/post-management',
+        path: config.routes.adminPostManagement,
         component: PostManagement
     },
     {
-        path: '/admin/voucher-management',
+        path: config.routes.adminVoucherManagement,
         component: VoucherManagement
     }
 ];

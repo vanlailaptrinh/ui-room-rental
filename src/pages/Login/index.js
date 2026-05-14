@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import AuthService from '../../services/authService';
 import { useAuth } from '../../context/authContext';
+import { jwtDecode } from 'jwt-decode';
+import config from '../../config';
 import './Login.css';
 
 export default function Login() {
@@ -17,23 +19,46 @@ export default function Login() {
         e.preventDefault();
         setError('');
         setIsLoading(true);
-
         try {
             const responseData = await AuthService.login(username, password);
-            console.log('Đăng nhập thành công:', responseData);
-            const authInfo = responseData.data; 
-            
-            // Kiểm tra xem có nhận được token không
+            const authInfo = responseData.data;
             if (!authInfo || !authInfo.accessToken) {
                 throw new Error('Không nhận được token từ server');
             }
             login(authInfo);
-            navigate("/");
+            const decoded = jwtDecode(
+                authInfo.accessToken
+            );
+            const role = decoded.role;
+
+            if (role === 'ADMIN') {
+                navigate(config.routes.adminDashboard);
+            } else if (role === 'LANDLORD') {
+                navigate(config.routes.landlordDashboard);
+            } else {
+                navigate(config.routes.home);
+            }
+
         } catch (err) {
             const errorMessage = err.message || '';
+            if (
+                errorMessage
+                    .toLowerCase()
+                    .includes('xác thực') ||
 
-            if (errorMessage.toLowerCase().includes('xác thực') || errorMessage.toLowerCase().includes('verified')) {
-                navigate('/verify-otp', { state: { email: username } });
+                errorMessage
+                    .toLowerCase()
+                    .includes('verified')
+            ) {
+                navigate(
+                    config.routes.verify,
+                    {
+                        state: {
+                            email: username
+                        }
+                    }
+                );
+
             } else {
                 setError(errorMessage || 'Sai tài khoản hoặc mật khẩu!');
             }
