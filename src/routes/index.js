@@ -1,4 +1,5 @@
 import MainLayout from '../layouts/MainLayout';
+import HeaderLayout from '../layouts/HeaderLayout';
 
 import config from '../config';
 
@@ -56,23 +57,28 @@ export const publicRoutes = [
 export const guestRoutes = [
     {
         path: config.routes.login,
-        component: Login
+        component: Login,
+        layout: HeaderLayout
     },
     {
         path: config.routes.register,
-        component: Register
+        component: Register,
+        layout: HeaderLayout
     },
     {
         path: config.routes.verify,
-        component: Verify
+        component: Verify,
+        layout: HeaderLayout
     },
     {
         path: config.routes.forgotPassword,
-        component: ForgotPassword
+        component: ForgotPassword,
+        layout: HeaderLayout
     },
     {
         path: config.routes.resetPassword,
-        component: ResetPassword
+        component: ResetPassword,
+        layout: HeaderLayout
     }
 ];
 

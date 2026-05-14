@@ -197,18 +197,6 @@ export default function Login() {
                             <Link className="register-link" to="/register" style={{ marginLeft: '5px' }}>Đăng ký</Link>
                         </p>
                     </div>
-
-                    {/* Trust Badge */}
-                    <div className="trust-badges" style={{ marginTop: '30px' }}>
-                        <div className="badge-item">
-                            <span className="material-symbols-outlined badge-icon">verified_user</span>
-                            <span className="badge-text">Secure Login</span>
-                        </div>
-                        <div className="badge-item">
-                            <span className="material-symbols-outlined badge-icon">encrypted</span>
-                            <span className="badge-text">SSL Encrypted</span>
-                        </div>
-                    </div>
                 </div>
             </section>
         </main>

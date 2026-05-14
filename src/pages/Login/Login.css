@@ -18,7 +18,7 @@
 
 .login-container {
   display: flex;
-  min-height: 100vh;
+  min-height: calc(100vh - 80px);
   background-color: var(--surface);
   font-family: var(--font-body);
   color: var(--on-surface);
@@ -377,34 +377,6 @@
   text-decoration: underline;
 }
 
-.trust-badges {
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(193, 198, 214, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  opacity: 0.7;
-}
-
-.badge-item {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.badge-icon {
-  font-size: 0.9rem;
-}
-
-.badge-text {
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
 @media (max-width: 1024px) {
   .login-sidebar {
     display: none;
@@ -447,10 +419,5 @@
   .btn-social {
     width: 100%;
     min-width: unset;
-  }
-
-  .trust-badges {
-    flex-wrap: wrap;
-    gap: 0.8rem;
   }
 }
