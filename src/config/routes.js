@@ -17,6 +17,7 @@ const routes = {
     profile: '/profile',
     favorites: '/favorites',
     chat: '/chat',
+    chatRoom: '/chat/:roomId',
     myBookings: '/my-bookings',
 
     // LANDLORD

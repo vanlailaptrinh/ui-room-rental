@@ -3,8 +3,11 @@ import { Link } from 'react-router-dom';
 import './Landlord.css';
 import BookingService from '../../services/bookingService';
 import NotificationBell from '../../components/NotificationBell';
-import {IconVerified} from "../../assets/Icons";
 import * as UserService from '../../services/userService';
+import { getOrCreateChatRoom, getAllUsers } from '../../services/chatService';
+import { db } from '../../services/firebase';
+import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { useAuth } from '../../context/authContext';
 
 /* ─── Helper: format thời gian ─── */
 const fmtDate = (iso) => {
@@ -43,22 +46,62 @@ const PricingCard = ({ pkg }) => (
     </div>
 );
 
+/* ─── Chat helpers ─── */
+function chatFormatTime(ts) {
+    if (!ts) return '';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+}
+function chatFormatDate(ts) {
+    if (!ts) return '';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    const today = new Date();
+    if (d.toDateString() === today.toDateString()) return 'Hôm nay';
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+    if (d.toDateString() === yesterday.toDateString()) return 'Hôm qua';
+    return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+function ChatAvatar({ username, avatar, size = 40 }) {
+    if (avatar) return <img src={avatar} alt={username} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />;
+    const initials = (username || '?').slice(0, 2).toUpperCase();
+    const colors = ['#6c63ff', '#06d6a0', '#f59e0b', '#ef4444', '#8b5cf6', '#3182ce'];
+    const color = colors[(username?.charCodeAt(0) || 0) % colors.length];
+    return (
+        <div style={{ width: size, height: size, borderRadius: '50%', background: `linear-gradient(135deg, ${color}88, ${color})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: size * 0.36, color: '#fff', flexShrink: 0 }}>
+            {initials}
+        </div>
+    );
+}
+
 function LandlordDashboard() {
+    const { user } = useAuth();
     const [activeTab, setActiveTab] = useState('dashboard');
 
     /* ─── Booking states ─── */
     const [bookings, setBookings]       = useState([]);
     const [bookingLoading, setBLoading] = useState(false);
     const [bookingError, setBError]     = useState(null);
-    const [processing, setProcessing]   = useState(null); // id đang approve/reject
+    const [processing, setProcessing]   = useState(null);
 
-    /* ─── Listings (giữ nguyên mock) ─── */
+    /* ─── Listings (mock) ─── */
     const [listings] = useState([
         { id: 101, title: 'Phòng trọ cao cấp Bình Thạnh', views: 1250, status: 'Đang hiển thị' },
         { id: 102, title: 'Căn hộ Studio Quận 7', views: 840, status: 'Đã cho thuê' },
     ]);
 
-    const [adPackage, setAdPackage] = useState({ name: 'Gói Ưu Tiên 1', daysLeft: 2, progress: 70 });
+    /* ─── Chat states ─── */
+    const [chatContacts, setChatContacts] = useState([]);
+    const [chatLoading, setChatLoading]   = useState(false);
+    const [chatError, setChatError]       = useState('');
+    const [activeContact, setActiveContact] = useState(null);  // người đang chat
+    const [chatRoomId, setChatRoomId]     = useState(null);
+    const [messages, setMessages]         = useState([]);
+    const [msgLoading, setMsgLoading]     = useState(false);
+    const [text, setText]                 = useState('');
+    const [sending, setSending]           = useState(false);
+    const [connecting, setConnecting]     = useState(null);
+    const messagesEndRef                  = useRef(null);
+    const textareaRef                     = useRef(null);
 
     /* ─── Fetch landlord bookings ─── */
     const fetchBookings = useCallback(async () => {
@@ -136,29 +179,217 @@ function LandlordDashboard() {
             {renderAppointments()}
         </div>
     );
-    /* ─── Tab: Messages (Tin nhắn) ─── */
-    const renderMessages = () => (
-        <section className="landlord-card landlord-full-width landlord-fade-in">
-            <div className="landlord-section-header">
-                <h3>Tin nhắn từ khách hàng</h3>
-            </div>
-            <div className="landlord-message-list">
-                {[1, 2].map(m => (
-                    <div key={m} className="landlord-message-item">
-                        <img src={`https://i.pravatar.cc/40?img=${m+10}`} alt="user" className="landlord-avatar" />
-                        <div className="landlord-message-content">
-                            <div className="landlord-message-user">
-                                <strong>Nguyễn Văn Khách {m}</strong>
-                                <span className="landlord-message-time">10:30 AM</span>
-                            </div>
-                            <p>Cho em hỏi phòng này còn trống không ạ?</p>
-                        </div>
-                        <button className="landlord-btn-text">Trả lời</button>
+    /* ─── Load contacts (người thuê) khi vào tab messages ─── */
+    const loadChatContacts = useCallback(async () => {
+        try {
+            setChatLoading(true);
+            setChatError('');
+            const all = await getAllUsers();
+            // LANDLORD chỉ thấy USER (người thuê)
+            const tenants = all.filter(u => u.role === 'USER' && String(u.id) !== String(user?.id));
+            setChatContacts(tenants);
+        } catch (err) {
+            setChatError(err?.response?.data?.message || err.message || 'Không thể tải danh sách');
+        } finally {
+            setChatLoading(false);
+        }
+    }, [user]);
+
+    useEffect(() => {
+        if (activeTab === 'messages') loadChatContacts();
+    }, [activeTab, loadChatContacts]);
+
+    /* ─── Mở phòng chat với contact ─── */
+    const openChat = async (contact) => {
+        try {
+            setConnecting(contact.id);
+            const room = await getOrCreateChatRoom(contact.id);
+            setActiveContact(contact);
+            setChatRoomId(room.roomId);
+            setMessages([]);
+            setMsgLoading(true);
+        } catch (err) {
+            alert('Không thể mở phòng chat: ' + (err?.response?.data?.message || err.message));
+        } finally {
+            setConnecting(null);
+        }
+    };
+
+    /* ─── Subscribe Firestore khi roomId thay đổi ─── */
+    useEffect(() => {
+        if (!chatRoomId) return;
+        const messagesRef = collection(db, 'chat_rooms', chatRoomId, 'messages');
+        const q = query(messagesRef, orderBy('timestamp', 'asc'));
+        const unsub = onSnapshot(q,
+            (snap) => {
+                setMessages(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                setMsgLoading(false);
+            },
+            (err) => { console.error('Firestore error:', err); setMsgLoading(false); }
+        );
+        return () => unsub();
+    }, [chatRoomId]);
+
+    /* ─── Auto scroll ─── */
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+
+    /* ─── Gửi tin nhắn ─── */
+    const sendChatMessage = async (e) => {
+        e.preventDefault();
+        const trimmed = text.trim();
+        if (!trimmed || sending) return;
+        setSending(true);
+        setText('');
+        try {
+            await addDoc(collection(db, 'chat_rooms', chatRoomId, 'messages'), {
+                senderId:   user?.id,
+                senderName: user?.username || user?.email,
+                content:    trimmed,
+                timestamp:  serverTimestamp(),
+            });
+        } catch (err) {
+            console.error('Send failed:', err);
+            setText(trimmed);
+        } finally {
+            setSending(false);
+            textareaRef.current?.focus();
+        }
+    };
+
+    /* ─── Tab: Messages (Tin nhắn) — REAL ─── */
+    const renderMessages = () => {
+        let lastDate = '';
+        return (
+            <div className="landlord-chat-wrapper landlord-fade-in">
+                {/* Danh sách người thuê */}
+                <aside className="landlord-chat-sidebar">
+                    <div className="landlord-chat-sidebar-header">
+                        <h3>👤 Người thuê</h3>
+                        <button className="landlord-chat-refresh-btn" onClick={loadChatContacts} title="Làm mới">↻</button>
                     </div>
-                ))}
+                    <div className="landlord-chat-contacts">
+                        {chatLoading ? (
+                            <div className="landlord-chat-center"><div className="landlord-ld-spinner" /><span>Đang tải...</span></div>
+                        ) : chatError ? (
+                            <div className="landlord-chat-center" style={{ color: '#e53e3e', gap: 8, flexDirection: 'column' }}>
+                                <span>⚠️ {chatError}</span>
+                                <button className="landlord-btn-text" onClick={loadChatContacts}>Thử lại</button>
+                            </div>
+                        ) : chatContacts.length === 0 ? (
+                            <div className="landlord-chat-center"><span>🔍</span><p style={{ color: '#a0aec0', fontSize: 13 }}>Chưa có người thuê nào</p></div>
+                        ) : (
+                            chatContacts.map(contact => (
+                                <div
+                                    key={contact.id}
+                                    className={`landlord-chat-contact-item ${activeContact?.id === contact.id ? 'landlord-chat-contact-active' : ''}`}
+                                    onClick={() => connecting !== contact.id && openChat(contact)}
+                                >
+                                    <div style={{ position: 'relative', flexShrink: 0 }}>
+                                        <ChatAvatar username={contact.username} avatar={contact.avatar} size={42} />
+                                        <span className="landlord-chat-online-dot" />
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ fontWeight: 700, fontSize: 14, color: '#2d3748', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{contact.username}</div>
+                                        <div style={{ fontSize: 12, color: '#a0aec0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{contact.email}</div>
+                                    </div>
+                                    {connecting === contact.id
+                                        ? <div className="landlord-ld-spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
+                                        : <span style={{ color: '#cbd5e0', fontSize: 18 }}>›</span>
+                                    }
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </aside>
+
+                {/* Cửa sổ chat */}
+                <section className="landlord-chat-room">
+                    {!activeContact ? (
+                        <div className="landlord-chat-placeholder">
+                            <div style={{ fontSize: 64, marginBottom: 12 }}>💬</div>
+                            <h3 style={{ color: '#2d3748', margin: 0 }}>Chọn người thuê để xem tin nhắn</h3>
+                            <p style={{ color: '#a0aec0', fontSize: 14, margin: '8px 0 0' }}>Click vào một người trong danh sách bên trái</p>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Header */}
+                            <div className="landlord-chat-room-header">
+                                <ChatAvatar username={activeContact.username} avatar={activeContact.avatar} size={38} />
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontWeight: 700, fontSize: 15, color: '#1a202c' }}>{activeContact.username}</div>
+                                    <div style={{ fontSize: 12, color: '#718096', display: 'flex', alignItems: 'center', gap: 5 }}>
+                                        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#48bb78', display: 'inline-block' }} />
+                                        👤 Người thuê
+                                    </div>
+                                </div>
+                                <button
+                                    className="landlord-btn-text"
+                                    onClick={() => { setActiveContact(null); setChatRoomId(null); setMessages([]); }}
+                                    style={{ fontSize: 20, padding: '4px 8px' }}
+                                >
+                                    ✕
+                                </button>
+                            </div>
+
+                            {/* Messages */}
+                            <div className="landlord-chat-messages">
+                                {msgLoading ? (
+                                    <div className="landlord-chat-center"><div className="landlord-ld-spinner" /><span>Đang tải tin nhắn...</span></div>
+                                ) : messages.length === 0 ? (
+                                    <div className="landlord-chat-center"><span style={{ fontSize: 40 }}>👋</span><p style={{ color: '#718096' }}>Chưa có tin nhắn. Hãy bắt đầu trò chuyện!</p></div>
+                                ) : (
+                                    messages.map(msg => {
+                                        const isMine = String(msg.senderId) === String(user?.id);
+                                        if (!msg.timestamp) return null;
+                                        const dateStr = chatFormatDate(msg.timestamp);
+                                        const showDate = dateStr !== lastDate;
+                                        lastDate = dateStr;
+                                        return (
+                                            <div key={msg.id}>
+                                                {showDate && (
+                                                    <div className="landlord-chat-date-divider"><span>{dateStr}</span></div>
+                                                )}
+                                                <div className={`landlord-chat-msg-row ${isMine ? 'landlord-chat-mine' : 'landlord-chat-theirs'}`}>
+                                                    {!isMine && <ChatAvatar username={msg.senderName} avatar={activeContact?.avatar} size={28} />}
+                                                    <div className={`landlord-chat-bubble ${isMine ? 'landlord-chat-bubble-mine' : 'landlord-chat-bubble-theirs'}`}>
+                                                        <div style={{ wordWrap: 'break-word' }}>{msg.content}</div>
+                                                        <div className="landlord-chat-bubble-time">{chatFormatTime(msg.timestamp)}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                                <div ref={messagesEndRef} />
+                            </div>
+
+                            {/* Input */}
+                            <form className="landlord-chat-input-bar" onSubmit={sendChatMessage}>
+                                <textarea
+                                    ref={textareaRef}
+                                    className="landlord-chat-textarea"
+                                    placeholder="Nhập tin nhắn... (Enter để gửi)"
+                                    value={text}
+                                    onChange={e => setText(e.target.value)}
+                                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(e); } }}
+                                    rows={1}
+                                    disabled={sending}
+                                />
+                                <button type="submit" className="landlord-chat-send-btn" disabled={!text.trim() || sending}>
+                                    {sending
+                                        ? <div className="landlord-ld-spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
+                                        : <span className="material-symbols-outlined" style={{ fontSize: 20 }}>send</span>
+                                    }
+                                </button>
+                            </form>
+                        </>
+                    )}
+                </section>
             </div>
-        </section>
-    );
+        );
+    };
 
     /* ─── Tab: Appointments (Bookings từ API) ─── */
     const renderAppointments = () => {

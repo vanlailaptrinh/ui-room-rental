@@ -17,6 +17,7 @@ import ResetPassword from '../pages/ResetPassword';
 import Profile from '../pages/Profile';
 import Favorites from '../pages/Favorites';
 import Chat from '../pages/Chat';
+import ChatRoom from '../pages/ChatRoom';
 import MyBookings from '../pages/MyBookings';
 
 import PostRoom from '../pages/PostRoom';
@@ -96,6 +97,11 @@ export const userRoutes = [
     {
         path: config.routes.chat,
         component: Chat,
+        layout: MainLayout
+    },
+    {
+        path: config.routes.chatRoom,
+        component: ChatRoom,
         layout: MainLayout
     },
     {

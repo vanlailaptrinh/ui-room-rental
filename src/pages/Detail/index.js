@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import './Detail.css';
 import {
     IconLocation, IconVerified, IconFavorite,
@@ -9,6 +9,7 @@ import api from '../../services/axios';
 import BookingService from '../../services/bookingService';
 import FavoriteService from '../../services/favoriteService';
 import * as userService from '../../services/userService';
+import { getOrCreateChatRoom } from '../../services/chatService';
 import { useAuth } from '../../context/authContext';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -23,6 +24,7 @@ L.Icon.Default.mergeOptions({
 
 function Detail() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const { user } = useAuth();
     const [post, setPost] = useState(null);
     const [landlord, setLandlord] = useState(null);
@@ -36,6 +38,7 @@ function Detail() {
     // Favorite state
     const [isFav, setIsFav] = useState(false);
     const [favLoading, setFavLoading] = useState(false);
+    const [chatLoading, setChatLoading] = useState(false);
 
     useEffect(() => {
         const fetchFullData = async () => {
@@ -94,6 +97,31 @@ function Detail() {
             alert(err?.response?.data?.message || 'Không thể cập nhật yêu thích.');
         } finally {
             setFavLoading(false);
+        }
+    };
+
+    // Nhắn tin cho chủ trọ
+    const handleStartChat = async () => {
+        if (!user) {
+            alert('Vui lòng đăng nhập để nhắn tin!');
+            return;
+        }
+        if (!landlord?.id) {
+            alert('Không tìm thấy thông tin chủ trọ.');
+            return;
+        }
+        if (chatLoading) return;
+        try {
+            setChatLoading(true);
+            const room = await getOrCreateChatRoom(landlord.id);
+            navigate(`/chat/${room.roomId}`, {
+                state: { roomId: room.roomId, targetUser: landlord },
+            });
+        } catch (err) {
+            console.error('Chat error:', err);
+            alert(err?.response?.data?.message || 'Không thể mở phòng chat. Vui lòng thử lại.');
+        } finally {
+            setChatLoading(false);
         }
     };
 
@@ -262,7 +290,13 @@ function Detail() {
                                     Chủ trọ
                                 </div>
                             </div>
-                            <button className="detail-btn-chat">Nhắn tin</button>
+                            <button
+                                className="detail-btn-chat"
+                                onClick={handleStartChat}
+                                disabled={chatLoading}
+                            >
+                                {chatLoading ? 'Đang kết nối...' : 'Nhắn tin'}
+                            </button>
                         </div>
                     </div>
                 </div>
