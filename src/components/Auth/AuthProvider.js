@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { AuthContext } from '../../context/authContext';
 import { getUserProfile } from '../../services/userService';
+import AuthService from '../../services/authService';
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -90,11 +91,38 @@ export const AuthProvider = ({ children }) => {
         await refreshUserProfile();
     }, [refreshUserProfile]);
 
+    const loginWithGoogle = useCallback(async (idToken) => {
+        try {
+            const responseData = await AuthService.loginGoogle(idToken);
+            const authInfo = responseData.data;
+            if (!authInfo || !authInfo.accessToken) {
+                throw new Error('Không nhận được token từ server sau khi đăng nhập Google');
+            }
+
+            localStorage.setItem('accessToken', authInfo.accessToken);
+            localStorage.setItem('refreshToken', authInfo.refreshToken);
+
+            const decoded = jwtDecode(authInfo.accessToken);
+            setUser({
+                email: decoded.sub,
+                role: decoded.role,
+            });
+
+            await refreshUserProfile();
+
+            return authInfo;
+        } catch (error) {
+            console.error('Lỗi xử lý loginWithGoogle trong Provider:', error);
+            throw error; 
+        }
+    }, [refreshUserProfile]);
+
     const value = useMemo(() => ({
         user,
         loading,
         login,
         logout,
+        loginWithGoogle,
         refreshUserProfile,
         isAuthenticated: !!user,
     }), [
@@ -102,6 +130,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         logout,
+        loginWithGoogle,
         refreshUserProfile,
     ]);
 
