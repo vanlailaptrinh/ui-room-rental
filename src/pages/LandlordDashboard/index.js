@@ -8,6 +8,10 @@ import { getOrCreateChatRoom, getAllUsers } from '../../services/chatService';
 import { db } from '../../services/firebase';
 import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../context/authContext';
+import packageService from '../../services/packageService';
+import orderService from "../../services/orderService";
+import paymentService from "../../services/paymentService";
+import PacketCard from '../../components/PacketCard'
 
 /* ─── Helper: format thời gian ─── */
 const fmtDate = (iso) => {
@@ -27,24 +31,6 @@ const StatusBadge = ({ status }) => {
     const { label, cls } = map[status] || { label: status, cls: '' };
     return <span className={`landlord-ld-status-badge ${cls}`}>{label}</span>;
 };
-
-/* Component phụ để tránh lặp code */
-const PricingCard = ({ pkg }) => (
-    <div className={`landlord-pricing-card ${pkg.popular ? 'featured' : ''}`}>
-        {pkg.popular && <div className="featured-badge">CHUYÊN NGHIỆP</div>}
-        <h4>{pkg.title}</h4>
-        <p className="pkg-desc">{pkg.desc}</p>
-        <div className="pkg-price">
-            <span className="amount">{pkg.price}</span>
-            <span className="period">/{pkg.duration.split(' ')[0]} {pkg.duration.split(' ')[1]}</span>
-        </div>
-        <ul className="pkg-features">
-            <li>✅ Giới hạn: <strong>{pkg.limit}</strong></li>
-            <li>✅ Hiển thị: <strong>{pkg.duration}</strong></li>
-        </ul>
-        <button className="landlord-btn-buy">Chọn gói này</button>
-    </div>
-);
 
 /* ─── Chat helpers ─── */
 function chatFormatTime(ts) {
@@ -560,39 +546,285 @@ function LandlordDashboard() {
     );
 
     const [subTab, setSubTab] = useState('buy');
-    /* ─── Tab: Gói tin (Hiển thị tất cả gói) ─── */
-    const renderPayments = () => {
-        const pricingData = {
-            post: [
-                { title: 'Gói đăng tin Cơ bản', price: '15.000đ', duration: '15 ngày', limit: '3 tin', desc: 'Phù hợp với nhu cầu cơ bản.', type: 'BASIC' },
-                { title: 'Gói đăng tin PRO', price: '25.000đ', duration: '30 ngày', limit: '3 tin', desc: 'Tối ưu hiệu quả hiển thị.', type: 'PRO', popular: true },
-            ],
-            push: [
-                { title: 'Gói đẩy tin Cơ bản', price: '12.000đ', duration: '5 ngày', limit: '3 tin', desc: 'Phù hợp với nhu cầu cơ bản.', type: 'BASIC' },
-                { title: 'Gói đẩy tin PRO', price: '20.000đ', duration: '10 ngày', limit: '3 tin', desc: 'Tối ưu hiệu quả hiển thị.', type: 'PRO', popular: true },
-            ]
+    const [packages, setPackages] = useState([]);
+    const [vouchers, setVouchers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // State cho Modal thanh toán
+    const [selectedPkg, setSelectedPkg] = useState(null);
+    const [selectedVoucher, setSelectedVoucher] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+
+    // lấy data
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const [pkgRes, voucherRes] = await Promise.all([
+                    packageService.getPackages(),
+                    packageService.getActiveVouchers()
+                ]);
+
+                if (pkgRes.code === 200) {
+                    setPackages(pkgRes.data || []);
+                }
+                if (voucherRes && voucherRes.code === 200) {
+                    setVouchers(voucherRes.data || []);
+                }
+            } catch (err) {
+                console.error("Lỗi fetch data:", err);
+                setError("Không thể kết nối đến hệ thống.");
+            } finally {
+                setLoading(false);
+            }
         };
 
+        fetchData();
+
+        // Fetch thông tin gói đang hoạt động của user
+        const fetchCurrentPackage = async () => {
+            setLoadingCurrentPkg(true);
+            try {
+                // Gọi API lấy toàn bộ gói (API này các chức năng khác gọi bình thường, không cần ID)
+                const res = await packageService.getPackages();
+
+                if (res && res.code === 200) {
+                    const allPackages = res.data || [];
+
+                    // Vì tài khoản của bạn đang test là Landlord thường,
+                    // chúng ta sẽ lọc lấy gói 'Gói đăng tin' với tier 'NORMAL' đang có trong hệ thống để hiển thị
+                    const myPackage = allPackages.find(
+                        pkg => pkg.type?.value === 'POSTING' && pkg.tier?.value === 'NORMAL'
+                    );
+
+                    if (myPackage) {
+                        console.log("Tìm thấy gói phù hợp cho Landlord:", myPackage);
+                        setCurrentPackage(myPackage); // Set vào state để hiển thị lên giao diện "Gói của tôi"
+                    } else {
+                        setCurrentPackage(null);
+                    }
+                }
+            } catch (error) {
+                console.error("Lỗi khi lấy gói đang hoạt động:", error);
+                setCurrentPackage(null);
+            } finally {
+                setLoadingCurrentPkg(false);
+            }
+        };
+        fetchCurrentPackage();
+    }, []);
+
+    // CÁC HÀM XỬ LÝ THANH TOÁN & VOUCHER
+    const handleSelectPacket = (pkg) => {
+        setSelectedPkg(pkg);
+        setSelectedVoucher(null);
+        setShowModal(true); // Mở modal khi bấm chọn gói
+    };
+
+    const calculateFinalPrice = () => {
+        if (!selectedPkg) return 0;
+        let price = selectedPkg.price || 0;
+
+        if (selectedVoucher) {
+            let discount = (price * (selectedVoucher.discountPercentage || 0)) / 100;
+            if (selectedVoucher.maxDiscountAmount && discount > selectedVoucher.maxDiscountAmount) {
+                discount = selectedVoucher.maxDiscountAmount;
+            }
+            price = Math.max(0, price - discount);
+        }
+        return price;
+    };
+
+    const handlePayment = async () => {
+        setLoading(true);
+        try {
+            const finalPrice = calculateFinalPrice();
+            const orderPayload = {
+                packageId: selectedPkg.id,
+                voucherId: selectedVoucher ? selectedVoucher.id : null,
+                totalPrice: finalPrice
+            };
+
+            const orderRes = await orderService.createOrder(orderPayload);
+            const orderId = orderRes?.data?.id || orderRes?.id;
+
+            if (orderId) {
+                const resData = await paymentService.createPaymentUrl(orderId);
+                if (resData && resData.code === 200) {
+                    window.location.href = resData.data;
+                } else {
+                    alert(resData.message || 'Không lấy được URL thanh toán');
+                }
+            } else {
+                alert(orderRes?.message || 'Khởi tạo đơn hàng thất bại, vui lòng thử lại!');
+            }
+        } catch (error) {
+            console.error('Lỗi thanh toán:', error);
+            alert(error.response?.data?.message || "Có lỗi xảy ra tại hệ thống thanh toán");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Thêm state để lưu thông tin gói hiện tại
+    const [currentPackage, setCurrentPackage] = useState(null);
+    const [loadingCurrentPkg, setLoadingCurrentPkg] = useState(false);
+
+
+    // 4. RENDER GIAO DIỆN CHÍNH
+    const renderPayments = () => {
+        if (loading) return <div className="nexus-pricing-loading">Đang tải dữ liệu...</div>;
+        if (error) return <div className="nexus-pricing-error">{error}</div>;
+
+        // Tách gói đăng tin (POSTING) và đẩy tin (BOOSTING) từ API thật
+        const postPackages = packages.filter(pkg => pkg.type?.value === 'POSTING');
+        const pushPackages = packages.filter(pkg => pkg.type?.value === 'BOOSTING');
+
         return (
-            <div className="landlord-fade-in">
+            <div className="landlord-fade-in landlord-payment-wrapper">
+                {/* 5. MODAL THANH TOÁN (Chỉ hiện khi showModal = true) */}
+                {showModal && selectedPkg && (
+                    <div className="nexus-modal-overlay">
+                        <div className="nexus-confirm-modal">
+                            <button className="close-modal" onClick={() => setShowModal(false)}>&times;</button>
+                            <h2>Xác nhận gói dịch vụ</h2>
+
+                            <div className="modal-pkg-info">
+                                <div className="info-row">
+                                    <span>Gói đã chọn:</span>
+                                    <strong>{selectedPkg.name} ({selectedPkg.tier?.value})</strong>
+                                </div>
+                                <div className="info-row">
+                                    <span>Thời gian:</span>
+                                    <strong>{selectedPkg.activeDays} ngày</strong>
+                                </div>
+                                <div className="info-row">
+                                    <span>Giá gốc:</span>
+                                    <strong>{selectedPkg.price?.toLocaleString()}đ</strong>
+                                </div>
+                            </div>
+
+                            <div className="voucher-section">
+                                <h4>Chọn Voucher giảm giá</h4>
+                                <select
+                                    className="voucher-select"
+                                    value={selectedVoucher?.id || ""}
+                                    onChange={(e) => {
+                                        const v = vouchers.find(v => v.id === e.target.value);
+                                        setSelectedVoucher(v || null);
+                                    }}
+                                >
+                                    <option value="">-- Không sử dụng voucher --</option>
+                                    {vouchers && vouchers.length > 0 ? (
+                                        vouchers.map(v => (
+                                            <option key={v.id} value={v.id}>
+                                                Mã: ...{v.id.slice(-6).toUpperCase()} (Giảm {v.discountPercentage}% - Tối đa {v.maxDiscountAmount?.toLocaleString()}đ)
+                                            </option>
+                                        ))
+                                    ) : (
+                                        <option disabled>Không có mã giảm giá nào khả dụng</option>
+                                    )}
+                                </select>
+                            </div>
+
+                            <div className="total-payment">
+                                <div className="total-row">
+                                    <span>Số tiền được giảm:</span>
+                                    <span className="discount-text">
+                                    -{selectedPkg && selectedVoucher
+                                        ? Math.min((selectedPkg.price * selectedVoucher.discountPercentage) / 100, selectedVoucher.maxDiscountAmount).toLocaleString()
+                                        : 0}đ
+                                </span>
+                                </div>
+                                <div className="total-row final">
+                                    <span>Tổng thanh toán:</span>
+                                    <span className="final-price">{calculateFinalPrice().toLocaleString()}đ</span>
+                                </div>
+                            </div>
+
+                            <button className="btn-confirm-payment" onClick={handlePayment}>
+                                Thanh toán ngay
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Sub-navigation */}
-                <div className="landlord-subtabs">
-                    <button className={subTab === 'current' ? 'active' : ''} onClick={() => setSubTab('current')}>Gói của tôi</button>
-                    <button className={subTab === 'buy' ? 'active' : ''} onClick={() => setSubTab('buy')}>Mua gói mới</button>
+                <div className="landlord-custom-subtabs">
+                    <button
+                        className={subTab === 'current' ? 'active' : ''}
+                        onClick={() => setSubTab('current')}
+                    >
+                        Gói của tôi
+                    </button>
+                    <button
+                        className={subTab === 'buy' ? 'active' : ''}
+                        onClick={() => setSubTab('buy')}
+                    >
+                        Mua gói mới
+                    </button>
                 </div>
 
                 {subTab === 'current' ? (
-                    <div className="landlord-card">
-                        <h3>Gói đang hoạt động</h3>
-                        <div className="landlord-current-pkg-item">
-                            <div className="pkg-info">
-                                <h4>Gói đăng tin PRO</h4>
-                                <p>Ngày hết hạn: 20/05/2024 (Còn 8 ngày)</p>
-                            </div>
-                            <div className="pkg-status">
-                                <span className="landlord-sb-approved">Đang sử dụng</span>
-                            </div>
+                    <div className="landlord-active-card">
+                        <div className="landlord-card-header">
+                            <h3>Gói đang hoạt động</h3>
+                            {currentPackage && (
+                                <span className="status-badge-active">
+                                ● Đang hoạt động
+                            </span>
+                            )}
                         </div>
+
+                        {loadingCurrentPkg ? (
+                            <p className="loading-text">Đang tải thông tin gói dịch vụ...</p>
+                        ) : currentPackage ? (
+                            <div className="landlord-current-pkg-item landlord-current-pkg-box">
+                                <div className="pkg-info">
+                                    <h4 className="pkg-title-row">
+                                        🚀 {currentPackage.name}
+                                        {currentPackage.tier?.value && (
+                                            <span className="tier-badge">
+                                            {currentPackage.tier.value}
+                                        </span>
+                                        )}
+                                    </h4>
+
+                                    <div className="info-stats-grid">
+                                        <div className="stat-card-item">
+                                            <span>📅 Hạn sử dụng gói</span>
+                                            <strong>{currentPackage.activeDays} ngày</strong>
+                                        </div>
+                                        <div className="stat-card-item">
+                                            <span>📊 Hạn mức đăng tin</span>
+                                            <strong>{currentPackage.limitQuota} bài viết</strong>
+                                        </div>
+                                        <div className="stat-card-item">
+                                            <span>🏷️ Loại dịch vụ</span>
+                                            <strong>
+                                                {currentPackage.type?.value === 'POSTING' ? 'Gói đăng tin' : currentPackage.type?.value || 'Đăng tin'}
+                                            </strong>
+                                        </div>
+                                        <div className="stat-card-item">
+                                            <span>💰 Giá trị gói</span>
+                                            <strong>{currentPackage.price?.toLocaleString()}đ</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="landlord-empty-pkg-state">
+                                <div className="icon">📦</div>
+                                <p>Bạn hiện chưa có gói dịch vụ nào đang hoạt động.</p>
+                                <button
+                                    className="btn-buy-now-trigger"
+                                    onClick={() => setSubTab('buy')}
+                                >
+                                    Mua gói dịch vụ ngay
+                                </button>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="landlord-pricing-container">
@@ -602,14 +834,29 @@ function LandlordDashboard() {
                         </div>
 
                         <div className="landlord-pricing-section">
-                            <div className="landlord-pricing-grid">
-                                {pricingData.post.map((pkg, idx) => (
-                                    <PricingCard key={`post-${idx}`} pkg={pkg} />
-                                ))}
-                                {pricingData.push.map((pkg, idx) => (
-                                    <PricingCard key={`push-${idx}`} pkg={pkg} />
-                                ))}
-                            </div>
+                            {/* Danh sách Gói Đăng Tin (Lọc từ API) */}
+                            {postPackages.length > 0 && (
+                                <>
+                                    <h3 className="pricing-section-title">Gói đăng tin</h3>
+                                    <div className="landlord-pricing-grid">
+                                        {postPackages.map((pkg) => (
+                                            <PacketCard key={pkg.id} pkg={pkg} onSelect={handleSelectPacket} />
+                                        ))}
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Danh sách Gói Đẩy Tin (Lọc từ API) */}
+                            {pushPackages.length > 0 && (
+                                <>
+                                    <h3 className="pricing-section-title pricing-section-title boost">Gói đẩy tin</h3>
+                                    <div className="landlord-pricing-grid">
+                                        {pushPackages.map((pkg) => (
+                                            <PacketCard key={pkg.id} pkg={pkg} onSelect={handleSelectPacket} />
+                                        ))}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 )}

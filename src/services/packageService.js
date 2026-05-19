@@ -11,8 +11,14 @@ export const getActiveVouchers = async () => {
     return response.data;
 };
 
+export const getPackageById = async (id) => {
+    const response = await axios.get(`/packages/${id}`);
+    return response.data;
+};
+
 const packageService = {
     getPackages,
-    getActiveVouchers
+    getActiveVouchers,
+    getPackageById
 };
 export default packageService;

@@ -172,7 +172,7 @@ function Header() {
                                             <Link to="/post" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
                                                 <span className="di-icon">📝</span> Đăng tin phòng
                                             </Link>
-                                            <Link to="/pricing" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
+                                            <Link to="/packet" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
                                                 <span className="di-icon">💳</span> Gói Tin
                                             </Link>
                                         </>

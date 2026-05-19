@@ -6,7 +6,7 @@ import config from '../config';
 import Home from '../pages/Home';
 import PostList from '../pages/PostList';
 import Detail from '../pages/Detail';
-import Pricing from '../pages/Pricing';
+import PacketPage from '../pages/Packet';
 
 import Login from '../pages/Login';
 import Verify from '../pages/Verify';
@@ -49,8 +49,8 @@ export const publicRoutes = [
         layout: MainLayout
     },
     {
-        path: config.routes.pricing,
-        component: Pricing,
+        path: config.routes.packet,
+        component: PacketPage,
         layout: MainLayout
     }
 ];

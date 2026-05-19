@@ -4,7 +4,7 @@ const routes = {
     home: '/',
     postList: '/postlist',
     detail: '/detail/:id',
-    pricing: '/pricing',
+    packet: '/packet',
 
     // GUEST
     login: '/login',

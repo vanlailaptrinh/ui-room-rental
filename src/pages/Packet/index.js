@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import packageService from '../../services/packageService';
 import orderService from "../../services/orderService";
-import paymentService from "../../services/paymentService"
-import './Pricing.css';
+import paymentService from "../../services/paymentService";
+import PacketCard from '../../components/PacketCard';
+import './Packet.css';
 
-function PricingPage() {
+function PacketPage() {
     const [packages, setPackages] = useState([]);
     const [vouchers, setVouchers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -16,6 +17,7 @@ function PricingPage() {
 
     const [activeTab, setActiveTab] = useState('POSTING');
     const [activeFaq, setActiveFaq] = useState(null);
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -30,7 +32,6 @@ function PricingPage() {
                 }
 
                 if (voucherRes && voucherRes.code === 200) {
-                    // ĐẢM BẢO data TRẢ VỀ LÀ MẢNG
                     setVouchers(voucherRes.data || []);
                 }
             } catch (err) {
@@ -54,20 +55,17 @@ function PricingPage() {
         let price = selectedPkg.price || 0;
 
         if (selectedVoucher) {
-            // Tính số tiền giảm dựa trên %
             let discount = (price * (selectedVoucher.discountPercentage || 0)) / 100;
-
-            // Nếu số tiền giảm vượt quá mức tối đa cho phép
             if (selectedVoucher.maxDiscountAmount && discount > selectedVoucher.maxDiscountAmount) {
                 discount = selectedVoucher.maxDiscountAmount;
             }
-
             price = Math.max(0, price - discount);
         }
         return price;
     };
 
     const displayPackages = packages.filter(pkg => pkg.type?.value === activeTab);
+
     const toggleFaq = (index) => {
         setActiveFaq(activeFaq === index ? null : index);
     };
@@ -111,8 +109,10 @@ function PricingPage() {
 
     if (loading) return <div className="nexus-pricing-loading">Đang tải bảng giá...</div>;
     if (error) return <div className="nexus-pricing-error">{error}</div>;
+
     return (
         <main className="nexus-pricing-container">
+            {/* Modal - Đã được khôi phục đầy đủ code gốc của bạn */}
             {showModal && selectedPkg && (
                 <div className="nexus-modal-overlay">
                     <div className="nexus-confirm-modal">
@@ -162,11 +162,10 @@ function PricingPage() {
                             <div className="total-row">
                                 <span>Số tiền được giảm:</span>
                                 <span className="discount-text">
-            {/* Tính toán hiển thị số tiền giảm thực tế */}
                                     -{selectedPkg && selectedVoucher
                                     ? Math.min((selectedPkg.price * selectedVoucher.discountPercentage) / 100, selectedVoucher.maxDiscountAmount).toLocaleString()
                                     : 0}đ
-        </span>
+                                </span>
                             </div>
                             <div className="total-row final">
                                 <span>Tổng thanh toán:</span>
@@ -180,7 +179,7 @@ function PricingPage() {
                     </div>
                 </div>
             )}
-            {/* Hero & Toggle Section */}
+
             <header className="nexus-pricing-header">
                 <h1>Bảng giá dịch vụ</h1>
                 <p>Kết nối trực tiếp từ hệ thống Nexus Living.</p>
@@ -202,56 +201,15 @@ function PricingPage() {
             </header>
 
             <div className="nexus-pricing-grid">
-                {displayPackages.map((pkg) => {
-                    const isPro = pkg.tier.value === 'PRO';
-                    return (
-                        <div key={pkg.id} className={`nexus-pricing-card ${isPro ? 'nexus-pricing-pro-card' : ''}`}>
-                            {isPro && <div className="nexus-pricing-popular-badge">Chuyên nghiệp</div>}
-
-                            <div className="nexus-pricing-card-header">
-                                <h3>{pkg.name} {isPro ? 'PRO' : 'Cơ bản'}</h3>
-                                <p>{isPro ? 'Tối ưu hiệu quả hiển thị.' : 'Phù hợp với nhu cầu cơ bản.'}</p>
-                            </div>
-
-                            <div className="nexus-pricing-card-price-box">
-                                <div className="nexus-pricing-price">{pkg.price.toLocaleString('vi-VN')}đ</div>
-                                <div className="nexus-pricing-period">/{pkg.activeDays} ngày</div>
-                            </div>
-
-                            <ul className="nexus-pricing-card-features">
-                                <li>
-                                    <span className="material-symbols-outlined nexus-pricing-icon-success">check_circle</span>
-                                    Giới hạn: <strong>{pkg.limitQuota} tin</strong>
-                                </li>
-                                <li>
-                                    <span className="material-symbols-outlined nexus-pricing-icon-success">check_circle</span>
-                                    Hiển thị: <strong>{pkg.activeDays} ngày</strong>
-                                </li>
-                                {/*{isPro ? (*/}
-                                {/*    <>*/}
-                                {/*        <li><span className="material-symbols-outlined nexus-pricing-icon-success">check_circle</span> Huy hiệu xác minh</li>*/}
-                                {/*        <li><span className="material-symbols-outlined nexus-pricing-icon-success">check_circle</span> Ưu tiên tìm kiếm</li>*/}
-                                {/*    </>*/}
-                                {/*) : (*/}
-                                {/*    <>*/}
-                                {/*        <li className="nexus-pricing-disabled"><span className="material-symbols-outlined">cancel</span> Huy hiệu xác minh</li>*/}
-                                {/*        <li className="nexus-pricing-disabled"><span className="material-symbols-outlined">cancel</span> Ưu tiên tìm kiếm</li>*/}
-                                {/*    </>*/}
-                                {/*)}*/}
-                            </ul>
-
-                            <button
-                                className={isPro ? 'nexus-pricing-btn-primary' : 'nexus-pricing-btn-outline'}
-                                onClick={() => handleSelectPlan(pkg)}
-                            >
-                                Chọn gói này
-                            </button>
-                        </div>
-                    );
-                })}
+                {displayPackages.map((pkg) => (
+                    <PacketCard
+                        key={pkg.id}
+                        pkg={pkg}
+                        onSelect={handleSelectPlan}
+                    />
+                ))}
             </div>
 
-            {/* Trust Section */}
             <section className="nexus-pricing-trust-section">
                 <div className="nexus-pricing-trust-main">
                     <img className="nexus-pricing-trust-bg" src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80" alt="background" />
@@ -289,7 +247,6 @@ function PricingPage() {
                 </div>
             </section>
 
-            {/* FAQ Section */}
             <section className="nexus-pricing-faq-section">
                 <h2>Câu hỏi thường gặp</h2>
                 <div className="nexus-pricing-faq-list">
@@ -316,4 +273,4 @@ function PricingPage() {
     );
 }
 
-export default PricingPage;
+export default PacketPage;

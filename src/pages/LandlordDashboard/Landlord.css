@@ -1010,3 +1010,173 @@ body {
         height: 400px;
     }
 }
+/* Container & hiệu ứng font chung */
+.landlord-payment-wrapper {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Thanh điều hướng Subtabs */
+.landlord-custom-subtabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 10px;
+}
+
+.landlord-custom-subtabs button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: #4b5563;
+    transition: all 0.2s ease;
+}
+
+.landlord-custom-subtabs button.active {
+    background: #007bff;
+    color: #fff;
+}
+
+/* Thẻ bọc thông tin Gói của tôi */
+.landlord-active-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+    border: 1px solid #f3f4f6;
+}
+
+.landlord-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.landlord-card-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    fontWeight: 600;
+    color: #111827;
+}
+
+/* Badge Trạng thái hoạt động */
+.status-badge-active {
+    background: #ecfdf5;
+    color: #059669;
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: 1px solid #a7f3d0;
+}
+
+.loading-text {
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
+/* Khối chi tiết gói */
+.landlord-current-pkg-box {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #f3f4f6;
+}
+
+.pkg-title-row {
+    margin: 0 0 16px 0;
+    font-size: 1.4rem;
+    color: #111827;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tier-badge {
+    font-size: 0.75rem;
+    background: #eff6ff;
+    color: #2563eb;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    border: 1px solid #bfdbfe;
+}
+
+/* Grid hiển thị 4 ô thông số */
+.info-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 10px;
+}
+
+.stat-card-item {
+    background: #fff;
+    padding: 12px 16px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+}
+
+.stat-card-item span {
+    font-size: 0.85rem;
+    color: #6b7280;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.stat-card-item strong {
+    font-size: 1.1rem;
+    color: #1f2937;
+}
+
+/* Giao diện trống khi không có gói */
+.landlord-empty-pkg-state {
+    text-align: center;
+    padding: 40px 20px;
+    border: 2px dashed #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+}
+
+.landlord-empty-pkg-state .icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+}
+
+.landlord-empty-pkg-state p {
+    margin: 0 0 16px 0;
+    color: #4b5563;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.btn-buy-now-trigger {
+    padding: 10px 24px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(37,99,235,0.2);
+    transition: background 0.2s ease;
+}
+
+.btn-buy-now-trigger:hover {
+    background: #1d4ed8;
+}
+
+/* Các tiêu đề nhóm gói dịch vụ */
+.pricing-section-title {
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+.pricing-section-title.boost {
+    margin-top: 30px;
+}
