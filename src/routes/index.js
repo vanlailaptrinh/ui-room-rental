@@ -1,5 +1,6 @@
 import MainLayout from '../layouts/MainLayout';
 import HeaderLayout from '../layouts/HeaderLayout';
+import AdminLayout from '../layouts/AdminLayout';
 
 import config from '../config';
 
@@ -23,13 +24,13 @@ import MyBookings from '../pages/MyBookings';
 import PostRoom from '../pages/PostRoom';
 import LandlordDashboard from '../pages/LandlordDashboard';
 
-import AdminDashboard from '../pages/AdminDashboard';
-import SystemStatistics from '../pages/SystemStatistics';
-import AccountManagement from '../pages/AccountManagement';
+import AdminDashboard from '../pages/Admin/AdminDashboard';
+import SystemStatistics from '../pages/Admin/SystemStatistics';
+import AccountManagement from '../pages/Admin/AccountAdmin';
 import Blacklist from '../pages/Blacklist';
 import FinancialManagement from '../pages/Finance';
-import PostManagement from '../pages/PostManagement';
-import VoucherManagement from '../pages/VoucherManagement';
+import PostManagement from '../pages/Admin/PostManagement';
+import VoucherManagement from '../pages/Admin/VoucherManagement';
 import PaymentCallback from '../pages/PaymentCallback';
 
 export const publicRoutes = [
@@ -130,30 +131,37 @@ export const landlordRoutes = [
 export const adminRoutes = [
     {
         path: config.routes.adminDashboard,
-        component: AdminDashboard
+        component: AdminDashboard,
+        layout: AdminLayout
     },
     {
         path: config.routes.adminStatistics,
-        component: SystemStatistics
+        component: SystemStatistics,
+        layout: AdminLayout
     },
     {
-        path: config.routes.adminAccountManagement,
-        component: AccountManagement
+        path: config.routes.adminAccounts,
+        component: AccountManagement,
+        layout: AdminLayout
     },
     {
         path: config.routes.adminBlacklist,
-        component: Blacklist
+        component: Blacklist,
+        layout: AdminLayout
     },
     {
         path: config.routes.adminFinance,
-        component: FinancialManagement
+        component: FinancialManagement,
+        layout: AdminLayout
     },
     {
-        path: config.routes.adminPostManagement,
-        component: PostManagement
+        path: config.routes.adminPosts,
+        component: PostManagement,
+        layout: AdminLayout
     },
     {
-        path: config.routes.adminVoucherManagement,
-        component: VoucherManagement
+        path: config.routes.adminVouchers,
+        component: VoucherManagement,
+        layout: AdminLayout
     }
 ];

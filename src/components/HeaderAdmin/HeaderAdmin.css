@@ -1,0 +1,83 @@
+.admin-header {
+  height: 80px;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  position: sticky;
+  top: 0;
+  width: 100%; 
+  
+  display: flex;
+  /* Đẩy toàn bộ các phần tử con trực tiếp bám sát hẳn sang lề phải */
+  justify-content: flex-end; 
+  align-items: center;
+  /* Tạo khoảng cách đồng đều giữa icon-group, divider và profile-group */
+  gap: 16px; 
+  
+  padding: 0 32px;
+  box-sizing: border-box;
+  z-index: 40;
+  border-bottom: 1px solid #ecedf7;
+}
+
+.icon-group {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-group button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  color: #414754;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-group button:hover {
+  background-color: #f1f5f9;
+}
+
+.divider {
+  width: 1px;
+  height: 32px;
+  background-color: #e0e2ec;
+}
+
+.profile-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-group span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d4ed8;
+}
+
+.profile-group img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.page-header {
+  margin-bottom: 40px;
+}
+
+.page-header h1 {
+  font-family: 'Manrope', sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
+}
+
+.page-header p {
+  color: #414754;
+  font-weight: 500;
+  margin: 0;
+}

@@ -27,12 +27,14 @@ const routes = {
 
     // ADMIN
     adminDashboard: '/admin/dashboard',
-    adminStatistics: '/admin/statistics',
-    adminAccountManagement: '/admin/account-management',
+    adminVouchers: '/admin/vouchers',
     adminBlacklist: '/admin/blacklist',
+    adminAccounts: '/admin/accounts', 
+    adminPosts: '/admin/posts',
     adminFinance: '/admin/finance',
-    adminPostManagement: '/admin/post-management',
-    adminVoucherManagement: '/admin/voucher-management'
+    adminReports: '/admin/reports',
+    adminDisputes: '/admin/disputes',
+    adminStatistics: '/admin/statistics',
 };
 
 export default routes;

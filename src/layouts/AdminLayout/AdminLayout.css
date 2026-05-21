@@ -1,0 +1,22 @@
+/* Thêm class cho thẻ div ngoài cùng để kích hoạt flexbox */
+.admin-layout-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f8fafc; /* Màu nền nhẹ phía sau */
+}
+
+.admin-main {
+  flex: 1;
+  /* Nếu SidebarAdmin của bạn đã có position: fixed hoặc absolute, hãy giữ margin-left. 
+     Nếu Sidebar là flex item bình thường, bạn có thể bỏ margin-left đi. */
+  margin-left: 280px; 
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Chống vỡ layout khi nội dung bên trong quá rộng */
+}
+
+.admin-content {
+  padding: 32px 32px 48px 32px;
+  flex: 1;
+}

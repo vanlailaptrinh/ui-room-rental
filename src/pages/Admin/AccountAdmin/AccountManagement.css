@@ -1,5 +1,4 @@
 /* KẾ THỪA LAYOUT TỪ ADMIN DASHBOARD */
-.admin-layout { display: flex; height: 100vh; background-color: #f8fafc; font-family: 'Inter', sans-serif; }
 .admin-sidebar { width: 280px; background: #ffffff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; padding: 24px 16px; position: fixed; height: 100vh; z-index: 50; }
 .sidebar-header h2 { font-size: 20px; font-weight: 800; color: #1d4ed8; margin-bottom: 4px; font-family: 'Manrope', sans-serif;}
 .sidebar-header p { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 32px;}
@@ -12,7 +11,6 @@
 .admin-info .name { font-size: 14px; font-weight: 700; color: #0f172a; margin: 0; }
 .admin-info .logout { font-size: 12px; color: #64748b; margin: 0; cursor: pointer; }
 
-.admin-main { flex: 1; margin-left: 280px; display: flex; flex-direction: column; }
 .admin-header { height: 80px; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(16px); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; position: sticky; top: 0; z-index: 40; }
 .search-box { display: flex; align-items: center; background: #f1f5f9; padding: 8px 16px; border-radius: 50px; width: 400px; gap: 8px; }
 .search-box input { border: none; background: transparent; outline: none; width: 100%; font-size: 14px; }
@@ -22,8 +20,6 @@
 .icon-group button:hover { background: #f1f5f9; }
 .divider { width: 1px; height: 32px; background: #e2e8f0; margin: 0 8px; }
 .profile-group img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-
-.admin-content { padding: 40px; overflow-y: auto; }
 
 /* HEADER ACCOUNT MANAGEMENT */
 .flex-between { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; }
