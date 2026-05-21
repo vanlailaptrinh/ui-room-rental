@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import packageService from '../../services/packageService';
-import orderService from "../../services/orderService";
-import paymentService from "../../services/paymentService";
+import PackageService from '../../services/packageService';
+import OrderService from '../../services/orderService';
+import PaymentService from '../../services/paymentService';
 import PacketCard from '../../components/PacketCard';
 import './Packet.css';
 
@@ -23,8 +23,8 @@ function PacketPage() {
             try {
                 setLoading(true);
                 const [pkgRes, voucherRes] = await Promise.all([
-                    packageService.getPackages(),
-                    packageService.getActiveVouchers()
+                    PackageService.getPackages(),
+                    PackageService.getActiveVouchers()
                 ]);
 
                 if (pkgRes.code === 200) {
@@ -80,11 +80,11 @@ function PacketPage() {
                 totalPrice: finalPrice
             };
 
-            const orderRes = await orderService.createOrder(orderPayload);
+            const orderRes = await OrderService.createOrder(orderPayload);
             const orderId = orderRes?.data?.id || orderRes?.id;
 
             if (orderId) {
-                const resData = await paymentService.createPaymentUrl(orderId);
+                const resData = await PaymentService.createPaymentUrl(orderId);
 
                 if (resData && resData.code === 200) {
                     window.location.href = resData.data;

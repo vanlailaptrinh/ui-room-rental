@@ -3,7 +3,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import { useAuth } from '../../context/authContext';
-import * as userService from '../../services/userService';
+import UserService from '../../services/userService';
 import './ChatRoom.css';
 
 // ── Helpers ──────────────────────────────────────────────
@@ -76,7 +76,7 @@ function ChatRoom() {
             const parts = roomId.split('_');
             const otherId = parts.find((p) => String(p) !== String(user.id));
             if (otherId) {
-                userService
+                UserService
                     .getUserById(otherId)
                     .then((res) => setTargetUser(res.data || res))
                     .catch(() => {});

@@ -4,7 +4,7 @@ import { IconChevronRight } from '../../assets/Icons';
 import PropertyCard from "../../components/PropertyCard";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
-import { getUserProfile, updateProfile } from '../../services/userService';
+import UserService from '../../services/userService';
 import PostService from '../../services/postService';
 
 function Profile() {
@@ -24,7 +24,7 @@ function Profile() {
     useEffect(() => {
         const fetchFullProfile = async () => {
             try {
-                const res = await getUserProfile();
+                const res = await UserService.getUserProfile();
                 const userData = res.data || res;
 
                 setFormData({
@@ -79,7 +79,7 @@ function Profile() {
             // data.append('avatar', fileInput.files[0]);
 
             console.log("Đang gửi dữ liệu kiểu FormData...");
-            const response = await updateProfile(data);
+            const response = await UserService.updateProfile(data);
 
             if (response.code === 200) {
                 alert("Cập nhật thành công!");

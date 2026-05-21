@@ -7,9 +7,9 @@ import {
 } from '../../assets/Icons';
 import api from '../../services/axios';
 import BookingService from '../../services/bookingService';
+import ChatService from '../../services/chatService';
 import FavoriteService from '../../services/favoriteService';
-import * as userService from '../../services/userService';
-import { getOrCreateChatRoom } from '../../services/chatService';
+import UserService from '../../services/userService';
 import { useAuth } from '../../context/authContext';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -55,7 +55,7 @@ function Detail() {
                     // 2. Lấy thông tin chủ nhà từ landlordId trong postData
                     if (postData.landlordId) {
                         try {
-                            const landlordRes = await userService.getUserById(postData.landlordId);
+                            const landlordRes = await UserService.getUserById(postData.landlordId);
                             // Theo BE của bạn, ApiResponse trả về data là UserResponse
                             setLandlord(landlordRes.data);
                         } catch (err) {
@@ -113,7 +113,7 @@ function Detail() {
         if (chatLoading) return;
         try {
             setChatLoading(true);
-            const room = await getOrCreateChatRoom(landlord.id);
+            const room = await ChatService.getOrCreateChatRoom(landlord.id);
             navigate(`/chat/${room.roomId}`, {
                 state: { roomId: room.roomId, targetUser: landlord },
             });

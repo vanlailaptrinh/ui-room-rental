@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { AuthContext } from '../../context/authContext';
-import { getUserProfile } from '../../services/userService';
+import UserService from '../../services/userService';
 import AuthService from '../../services/authService';
 
 export const AuthProvider = ({ children }) => {
@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
     // Lấy full profile nền (background)
     const refreshUserProfile = useCallback(async () => {
         try {
-            const response = await getUserProfile();
+            const response = await UserService.getUserProfile();
             const userData = response.data;
 
             if (userData) {

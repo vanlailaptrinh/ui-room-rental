@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import paymentService from '../../services/paymentService';
+import PaymentService from '../../services/paymentService';
 import './PaymentCallback.css';
 
 const PaymentCallback = () => {
@@ -22,7 +22,7 @@ const PaymentCallback = () => {
             isCalled.current = true;
 
             try {
-                const response = await paymentService.verifyPayment(queryParams);
+                const response = await PaymentService.verifyPayment(queryParams);
                 if (response.code === 200 && response.data === true) {
                     setStatus('success');
                     setMessage(response.message);

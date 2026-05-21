@@ -3,14 +3,15 @@ import { Link } from 'react-router-dom';
 import './Landlord.css';
 import BookingService from '../../services/bookingService';
 import NotificationBell from '../../components/NotificationBell';
-import * as UserService from '../../services/userService';
-import { getOrCreateChatRoom, getAllUsers } from '../../services/chatService';
 import { db } from '../../services/firebase';
 import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../context/authContext';
-import packageService from '../../services/packageService';
-import orderService from "../../services/orderService";
-import paymentService from "../../services/paymentService";
+import ChatService from '../../services/chatService';
+import UserService from '../../services/userService';
+import VoucherService from '../../services/voucherService';
+import PackageService from '../../services/packageService';
+import OrderService from '../../services/orderService';
+import PaymentService from '../../services/paymentService';
 import PacketCard from '../../components/PacketCard'
 
 /* ─── Helper: format thời gian ─── */
@@ -170,7 +171,7 @@ function LandlordDashboard() {
         try {
             setChatLoading(true);
             setChatError('');
-            const all = await getAllUsers();
+            const all = await UserService.getAllUsers();
             // LANDLORD chỉ thấy USER (người thuê)
             const tenants = all.filter(u => u.role === 'USER' && String(u.id) !== String(user?.id));
             setChatContacts(tenants);
@@ -189,7 +190,7 @@ function LandlordDashboard() {
     const openChat = async (contact) => {
         try {
             setConnecting(contact.id);
-            const room = await getOrCreateChatRoom(contact.id);
+            const room = await ChatService.getOrCreateChatRoom(contact.id);
             setActiveContact(contact);
             setChatRoomId(room.roomId);
             setMessages([]);
@@ -562,8 +563,8 @@ function LandlordDashboard() {
             try {
                 setLoading(true);
                 const [pkgRes, voucherRes] = await Promise.all([
-                    packageService.getPackages(),
-                    packageService.getActiveVouchers()
+                    PackageService.getPackages(),
+                    VoucherService.getActiveVouchers()
                 ]);
 
                 if (pkgRes.code === 200) {
@@ -587,7 +588,7 @@ function LandlordDashboard() {
             setLoadingCurrentPkg(true);
             try {
                 // Gọi API lấy toàn bộ gói (API này các chức năng khác gọi bình thường, không cần ID)
-                const res = await packageService.getPackages();
+                const res = await PackageService.getPackages();
 
                 if (res && res.code === 200) {
                     const allPackages = res.data || [];
@@ -646,11 +647,11 @@ function LandlordDashboard() {
                 totalPrice: finalPrice
             };
 
-            const orderRes = await orderService.createOrder(orderPayload);
+            const orderRes = await OrderService.createOrder(orderPayload);
             const orderId = orderRes?.data?.id || orderRes?.id;
 
             if (orderId) {
-                const resData = await paymentService.createPaymentUrl(orderId);
+                const resData = await PaymentService.createPaymentUrl(orderId);
                 if (resData && resData.code === 200) {
                     window.location.href = resData.data;
                 } else {

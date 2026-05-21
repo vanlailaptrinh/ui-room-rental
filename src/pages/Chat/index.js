@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
-import { getAllUsers, getOrCreateChatRoom } from '../../services/chatService';
+import ChatService from '../../services/chatService';
+import UserService from '../../services/userService';
 import './Chat.css';
 
 function Avatar({ username, avatar, size = 48 }) {
@@ -56,7 +57,7 @@ function Chat() {
         try {
             setLoading(true);
             setError('');
-            const all = await getAllUsers();
+            const all = await UserService.getAllUsers();
             const filtered = all.filter(
                 (u) => u.role === targetRole && u.id !== user?.id
             );
@@ -71,7 +72,7 @@ function Chat() {
     async function startChat(targetUser) {
         try {
             setConnecting(targetUser.id);
-            const room = await getOrCreateChatRoom(targetUser.id);
+            const room = await ChatService.getOrCreateChatRoom(targetUser.id);
             navigate(`/chat/${room.roomId}`, {
                 state: { roomId: room.roomId, targetUser },
             });
