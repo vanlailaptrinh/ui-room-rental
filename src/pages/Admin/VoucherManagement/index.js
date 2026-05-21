@@ -381,7 +381,7 @@ function VoucherManagement() {
                                                             style={{ padding: '4px 8px', background: '#7f1d1d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
                                                             title="Xóa hẳn bản ghi khỏi database"
                                                         >
-                                                            Xóa cứng
+                                                            Xóa
                                                         </button>
                                                     </div>
                                                 </td>

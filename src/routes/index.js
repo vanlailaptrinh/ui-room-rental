@@ -25,10 +25,9 @@ import PostRoom from '../pages/PostRoom';
 import LandlordDashboard from '../pages/LandlordDashboard';
 
 import AdminDashboard from '../pages/Admin/AdminDashboard';
-import SystemStatistics from '../pages/Admin/SystemStatistics';
+import FinanceManagement from '../pages/Admin/FinanceManagement';
 import AccountManagement from '../pages/Admin/AccountAdmin';
 import Blacklist from '../pages/Blacklist';
-import FinancialManagement from '../pages/Finance';
 import PostManagement from '../pages/Admin/PostManagement';
 import VoucherManagement from '../pages/Admin/VoucherManagement';
 import PackageManagement from '../pages/Admin/PackageManagement';
@@ -136,11 +135,6 @@ export const adminRoutes = [
         layout: AdminLayout
     },
     {
-        path: config.routes.adminStatistics,
-        component: SystemStatistics,
-        layout: AdminLayout
-    },
-    {
         path: config.routes.adminAccounts,
         component: AccountManagement,
         layout: AdminLayout
@@ -152,7 +146,7 @@ export const adminRoutes = [
     },
     {
         path: config.routes.adminFinance,
-        component: FinancialManagement,
+        component: FinanceManagement,
         layout: AdminLayout
     },
     {
