@@ -1,4 +1,4 @@
-import api from './axios'; // Sử dụng instance 'api' đồng bộ toàn hệ thống
+import api from './axios';
 
 const ENDPOINT = '/users';
 
@@ -7,18 +7,18 @@ const UserService = {
     getAllUsers: async () => {
         try {
             const response = await api.get(`${ENDPOINT}`);
-            return response.data; // Trả về ApiResponse chứa danh sách users
+            return response.data; 
         } catch (error) {
             console.error("Error fetching all users:", error);
             throw error;
         }
     },
 
-    // [GET] /users/profile - Lấy thông tin profile cá nhân của user hiện tại
+    // [GET] /users/profile - Lấy thông tin profile cá nhân
     getUserProfile: async () => {
         try {
             const response = await api.get(`${ENDPOINT}/profile`);
-            return response.data; // Trả về ApiResponse chứa thông tin cá nhân
+            return response.data;
         } catch (error) {
             console.error("Error fetching user profile:", error);
             throw error;
@@ -29,7 +29,7 @@ const UserService = {
     getUserById: async (userId) => {
         try {
             const response = await api.get(`${ENDPOINT}/${userId}`);
-            return response.data; // Trả về ApiResponse chứa chi tiết user
+            return response.data;
         } catch (error) {
             console.error(`Error fetching user by id ${userId}:`, error);
             throw error;
@@ -40,9 +40,20 @@ const UserService = {
     updateProfile: async (formDataPayload) => {
         try {
             const response = await api.put(`${ENDPOINT}/profile`, formDataPayload);
-            return response.data; // Trả về ApiResponse chứa thông tin sau khi cập nhật
+            return response.data;
         } catch (error) {
             console.error("Error updating profile:", error);
+            throw error;
+        }
+    },
+
+    // [PUT] /users/:id/status?isActive=... - Khóa hoặc mở khóa tài khoản (ADMIN)
+    toggleUserStatus: async (userId, isActive) => {
+        try {
+            const response = await api.put(`${ENDPOINT}/${userId}/status?isActive=${isActive}`);
+            return response.data;
+        } catch (error) {
+            console.error(`Error toggling status for user ${userId}:`, error);
             throw error;
         }
     }

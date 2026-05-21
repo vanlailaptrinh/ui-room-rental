@@ -26,7 +26,7 @@ import LandlordDashboard from '../pages/LandlordDashboard';
 
 import AdminDashboard from '../pages/Admin/AdminDashboard';
 import FinanceManagement from '../pages/Admin/FinanceManagement';
-import AccountManagement from '../pages/Admin/AccountAdmin';
+import AccountManagement from '../pages/Admin/AccountManagement';
 import Blacklist from '../pages/Blacklist';
 import PostManagement from '../pages/Admin/PostManagement';
 import VoucherManagement from '../pages/Admin/VoucherManagement';
