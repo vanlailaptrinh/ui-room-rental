@@ -1,4 +1,4 @@
-import api from './axios'; // Sử dụng instance 'api' đồng bộ toàn hệ thống
+import api from './axios';
 
 const ENDPOINT = '/packages';
 

@@ -9,6 +9,7 @@ const SidebarAdmin = () => {
   const menuItems = [
     { path: config.routes.adminDashboard, icon: 'dashboard', label: 'Bảng điều khiển' },
     { path: config.routes.adminVouchers, icon: 'confirmation_number', label: 'Quản lý Voucher' },
+    { path: config.routes.adminPackages, icon: 'inventory_2', label: 'Quản lý Gói dịch vụ' },
     { path: config.routes.adminBlacklist, icon: 'block', label: 'Quản lý Danh sách đen' },
     { path: config.routes.adminAccounts, icon: 'group', label: 'Quản lý Người dùng' },
     { path: config.routes.adminPosts, icon: 'apartment', label: 'Quản lý Bài đăng' },
@@ -16,7 +17,7 @@ const SidebarAdmin = () => {
     { path: config.routes.adminReports, icon: 'report', label: 'Quản lý Báo cáo' },
     { path: config.routes.adminDisputes, icon: 'gavel', label: 'Xử lý tranh chấp' },
     { path: config.routes.adminStatistics, icon: 'analytics', label: 'Thống kê hệ thống' },
-    ];
+];
 
   return (
     <aside className="admin-sidebar">

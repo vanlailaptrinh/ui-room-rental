@@ -31,6 +31,7 @@ import Blacklist from '../pages/Blacklist';
 import FinancialManagement from '../pages/Finance';
 import PostManagement from '../pages/Admin/PostManagement';
 import VoucherManagement from '../pages/Admin/VoucherManagement';
+import PackageManagement from '../pages/Admin/PackageManagement';
 import PaymentCallback from '../pages/PaymentCallback';
 
 export const publicRoutes = [
@@ -162,6 +163,11 @@ export const adminRoutes = [
     {
         path: config.routes.adminVouchers,
         component: VoucherManagement,
+        layout: AdminLayout
+    },
+    {
+        path: config.routes.adminPackages,
+        component: PackageManagement,
         layout: AdminLayout
     }
 ];

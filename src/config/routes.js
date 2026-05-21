@@ -28,6 +28,7 @@ const routes = {
     // ADMIN
     adminDashboard: '/admin/dashboard',
     adminVouchers: '/admin/vouchers',
+    adminPackages: '/admin/packages',
     adminBlacklist: '/admin/blacklist',
     adminAccounts: '/admin/accounts', 
     adminPosts: '/admin/posts',
