@@ -1,17 +1,17 @@
-/* --- Khung Canvas Nền (Đã bỏ padding ngoài) --- */
-.main-wrapper {
+/* --- Khung Canvas Nền --- */
+.account-main-wrapper {
   padding: 0;
   background-color: #f8fafc;
   min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-.content-canvas {
+.account-content-canvas {
   width: 100%;
   margin: 0 auto;
 }
 
-.loading-canvas {
+.account-loading-canvas {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -22,7 +22,7 @@
 }
 
 /* --- Page Header & Khối Tìm Kiếm --- */
-.flex-between {
+.account-flex-between {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -31,25 +31,25 @@
   padding: 20px 0;
 }
 
-.page-title {
+.account-page-title {
   font-size: 26px;
   font-weight: 700;
   color: #1e293b;
   letter-spacing: -0.5px;
 }
 
-.page-desc {
+.account-page-desc {
   font-size: 13.5px;
   color: #64748b;
   margin-top: 4px;
 }
 
-.search-box-wrapper {
+.account-search-box-wrapper {
   position: relative;
   width: 320px;
 }
 
-.search-icon {
+.account-search-icon {
   position: absolute;
   left: 14px;
   top: 50%;
@@ -58,7 +58,7 @@
   font-size: 18px;
 }
 
-.search-input {
+.account-search-input {
   width: 100%;
   padding: 10px 14px 10px 42px;
   font-size: 13.5px;
@@ -70,20 +70,20 @@
   transition: all 0.2s ease;
 }
 
-.search-input:focus {
+.account-search-input:focus {
   border-color: #4f46e5;
   box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
 }
 
-/* --- Bento Grid Thống Kê (Cố định 4 cột trên 1 hàng) --- */
-.am-stats-grid {
+/* --- Bento Grid Thống Kê --- */
+.account-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 24px;
 }
 
-.am-stat-card {
+.account-stat-card {
   background: #ffffff;
   border-radius: 14px;
   padding: 20px;
@@ -94,7 +94,7 @@
   justify-content: space-between;
 }
 
-.icon-box {
+.account-icon-box {
   width: 42px;
   height: 42px;
   border-radius: 10px;
@@ -104,42 +104,44 @@
   margin-bottom: 14px;
 }
 
-.icon-box span {
+.account-icon-box span {
   font-size: 20px;
 }
 
-.icon-box.blue { background: #eff6ff; color: #3b82f6; }
-.icon-box.teal { background: #f0fdf4; color: #10b981; }
-.icon-box.orange { background: #fff7ed; color: #f97316; }
-.icon-box.red { background: #fef2f2; color: #ef4444; }
+.account-icon-box.account-blue { background: #eff6ff; color: #3b82f6; }
+.account-icon-box.account-teal { background: #f0fdf4; color: #10b981; }
+.account-icon-box.account-orange { background: #fff7ed; color: #f97316; }
+.account-icon-box.account-red { background: #fef2f2; color: #ef4444; }
 
-.am-stat-card .title {
+.account-stat-card .account-card-title {
   font-size: 11px;
   font-weight: 700;
   color: #94a3b8;
   letter-spacing: 0.8px;
   text-transform: uppercase;
+  margin: 0;
 }
 
-.am-stat-card h3 {
+.account-stat-card h3 {
   font-size: 28px;
   font-weight: 700;
   color: #0f172a;
   margin: 6px 0;
 }
 
-.trend {
+.account-trend {
   font-size: 12px;
   display: flex;
   align-items: center;
   gap: 4px;
   font-weight: 500;
+  margin: 0;
 }
-.trend.positive { color: #10b981; }
-.trend.warning { color: #f97316; }
-.trend span { font-size: 16px; }
+.account-trend.account-positive { color: #10b981; }
+.account-trend.account-warning { color: #f97316; }
+.account-trend span { font-size: 16px; }
 
-.progress-bar {
+.account-progress-bar {
   height: 6px;
   background: #f1f5f9;
   border-radius: 99px;
@@ -147,16 +149,21 @@
   overflow: hidden;
 }
 
-.progress-bar .fill {
+.account-progress-bar .account-fill {
   height: 100%;
   border-radius: 99px;
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.progress-bar .fill.teal { background-color: #10b981; }
-.progress-bar .fill.orange { background-color: #f97316; }
+.account-progress-bar .account-fill.account-teal { background-color: #10b981; }
+.account-progress-bar .account-fill.account-orange { background-color: #f97316; }
+.account-progress-bar .account-fill.account-red-bar { background-color: #ef4444; }
+
+.account-font-bold {
+  font-weight: 700;
+}
 
 /* --- Table Container & Thanh Bộ Lọc --- */
-.am-table-container {
+.account-table-container {
   background: #ffffff;
   border-radius: 14px;
   border: 1px solid #e2e8f0;
@@ -164,7 +171,7 @@
   margin-bottom: 32px;
 }
 
-.am-table-filters {
+.account-table-filters {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -175,25 +182,25 @@
   gap: 16px;
 }
 
-.filter-group {
+.account-filter-group {
   display: flex;
   gap: 12px;
 }
 
-.filter-item {
+.account-filter-item {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.filter-item label {
+.account-filter-item label {
   font-size: 10.5px;
   font-weight: 700;
   color: #64748b;
   letter-spacing: 0.5px;
 }
 
-.filter-item select {
+.account-filter-item select {
   padding: 8px 14px;
   font-size: 13px;
   border: 1px solid #cbd5e1;
@@ -206,11 +213,11 @@
   transition: all 0.15s ease;
 }
 
-.filter-item select:focus {
+.account-filter-item select:focus {
   border-color: #4f46e5;
 }
 
-.filter-actions {
+.account-filter-actions {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -219,7 +226,7 @@
   font-weight: 500;
 }
 
-.filter-actions button {
+.account-filter-actions button {
   border: 1px solid #e2e8f0;
   background: #ffffff;
   width: 32px;
@@ -233,25 +240,25 @@
   transition: all 0.15s ease;
 }
 
-.filter-actions button:hover:not(:disabled) {
+.account-filter-actions button:hover:not(:disabled) {
   background: #f8fafc;
   border-color: #cbd5e1;
 }
 
-.filter-actions button:disabled {
+.account-filter-actions button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
 /* --- Thiết Kế Bảng Dữ Liệu UI --- */
-.am-table {
+.account-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
   font-size: 13.5px;
 }
 
-.am-table th {
+.account-table th {
   padding: 14px 20px;
   background: #f8fafc;
   font-weight: 600;
@@ -262,34 +269,34 @@
   border-bottom: 1px solid #e2e8f0;
 }
 
-.am-table td {
+.account-table td {
   padding: 16px 20px;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
   color: #334155;
 }
 
-.am-table tbody tr:hover {
+.account-table tbody tr:hover {
   background-color: #f8fafc;
 }
 
-.text-right { text-align: right; }
+.account-text-right { text-align: right; }
 
 /* --- Thông tin Chi tiết User --- */
-.am-user-cell {
+.account-user-cell {
   display: flex;
   align-items: center;
   gap: 14px;
 }
 
-.avatar-wrapper {
+.account-avatar-wrapper {
   position: relative;
   width: 40px;
   height: 40px;
   flex-shrink: 0;
 }
 
-.avatar-wrapper img {
+.account-avatar-wrapper img {
   width: 100%;
   height: 100%;
   border-radius: 50%;
@@ -297,12 +304,12 @@
   border: 1px solid #e2e8f0;
 }
 
-.avatar-wrapper img.grayscale {
+.account-avatar-wrapper img.account-grayscale {
   filter: grayscale(1);
   opacity: 0.5;
 }
 
-.status-dot {
+.account-status-dot {
   position: absolute;
   bottom: 1px;
   right: 1px;
@@ -311,36 +318,39 @@
   border-radius: 50%;
   border: 2px solid #ffffff;
 }
-.status-dot.online { background-color: #10b981; }
-.status-dot.offline { background-color: #94a3b8; }
+.account-status-dot.account-online { background-color: #10b981; }
+.account-status-dot.account-offline { background-color: #94a3b8; }
 
-.user-info .name {
+.account-user-info .account-name {
   font-weight: 600;
   color: #0f172a;
   font-size: 14px;
   display: flex;
   align-items: center;
   gap: 6px;
+  margin: 0;
 }
 
-.user-info .email {
+.account-user-info .account-email {
   font-size: 12.5px;
   color: #64748b;
   margin-top: 1px;
+  margin-bottom: 0;
 }
 
-.phone-sub {
+.account-phone-sub {
   font-size: 11.5px;
   color: #94a3b8;
   margin-top: 2px;
+  margin-bottom: 0;
 }
 
 /* --- Trạng Thái Badges Mới --- */
-.locked-row {
+.account-locked-row {
   background-color: #f8fafc;
 }
 
-.locked-badge {
+.account-locked-badge {
   background: #fef2f2;
   color: #ef4444;
   font-size: 10px;
@@ -350,31 +360,29 @@
   border: 1px solid rgba(239, 68, 68, 0.15);
 }
 
-.role-badge {
+.account-role-badge {
   font-size: 12px;
   padding: 4px 10px;
   border-radius: 6px;
   font-weight: 600;
   display: inline-block;
 }
-.role-badge.teal { background: #ecfdf5; color: #059669; }
-.role-badge.orange { background: #fff7ed; color: #d97706; }
-.role-badge.red { background: #fdf2f8; color: #db2777; }
+.account-role-badge.account-teal { background: #ecfdf5; color: #059669; }
+.account-role-badge.account-orange { background: #fff7ed; color: #d97706; }
+.account-role-badge.account-red { background: #fdf2f8; color: #db2777; }
 
 /* Trạng thái xác nhận và hoạt động dạng tag */
-.am-status-tag {
+.account-status-tag {
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 12.5px;
   font-weight: 500;
   display: inline-block;
 }
-.am-status-tag.confirmed { background: #ecfdf5; color: #047857; }
-.am-status-tag.unconfirmed { background: #fff7ed; color: #c2410c; }
-.am-status-tag.active { background: #eff6ff; color: #1d4ed8; }
-.am-status-tag.locked { background: #fef2f2; color: #b91c1c; }
+.account-status-tag.account-active { background: #eff6ff; color: #1d4ed8; }
+.account-status-tag.account-locked { background: #fef2f2; color: #b91c1c; }
 
-.rating-cell-flex {
+.account-rating-cell-flex {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -382,23 +390,23 @@
   color: #334155;
 }
 
-.star-icon {
+.account-star-icon {
   color: #eab308;
   font-size: 18px;
 }
 
-.not-applicable {
+.account-not-applicable {
   color: #cbd5e1;
   font-weight: 400;
   padding-left: 8px;
 }
 
 /* --- Nhóm Nút Thao Tác Quản Trị --- */
-.actions-cell {
+.account-actions-cell {
   text-align: right;
 }
 
-.icon-btn {
+.account-icon-btn {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   width: 34px;
@@ -414,29 +422,29 @@
   transition: all 0.15s ease;
 }
 
-.icon-btn span {
+.account-icon-btn span {
   font-size: 18px;
 }
 
-.icon-btn:hover {
+.account-icon-btn:hover {
   background: #f8fafc;
   color: #0f172a;
   border-color: #cbd5e1;
 }
 
-.icon-btn.block:hover {
+.account-icon-btn.account-block:hover {
   background: #fef2f2;
   color: #dc2626;
   border-color: #fca5a5;
 }
 
-.icon-btn.unlock:hover {
+.account-icon-btn.account-unlock:hover {
   background: #f0fdf4;
   color: #16a34a;
   border-color: #86efac;
 }
 
-.empty-table-state {
+.account-empty-table-state {
   text-align: center;
   padding: 40px;
   color: #94a3b8;
@@ -444,7 +452,7 @@
 }
 
 /* --- Khối Điều Hướng Phân Trang --- */
-.am-pagination {
+.account-pagination {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -455,7 +463,7 @@
   border-bottom-right-radius: 14px;
 }
 
-.page-size {
+.account-page-size {
   font-size: 13px;
   color: #64748b;
   display: flex;
@@ -463,7 +471,7 @@
   gap: 8px;
 }
 
-.page-size select {
+.account-page-size select {
   padding: 6px 10px;
   border-radius: 6px;
   border: 1px solid #cbd5e1;
@@ -473,12 +481,12 @@
   cursor: pointer;
 }
 
-.page-numbers {
+.account-page-numbers {
   display: flex;
   gap: 6px;
 }
 
-.page-numbers button {
+.account-page-numbers button {
   border: 1px solid #e2e8f0;
   background: #ffffff;
   min-width: 32px;
@@ -495,31 +503,31 @@
   transition: all 0.15s ease;
 }
 
-.page-numbers button:hover:not(.active):not(:disabled) {
+.account-page-numbers button:hover:not(.account-active):not(:disabled) {
   background: #f8fafc;
   border-color: #cbd5e1;
   color: #0f172a;
 }
 
-.page-numbers button.active {
+.account-page-numbers button.account-active {
   background: #4f46e5;
   color: #ffffff;
   border-color: #4f46e5;
   font-weight: 600;
 }
 
-.page-numbers button:disabled {
+.account-page-numbers button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.page-numbers .nav-arrow {
+.account-page-numbers .account-nav-arrow {
   font-weight: 600;
   letter-spacing: -1px;
 }
 
 /* --- MODAL HIỂN THỊ CHI TIẾT POPUP --- */
-.am-modal-overlay {
+.account-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -533,17 +541,17 @@
   z-index: 9999;
 }
 
-.am-modal-content {
+.account-modal-content {
   background: #ffffff;
   width: 100%;
   max-width: 500px;
   border-radius: 16px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   overflow: hidden;
-  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: accountSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.am-modal-header {
+.account-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -551,13 +559,14 @@
   border-bottom: 1px solid #f1f5f9;
 }
 
-.am-modal-header h2 {
+.account-modal-header h2 {
   font-size: 18px;
   font-weight: 700;
   color: #0f172a;
+  margin: 0;
 }
 
-.am-modal-header .close-btn {
+.account-modal-header .account-close-btn {
   background: transparent;
   border: none;
   color: #64748b;
@@ -566,15 +575,15 @@
   align-items: center;
 }
 
-.am-modal-header .close-btn:hover {
+.account-modal-header .account-close-btn:hover {
   color: #0f172a;
 }
 
-.am-modal-body {
+.account-modal-body {
   padding: 24px;
 }
 
-.user-profile-summary {
+.account-user-profile-summary {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -582,7 +591,7 @@
   margin-bottom: 24px;
 }
 
-.large-avatar {
+.account-large-avatar {
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -591,14 +600,15 @@
   margin-bottom: 12px;
 }
 
-.user-profile-summary h3 {
+.account-user-profile-summary h3 {
   font-size: 18px;
   font-weight: 600;
   color: #1e293b;
   margin-bottom: 6px;
+  margin-top: 0;
 }
 
-.info-details-grid {
+.account-info-details-grid {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -608,7 +618,7 @@
   border: 1px solid #e2e8f0;
 }
 
-.detail-item {
+.account-detail-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -617,22 +627,22 @@
   border-bottom: 1px dashed #e2e8f0;
 }
 
-.detail-item:last-child {
+.account-detail-item:last-child {
   border-bottom: none;
   padding-bottom: 0;
 }
 
-.detail-item .label {
+.account-detail-item .account-label {
   color: #64748b;
   font-weight: 500;
 }
 
-.detail-item .value {
+.account-detail-item .account-value {
   color: #1e293b;
   font-weight: 600;
 }
 
-.detail-item .value.code {
+.account-detail-item .account-value.account-code {
   font-family: monospace;
   color: #6366f1;
   background: #e0e7ff;
@@ -641,14 +651,14 @@
   font-size: 12px;
 }
 
-.rating-style {
+.account-rating-style {
   display: flex;
   align-items: center;
   gap: 4px;
   color: #eab308 !important;
 }
 
-.am-modal-footer {
+.account-modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -657,7 +667,7 @@
   border-top: 1px solid #f1f5f9;
 }
 
-.am-modal-footer button {
+.account-modal-footer button {
   padding: 9px 16px;
   font-size: 13.5px;
   font-weight: 500;
@@ -666,48 +676,48 @@
   transition: all 0.15s ease;
 }
 
-.btn-secondary {
+.account-btn-secondary {
   border: 1px solid #cbd5e1;
   background: #ffffff;
   color: #475569;
 }
-.btn-secondary:hover { background: #f1f5f9; }
+.account-btn-secondary:hover { background: #f1f5f9; }
 
-.action-toggle-btn { border: none; color: #ffffff; }
-.btn-danger { background: #ef4444; }
-.btn-danger:hover { background: #dc2626; }
-.btn-success { background: #10b981; }
-.btn-success:hover { background: #059669; }
+.account-action-toggle-btn { border: none; color: #ffffff; }
+.account-btn-danger { background: #ef4444; }
+.account-btn-danger:hover { background: #dc2626; }
+.account-btn-success { background: #10b981; }
+.account-btn-success:hover { background: #059669; }
 
 /* Animate */
-@keyframes slideUp {
+@keyframes accountSlideUp {
   from { transform: translateY(12px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* --- Responsive cho màn hình nhỏ --- */
+/* --- Responsive --- */
 @media (max-width: 1024px) {
-  .am-stats-grid {
+  .account-stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 640px) {
-  .am-stats-grid {
+  .account-stats-grid {
     grid-template-columns: 1fr;
   }
-  .flex-between {
+  .account-flex-between {
     flex-direction: column;
     align-items: flex-start;
   }
-  .search-box-wrapper {
+  .account-search-box-wrapper {
     width: 100%;
   }
-  .am-table-filters {
+  .account-table-filters {
     flex-direction: column;
     align-items: flex-start;
   }
-  .filter-group {
+  .account-filter-group {
     width: 100%;
     flex-direction: column;
   }

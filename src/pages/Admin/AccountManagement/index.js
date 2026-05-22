@@ -56,7 +56,7 @@ const AccountManagement = () => {
         // Phân loại đếm theo vai trò (Role)
         if (u.role === 'LANDLORD') {
           landlordCount++;
-        } else if (u.role === 'STUDENT' || u.role === 'USER' || u.role !== 'ADMIN') { 
+        } else if (u.role === 'USER' || u.role !== 'ADMIN') { 
           // Mặc định các tài khoản không phải Admin/Chủ trọ sẽ tính là Người thuê (Sinh viên)
           tenantCount++;
         }
@@ -139,83 +139,83 @@ const AccountManagement = () => {
   const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
 
   if (loading) {
-    return <div className="loading-canvas">Đang đồng bộ dữ liệu tài khoản hệ thống...</div>;
+    return <div className="account-loading-canvas">Đang đồng bộ dữ liệu tài khoản hệ thống...</div>;
   }
 
   return (
-    <main className="main-wrapper">
-      <div className="content-canvas">
+    <main className="account-main-wrapper">
+      <div className="account-content-canvas">
         
         {/* Page Header */}
-        <div className="flex-between">
+        <div className="account-flex-between">
           <div>
-            <h1 className="page-title">Quản lý Tài khoản</h1>
-            <p className="page-desc">Giám sát số lượng phân quyền thành viên, trạng thái hoạt động và thực thi kỷ luật hệ thống.</p>
+            <h1 className="account-page-title">Quản lý Tài khoản</h1>
+            <p className="account-page-desc">Giám sát số lượng phân quyền thành viên, trạng thái hoạt động và thực thi kỷ luật hệ thống.</p>
           </div>
-          <div className="search-box-wrapper">
-            <span className="material-symbols-outlined search-icon">search</span>
+          <div className="account-search-box-wrapper">
+            <span className="material-symbols-outlined account-search-icon">search</span>
             <input 
               type="text" 
               placeholder="Tìm tên, email, sđt..." 
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
-              className="search-input"
+              className="account-search-input"
             />
           </div>
         </div>
 
-        {/* BENTO STATS GRID (Cập nhật hiển thị chi tiết theo yêu cầu) */}
-        <div className="am-stats-grid">
+        {/* BENTO STATS GRID */}
+        <div className="account-stats-grid">
           {/* 1. Tổng tài khoản */}
-          <div className="am-stat-card">
-            <div className="icon-box blue"><span className="material-symbols-outlined">group</span></div>
+          <div className="account-stat-card">
+            <div className="account-icon-box account-blue"><span className="material-symbols-outlined">group</span></div>
             <div>
-              <p className="title">TỔNG TÀI KHOẢN</p>
+              <p className="account-card-title">TỔNG TÀI KHOẢN</p>
               <h3>{stats.total.toLocaleString()}</h3>
             </div>
-            <p className="trend positive"><span className="material-symbols-outlined">analytics</span> Mọi vai trò hệ thống</p>
+            <p className="account-trend account-positive"><span className="material-symbols-outlined">analytics</span> Mọi vai trò hệ thống</p>
           </div>
           
           {/* 2. Tài khoản Người Thuê */}
-          <div className="am-stat-card">
-            <div className="icon-box teal"><span className="material-symbols-outlined">school</span></div>
+          <div className="account-stat-card">
+            <div className="account-icon-box account-teal"><span className="material-symbols-outlined">school</span></div>
             <div>
-              <p className="title font-bold">TÀI KHOẢN NGƯỜI THUÊ</p>
+              <p className="account-card-title account-font-bold">TÀI KHOẢN NGƯỜI THUÊ</p>
               <h3>{stats.tenants.toLocaleString()}</h3>
             </div>
-            <div className="progress-bar">
+            <div className="account-progress-bar">
               <div 
-                className="fill teal" 
+                className="account-fill account-teal" 
                 style={{ width: `${stats.total > 0 ? (stats.tenants / stats.total) * 100 : 0}%` }}
               ></div>
             </div>
           </div>
           
           {/* 3. Tài khoản Chủ Trọ */}
-          <div className="am-stat-card">
-            <div className="icon-box orange"><span className="material-symbols-outlined">real_estate_agent</span></div>
+          <div className="account-stat-card">
+            <div className="account-icon-box account-orange"><span className="material-symbols-outlined">real_estate_agent</span></div>
             <div>
-              <p className="title font-bold">TÀI KHOẢN CHỦ TRỌ</p>
+              <p className="account-card-title account-font-bold">TÀI KHOẢN CHỦ TRỌ</p>
               <h3>{stats.landlords.toLocaleString()}</h3>
             </div>
-            <div className="progress-bar">
+            <div className="account-progress-bar">
               <div 
-                className="fill orange" 
+                className="account-fill account-orange" 
                 style={{ width: `${stats.total > 0 ? (stats.landlords / stats.total) * 100 : 0}%` }}
               ></div>
             </div>
           </div>
           
           {/* 4. Tài khoản Bị Khóa */}
-          <div className="am-stat-card">
-            <div className="icon-box red"><span className="material-symbols-outlined">lock</span></div>
+          <div className="account-stat-card">
+            <div className="account-icon-box account-red"><span className="material-symbols-outlined">lock</span></div>
             <div>
-              <p className="title font-bold">TÀI KHOẢN BỊ KHÓA</p>
+              <p className="account-card-title account-font-bold">TÀI KHOẢN BỊ KHÓA</p>
               <h3>{stats.locked.toLocaleString()}</h3>
             </div>
-            <div className="progress-bar">
+            <div className="account-progress-bar">
               <div 
-                className="fill red-bar" 
+                className="account-fill account-red-bar" 
                 style={{ width: `${stats.total > 0 ? (stats.locked / stats.total) * 100 : 0}%` }}
               ></div>
             </div>
@@ -223,10 +223,10 @@ const AccountManagement = () => {
         </div>
 
         {/* BẢNG DỮ LIỆU & BỘ LỌC */}
-        <div className="am-table-container">
-          <div className="am-table-filters">
-            <div className="filter-group">
-              <div className="filter-item">
+        <div className="account-table-container">
+          <div className="account-table-filters">
+            <div className="account-filter-group">
+              <div className="account-filter-item">
                 <label>TRẠNG THÁI HOẠT ĐỘNG</label>
                 <select value={activeFilter} onChange={(e) => setActiveFilter(e.target.value)}>
                   <option value="ALL">Tất cả trạng thái</option>
@@ -236,7 +236,7 @@ const AccountManagement = () => {
               </div>
             </div>
             
-            <div className="filter-actions">
+            <div className="account-filter-actions">
               <span>Hiển thị {filteredUsers.length > 0 ? indexOfFirstItem + 1 : 0}-{Math.min(indexOfLastItem, filteredUsers.length)} trên {filteredUsers.length} kết quả</span>
               <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
                 <span className="material-symbols-outlined">chevron_left</span>
@@ -247,14 +247,14 @@ const AccountManagement = () => {
             </div>
           </div>
 
-          <table className="am-table">
+          <table className="account-table">
             <thead>
               <tr>
                 <th>NGƯỜI DÙNG</th>
                 <th>VAI TRÒ</th>
                 <th>TRẠNG THÁI HOẠT ĐỘNG</th>
                 <th>ĐÁNH GIÁ (RATING)</th>
-                <th className="text-right">THAO TÁC QUẢN TRỊ</th>
+                <th className="account-text-right">THAO TÁC QUẢN TRỊ</th>
               </tr>
             </thead>
             <tbody>
@@ -263,53 +263,53 @@ const AccountManagement = () => {
                 const isLandlord = user.role === 'LANDLORD';
                 
                 return (
-                  <tr key={user.id} className={isLocked ? "locked-row" : ""}>
+                  <tr key={user.id} className={isLocked ? "account-locked-row" : ""}>
                     <td>
-                      <div className="am-user-cell">
-                        <div className="avatar-wrapper">
+                      <div className="account-user-cell">
+                        <div className="account-avatar-wrapper">
                           <img 
                             src={user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&h=100&q=80"} 
                             alt={user.username} 
-                            className={isLocked ? "grayscale" : ""} 
+                            className={isLocked ? "account-grayscale" : ""} 
                           />
-                          <span className={`status-dot ${isLocked ? "offline" : "online"}`}></span>
+                          <span className={`account-status-dot ${isLocked ? "account-offline" : "account-online"}`}></span>
                         </div>
-                        <div className="user-info">
-                          <p className="name">
+                        <div className="account-user-info">
+                          <p className="account-name">
                             {user.username || 'Không tên'} 
-                            {isLocked && <span className="locked-badge">Đã khóa</span>}
+                            {isLocked && <span className="account-locked-badge">Đã khóa</span>}
                           </p>
-                          <p className="email">{user.email}</p>
-                          {user.phone && <p className="phone-sub">SĐT: {user.phone}</p>}
+                          <p className="account-email">{user.email}</p>
+                          {user.phone && <p className="account-phone-sub">SĐT: {user.phone}</p>}
                         </div>
                       </div>
                     </td>
                     <td>
-                      <span className={`role-badge ${user.role === 'ADMIN' ? 'red' : isLandlord ? 'orange' : 'teal'}`}>
-                        {user.role === 'ADMIN' ? 'Admin' : isLandlord ? 'Chủ nhà' : 'Sinh viên'}
+                      <span className={`account-role-badge ${user.role === 'ADMIN' ? 'account-red' : isLandlord ? 'account-orange' : 'account-teal'}`}>
+                        {user.role === 'ADMIN' ? 'Admin' : isLandlord ? 'Chủ nhà' : 'Sinh viên/Người dùng'}
                       </span>
                     </td>
                     <td>
-                      <span className={`am-status-tag ${!isLocked ? 'active' : 'locked'}`}>
+                      <span className={`account-status-tag ${!isLocked ? 'account-active' : 'account-locked'}`}>
                         {!isLocked ? 'Đang hoạt động' : 'Đã khóa'}
                       </span>
                     </td>
                     <td>
                       {isLandlord ? (
-                        <div className="rating-cell-flex">
-                          <span className="material-symbols-outlined star-icon">star</span>
+                        <div className="account-rating-cell-flex">
+                          <span className="material-symbols-outlined account-star-icon">star</span>
                           <span>{user.rating ? user.rating.toFixed(1) : '5.0'}</span>
                         </div>
                       ) : (
-                        <span className="not-applicable">—</span>
+                        <span className="account-not-applicable">—</span>
                       )}
                     </td>
-                    <td className="actions-cell">
-                      <button className="icon-btn" title="Xem hồ sơ chi tiết" onClick={() => handleOpenDetails(user)}>
+                    <td className="account-actions-cell">
+                      <button className="account-icon-btn" title="Xem hồ sơ chi tiết" onClick={() => handleOpenDetails(user)}>
                         <span className="material-symbols-outlined">visibility</span>
                       </button>
                       <button 
-                        className={`icon-btn ${isLocked ? 'unlock' : 'block'}`} 
+                        className={`account-icon-btn ${isLocked ? 'account-unlock' : 'account-block'}`} 
                         title={isLocked ? "Mở khóa tài khoản" : "Khóa tài khoản"}
                         onClick={() => handleToggleStatus(user.id, !isLocked)}
                       >
@@ -324,7 +324,7 @@ const AccountManagement = () => {
 
               {filteredUsers.length === 0 && (
                 <tr>
-                  <td colSpan="5" className="empty-table-state">
+                  <td colSpan="5" className="account-empty-table-state">
                     Không tìm thấy tài khoản người dùng nào khớp với tiêu chuẩn bộ lọc.
                   </td>
                 </tr>
@@ -334,8 +334,8 @@ const AccountManagement = () => {
 
           {/* THANH ĐIỀU HƯỚNG PHÂN TRANG */}
           {totalPages > 1 && (
-            <div className="am-pagination">
-              <div className="page-size">
+            <div className="account-pagination">
+              <div className="account-page-size">
                 <span>Số hàng hiển thị:</span>
                 <select 
                   value={itemsPerPage} 
@@ -346,9 +346,9 @@ const AccountManagement = () => {
                   <option value={24}>24 hàng</option>
                 </select>
               </div>
-              <div className="page-numbers">
+              <div className="account-page-numbers">
                 <button 
-                  className="nav-arrow" 
+                  className="account-nav-arrow" 
                   onClick={() => handlePageChange(1)} 
                   disabled={currentPage === 1}
                 >
@@ -360,7 +360,7 @@ const AccountManagement = () => {
                   return (
                     <button 
                       key={p} 
-                      className={currentPage === p ? "active" : ""}
+                      className={currentPage === p ? "account-active" : ""}
                       onClick={() => handlePageChange(p)}
                     >
                       {p}
@@ -369,7 +369,7 @@ const AccountManagement = () => {
                 })}
 
                 <button 
-                  className="nav-arrow" 
+                  className="account-nav-arrow" 
                   onClick={() => handlePageChange(totalPages)} 
                   disabled={currentPage === totalPages}
                 >
@@ -384,69 +384,69 @@ const AccountManagement = () => {
 
       {/* MODAL XEM CHI TIẾT NGƯỜI DÙNG */}
       {showDetailModal && selectedUser && (
-        <div className="am-modal-overlay" onClick={() => setShowDetailModal(false)}>
-          <div className="am-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="am-modal-header">
+        <div className="account-modal-overlay" onClick={() => setShowDetailModal(false)}>
+          <div className="account-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="account-modal-header">
               <h2>Chi Tiết Tài Khoản</h2>
-              <button className="close-btn" onClick={() => setShowDetailModal(false)}>
+              <button className="account-close-btn" onClick={() => setShowDetailModal(false)}>
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
             
-            <div className="am-modal-body">
-              <div className="user-profile-summary">
+            <div className="account-modal-body">
+              <div className="account-user-profile-summary">
                 <img 
                   src={selectedUser.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&h=100&q=80"} 
                   alt={selectedUser.username} 
-                  className="large-avatar"
+                  className="account-large-avatar"
                 />
                 <h3>{selectedUser.username || 'Chưa thiết lập tên'}</h3>
-                <span className={`role-badge ${selectedUser.role === 'ADMIN' ? 'red' : selectedUser.role === 'LANDLORD' ? 'orange' : 'teal'}`}>
+                <span className={`account-role-badge ${selectedUser.role === 'ADMIN' ? 'account-red' : selectedUser.role === 'LANDLORD' ? 'account-orange' : 'account-teal'}`}>
                   {selectedUser.role === 'ADMIN' ? 'Quản trị viên' : selectedUser.role === 'LANDLORD' ? 'Chủ nhà trọ' : 'Sinh viên / Người thuê'}
                 </span>
               </div>
 
-              <div className="info-details-grid">
-                <div className="detail-item">
-                  <span className="label">Mã ID hệ thống:</span>
-                  <span className="value code">{selectedUser.id}</span>
+              <div className="account-info-details-grid">
+                <div className="account-detail-item">
+                  <span className="account-label">Mã ID hệ thống:</span>
+                  <span className="account-value account-code">{selectedUser.id}</span>
                 </div>
-                <div className="detail-item">
-                  <span className="label">Địa chỉ Email:</span>
-                  <span className="value">{selectedUser.email || 'Chưa liên kết'}</span>
+                <div className="account-detail-item">
+                  <span className="account-label">Địa chỉ Email:</span>
+                  <span className="account-value">{selectedUser.email || 'Chưa liên kết'}</span>
                 </div>
-                <div className="detail-item">
-                  <span className="label">Số điện thoại:</span>
-                  <span className="value">{selectedUser.phone || 'Chưa cập nhật'}</span>
+                <div className="account-detail-item">
+                  <span className="account-label">Số điện thoại:</span>
+                  <span className="account-value">{selectedUser.phone || 'Chưa cập nhật'}</span>
                 </div>
                 
                 {selectedUser.role === 'LANDLORD' && (
-                  <div className="detail-item">
-                    <span className="label">Điểm số uy tín:</span>
-                    <span className="value rating-style">
+                  <div className="account-detail-item">
+                    <span className="account-label">Điểm số uy tín:</span>
+                    <span className="account-value account-rating-style">
                       <span className="material-symbols-outlined">star</span>
                       {selectedUser.rating ? selectedUser.rating.toFixed(1) : '5.0'} / 5.0
                     </span>
                   </div>
                 )}
 
-                <div className="detail-item">
-                  <span className="label">Trạng thái hoạt động:</span>
-                  <span className={`value am-status-tag ${selectedUser.isActive ? 'active' : 'locked'}`}>
+                <div className="account-detail-item">
+                  <span className="account-label">Trạng thái hoạt động:</span>
+                  <span className={`account-value account-status-tag ${selectedUser.isActive ? 'account-active' : 'account-locked'}`}>
                     {selectedUser.isActive ? 'Đang hoạt động' : 'Đang bị khóa'}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="am-modal-footer">
+            <div className="account-modal-footer">
               <button 
-                className={`action-toggle-btn ${selectedUser.isActive ? 'btn-danger' : 'btn-success'}`}
+                className={`account-action-toggle-btn ${selectedUser.isActive ? 'account-btn-danger' : 'account-btn-success'}`}
                 onClick={() => handleToggleStatus(selectedUser.id, selectedUser.isActive)}
               >
                 {selectedUser.isActive ? 'Khóa tài khoản này' : 'Kích hoạt tài khoản'}
               </button>
-              <button className="btn-secondary" onClick={() => setShowDetailModal(false)}>Đóng</button>
+              <button className="account-btn-secondary" onClick={() => setShowDetailModal(false)}>Đóng</button>
             </div>
           </div>
         </div>

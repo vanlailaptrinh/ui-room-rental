@@ -372,7 +372,6 @@ const PostManagement = () => {
                                         <span className={`post-card-status-pill post-status-${item.status?.toLowerCase()}`}>
                                             {item.status}
                                         </span>
-                                        <div className="post-card-tier">Tier: {item.postingTier}</div>
                                     </div>
                                     
                                     <div className="post-card-body">
