@@ -13,6 +13,8 @@ import PackageService from '../../services/packageService';
 import OrderService from '../../services/orderService';
 import PaymentService from '../../services/paymentService';
 import PacketCard from '../../components/PacketCard'
+import PostService from '../../services/postService';
+import { FiEdit2, FiArrowUpCircle, FiTrash2, FiMapPin, FiEye } from 'react-icons/fi';
 
 /* ─── Helper: format thời gian ─── */
 const fmtDate = (iso) => {
@@ -69,12 +71,6 @@ function LandlordDashboard() {
     const [bookingLoading, setBLoading] = useState(false);
     const [bookingError, setBError]     = useState(null);
     const [processing, setProcessing]   = useState(null);
-
-    /* ─── Listings (mock) ─── */
-    const [listings] = useState([
-        { id: 101, title: 'Phòng trọ cao cấp Bình Thạnh', views: 1250, status: 'Đang hiển thị' },
-        { id: 102, title: 'Căn hộ Studio Quận 7', views: 840, status: 'Đã cho thuê' },
-    ]);
 
     /* ─── Chat states ─── */
     const [chatContacts, setChatContacts] = useState([]);
@@ -477,6 +473,155 @@ function LandlordDashboard() {
         );
     };
 
+    const [listings, setListings] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    // 2. Gọi API khi component load
+    useEffect(() => {
+        const fetchLandlordPosts = async () => {
+            try {
+                setLoading(true);
+                const response = await PostService.getMyPosts();
+
+                // Dựa vào cấu trúc JSON trong ảnh: dữ liệu nằm trong response.data
+                if (response && response.code === 200) {
+                    setListings(response.data);
+                }
+            } catch (error) {
+                console.error("Không thể tải danh sách bài đăng:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchLandlordPosts();
+    }, []);
+
+    // State quản lý Popup & Dữ liệu đang sửa
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingPost, setEditingPost] = useState(null);
+    const [selectedImage, setSelectedImage] = useState(null); // Quản lý file ảnh mới nếu có
+
+
+    // THEO DÕI THAY ĐỔI CÁC Ô INPUT TEXT
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setEditingPost(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    // Mảng chứa các file ảnh mới chuẩn bị upload (đối tượng File)
+    const [newImages, setNewImages] = useState([]);
+    // Mảng chứa các đường dẫn ảnh hiện tại từ server (để hiển thị và xóa)
+    const [currentImages, setCurrentImages] = useState([]);
+
+    // KÍCH HOẠT MỞ POPUP SỬA
+    const handleEditClick = (post) => {
+        setEditingPost({ ...post });
+        setNewImages([]); // Reset danh sách ảnh mới chọn
+
+        // Gom tất cả các nguồn ảnh có thể có từ API vào một mảng duy nhất
+        let imagesArray = [];
+        if (Array.isArray(post.images)) {
+            imagesArray = post.images.map(img => typeof img === 'string' ? img : img.url);
+        } else if (post.imageUrl) {
+            imagesArray = [post.imageUrl];
+        } else if (post.image) {
+            imagesArray = [post.image];
+        }
+        setCurrentImages(imagesArray.filter(Boolean)); // Lọc bỏ giá trị null/undefined
+
+        setIsEditModalOpen(true);
+    };
+
+    // THEO DÕI KHI CHỌN THÊM CÁC ẢNH MỚI (Cho phép chọn nhiều ảnh)
+    const handleFileChange = (e) => {
+        if (e.target.files) {
+            const filesArray = Array.from(e.target.files);
+            setNewImages(prev => [...prev, ...filesArray]);
+        }
+    };
+
+    // XÓA ẢNH HIỆN TẠI (ẢNH ĐÃ CÓ TRÊN SERVER)
+    const handleRemoveCurrentImg = (indexToRemove) => {
+        setCurrentImages(prev => prev.filter((_, index) => index !== indexToRemove));
+    };
+
+    // XÓA ẢNH MỚI CHỌN (ẢNH TẠM DƯỚI LOCAL)
+    const handleRemoveNewImg = (indexToRemove) => {
+        setNewImages(prev => prev.filter((_, index) => index !== indexToRemove));
+    };
+
+    // GỬI CẬP NHẬT LÊN SERVER
+    const handleUpdateSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const formData = new FormData();
+            formData.append('title', editingPost.title || '');
+            formData.append('address', editingPost.address || '');
+            formData.append('price', editingPost.price || 0);
+            formData.append('area', editingPost.area || '');
+            formData.append('description', editingPost.description || '');
+
+            // Gửi mảng danh sách ảnh cũ còn giữ lại (tùy thuộc API của bạn cần format chuỗi hay mảng JSON)
+            formData.append('remainImages', JSON.stringify(currentImages));
+
+            // Đẩy tất cả các file ảnh mới vào FormData
+            newImages.forEach((file) => {
+                formData.append('images', file); // Tên field 'images' tương thích xử lý chuỗi nhiều file của BE
+            });
+
+            const responseData = await PostService.updatePost(editingPost.id, formData);
+
+            // Đồng bộ lại UI danh sách
+            setListings(prevListings =>
+                prevListings.map(item =>
+                    item.id === editingPost.id
+                        ? {
+                            ...item,
+                            ...editingPost,
+                            // Cập nhật lại ảnh đại diện mới dựa trên dữ liệu mới nhất
+                            images: responseData?.images || currentImages,
+                            imageUrl: responseData?.imageUrl || currentImages[0]
+                        }
+                        : item
+                )
+            );
+
+            alert("Cập nhật bài đăng thành công!");
+            handleCloseModal();
+        } catch (error) {
+            console.error(error);
+            alert("Lỗi khi cập nhật dữ liệu.");
+        }
+    };
+
+    const handleCloseModal = () => {
+        setIsEditModalOpen(false);
+        setEditingPost(null);
+        setNewImages([]);
+        setCurrentImages([]);
+    };
+
+    // GỬI API XÓA (DELETE)
+    const handleDelete = async (id) => {
+        const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa bài đăng này hoàn toàn không?");
+        if (!confirmDelete) return;
+
+        try {
+            // Gọi API Delete từ PostService
+            await PostService.deletePost(id);
+
+            // Lọc bỏ item vừa xóa ra khỏi danh sách hiển thị
+            setListings(prevListings => prevListings.filter(item => item.id !== id));
+            alert("Xóa bài đăng thành công!");
+        } catch (error) {
+            console.error("Lỗi khi xóa bài đăng:", error);
+            alert(error.response?.data?.message || "Không thể xóa bài đăng này.");
+        }
+    };
     /* ─── Tab: Listings  ─── */
     const renderListings = () => (
         <section className="landlord-card landlord-full-width landlord-fade-in">
@@ -485,7 +630,7 @@ function LandlordDashboard() {
                     <h3>Danh sách tin đăng</h3>
                     <span className="landlord-ld-count-badge">{listings.length} tin</span>
                 </div>
-                <button className="landlord-btn-primary-small">+ Đăng tin mới</button>
+                <Link to='/post' className="landlord-btn-primary-small">+ Đăng tin mới</Link>
             </div>
 
             <div className="landlord-table-responsive">
@@ -502,44 +647,87 @@ function LandlordDashboard() {
                     </tr>
                     </thead>
                     <tbody>
-                    {listings.map((item) => (
-                        <tr key={item.id}>
-                            <td>
-                                <div className="landlord-table-img">
-                                    <img src={`https://picsum.photos/80/60?random=${item.id}`} alt="room" />
-                                </div>
-                            </td>
-                            <td>
-                                <div className="landlord-table-info">
-                                    <div className="title">{item.title}</div>
-                                    <div className="address">📍 {item.id === 101 ? 'Bình Thạnh, TP.HCM' : 'Quận 7, TP.HCM'}</div>
-                                </div>
-                            </td>
-                            <td>
-                                <span className="landlord-table-price">{item.id === 101 ? '4.5tr' : '3.8tr'}/tháng</span>
-                            </td>
-                            <td>
-                                <div className="landlord-table-views">
-                                    <span>👁️ {item.views}</span>
-                                </div>
-                            </td>
-                            <td>
-                                <span className="landlord-table-date">12/04/2024</span>
-                            </td>
-                            <td>
-                                <span className={`landlord-status-dot ${item.status === 'Đang hiển thị' ? 'active' : 'inactive'}`}>
-                                    {item.status}
-                                </span>
-                            </td>
-                            <td style={{ textAlign: 'right' }}>
-                                <div className="landlord-table-actions">
-                                    <button className="btn-action edit" title="Chỉnh sửa">✏️</button>
-                                    <button className="btn-action push" title="Đẩy tin">🚀</button>
-                                    <button className="btn-action delete" title="Xóa">🗑️</button>
-                                </div>
+                    {listings.length === 0 ? (
+                        <tr>
+                            <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
+                                Bạn chưa có bài đăng nào.
                             </td>
                         </tr>
-                    ))}
+                    ) : (
+                        listings.map((item) => (
+                            <tr key={item.id}>
+                                <td>
+                                    <div className="landlord-table-img">
+                                        <img
+                                            src={
+                                                item.imageUrl ||
+                                                item.image ||
+                                                (Array.isArray(item.images) && item.images[0]) ||
+                                                "https://placehold.co/80x60?text=No+Image"
+                                            }
+                                            alt={item.title || "room"}
+                                            onError={(e) => {
+                                                // Backup phòng hờ link ảnh từ data bị die/lỗi 404
+                                                e.target.src = "https://placehold.co/80x60?text=No+Image";
+                                            }}
+                                        />
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className="landlord-table-info">
+                                        {/* Map chuẩn theo các field từ API */}
+                                        <div className="title" style={{ fontWeight: 'bold' }}>{item.title || "Chưa có tiêu đề"}</div>
+                                        <div className="address" title={item.address} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#666', fontSize: '13px', marginTop: '4px' }}>
+                                            <FiMapPin size={14} color="#666" />
+                                            {item.address ? (item.address.split(',')[0] + ', ' + item.address.split(',').slice(-2)[0]?.trim()) : 'Chưa cập nhật'}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {/* Format giá tiền động, giả sử API trả về số raw hoặc item.price */}
+                                    <span className="landlord-table-price">
+                                        {item.price ? `${(item.price / 1000000).toFixed(1)}tr` : 'Liên hệ'}/tháng
+                                    </span>
+                                </td>
+                                <td>
+                                    <div className="landlord-table-views" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#666' }}>
+                                        <FiEye size={16} color="#666" />
+                                        <span>{item.views || 0}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    {/* Format ngày tạo từ trường item.createdAt trong ảnh */}
+                                    <span className="landlord-table-date">
+                                        {item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : 'N/A'}
+                                    </span>
+                                </td>
+                                <td>
+                                    {/* Hiển thị trạng thái động từ API */}
+                                    <span className={`landlord-status-dot ${item.status === 'ACTIVE' || item.status === 'Đang hiển thị' ? 'active' : 'inactive'}`}>
+                                        {item.status || 'Chờ duyệt'}
+                                    </span>
+                                </td>
+                                <td style={{ textAlign: 'right' }}>
+                                    <div className="landlord-list-table-actions">
+                                        <button
+                                            className="landlord-list-btn-action edit"
+                                            title="Chỉnh sửa"
+                                            onClick={() => handleEditClick(item)}
+                                        >
+                                            <FiEdit2 size={22} color="#333" />
+                                        </button>
+                                        <button
+                                            className="landlord-list-btn-action delete"
+                                            title="Xóa"
+                                            onClick={() => handleDelete(item.id)}
+                                        >
+                                            <FiTrash2 size={22} color="#333" />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))
+                    )}
                     </tbody>
                 </table>
             </div>
@@ -549,7 +737,6 @@ function LandlordDashboard() {
     const [subTab, setSubTab] = useState('buy');
     const [packages, setPackages] = useState([]);
     const [vouchers, setVouchers] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     // State cho Modal thanh toán
@@ -971,6 +1158,157 @@ function LandlordDashboard() {
                     {activeTab === 'reports'      && renderReports()}
                 </div>
             </main>
+            {/* POPUP MODAL HIỂN THỊ TOÀN BỘ THÔNG TIN ĐỂ CHỈNH SỬA */}
+            {isEditModalOpen && editingPost && (
+                <div className="landlord-modal-overlay" onClick={handleCloseModal}>
+                    <div className="landlord-modal-container layout-large" onClick={(e) => e.stopPropagation()}>
+                        <div className="landlord-modal-header">
+                            <div>
+                                <h3>Chỉnh sửa chi tiết tin đăng</h3>
+                                <p className="modal-subtitle">Cập nhật đầy đủ thông tin và hình ảnh phòng trọ</p>
+                            </div>
+                            <button className="landlord-modal-close" onClick={handleCloseModal}>&times;</button>
+                        </div>
+
+                        <form onSubmit={handleUpdateSubmit} className="landlord-modal-form scrollable-form">
+                            <div className="modal-grid-layout">
+
+                                {/* CỘT TRÁI: THÔNG TIN CHI TIẾT */}
+                                <div className="modal-column-left">
+                                    <div className="form-group">
+                                        <label>Tiêu đề bài đăng</label>
+                                        <input
+                                            type="text"
+                                            name="title"
+                                            value={editingPost.title || ''}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Địa chỉ chi tiết</label>
+                                        <input
+                                            type="text"
+                                            name="address"
+                                            value={editingPost.address || ''}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="form-row-2col">
+                                        <div className="form-group">
+                                            <label>Giá thuê (VND / tháng)</label>
+                                            <input
+                                                type="number"
+                                                name="price"
+                                                value={editingPost.price || ''}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                            <small className="price-preview">
+                                                {editingPost.price ? `➔ ${(editingPost.price / 1000000).toFixed(1)} triệu/tháng` : '➔ Chưa nhập giá'}
+                                            </small>
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Diện tích (m²)</label>
+                                            <input
+                                                type="number"
+                                                name="area"
+                                                value={editingPost.area || ''}
+                                                onChange={handleInputChange}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Mô tả chi tiết phòng trọ</label>
+                                        <textarea
+                                            name="description"
+                                            rows="4"
+                                            value={editingPost.description || ''}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* CỘT PHẢI: QUẢN LÝ NHIỀU HÌNH ẢNH */}
+                                <div className="modal-column-right">
+                                    <div className="form-group images-management-section">
+                                        <label>Danh sách hình ảnh phòng</label>
+
+                                        {/* Khu vực hiển thị lưới các ảnh */}
+                                        <div className="images-preview-grid">
+
+                                            {/* 1. Render các ảnh cũ từ server */}
+                                            {currentImages.map((url, idx) => (
+                                                <div className="img-thumb-container" key={`current-${idx}`}>
+                                                    <img src={url} alt="Room current" />
+                                                    <button
+                                                        type="button"
+                                                        className="btn-remove-thumb"
+                                                        onClick={() => handleRemoveCurrentImg(idx)}
+                                                        title="Xóa ảnh này"
+                                                    >
+                                                        &times;
+                                                    </button>
+                                                </div>
+                                            ))}
+
+                                            {/* 2. Render các ảnh mới chọn dưới máy local */}
+                                            {newImages.map((file, idx) => (
+                                                <div className="img-thumb-container new-upload" key={`new-${idx}`}>
+                                                    <img src={URL.createObjectURL(file)} alt="Room new" />
+                                                    <button
+                                                        type="button"
+                                                        className="btn-remove-thumb"
+                                                        onClick={() => handleRemoveNewImg(idx)}
+                                                        title="Xóa ảnh này"
+                                                    >
+                                                        &times;
+                                                    </button>
+                                                </div>
+                                            ))}
+
+                                            {/* Hiện thông báo nếu bài đăng trống ảnh */}
+                                            {currentImages.length === 0 && newImages.length === 0 && (
+                                                <div className="no-img-placeholder">
+                                                    Chưa có hình ảnh nào.
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Nút bấm thêm ảnh thiết kế mỏng gọn */}
+                                        <label className="custom-file-upload-btn">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                multiple // Cho phép chọn một lúc nhiều tấm ảnh
+                                                onChange={handleFileChange}
+                                                style={{ display: 'none' }}
+                                            />
+                                            ➕ Thêm hình ảnh
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            {/* THANH THAO TÁC Ở ĐÁY */}
+                            <div className="landlord-modal-actions">
+                                <button type="button" className="btn-cancel" onClick={handleCloseModal}>
+                                    Hủy bỏ
+                                </button>
+                                <button type="submit" className="postr-btn-submit">
+                                    Lưu toàn bộ thay đổi
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
