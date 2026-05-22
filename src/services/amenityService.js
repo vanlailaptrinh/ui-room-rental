@@ -1,6 +1,5 @@
 import api from './axios';
 
-// Định nghĩa endpoint gốc cho các dịch vụ liên quan đến tiện ích
 const ENDPOINT = '/amenities';
 
 const AmenityService = {
@@ -21,6 +20,36 @@ const AmenityService = {
             return response.data;
         } catch (error) {
             console.error(`Error fetching amenity with ID ${id}:`, error);
+            throw error;
+        }
+    },
+
+    createAmenity: async (request) => {
+        try {
+            const response = await api.post(ENDPOINT, request);
+            return response.data;
+        } catch (error) {
+            console.error("Error creating amenity:", error);
+            throw error;
+        }
+    },
+
+    updateAmenity: async (id, request) => {
+        try {
+            const response = await api.put(`${ENDPOINT}/${id}`, request);
+            return response.data;
+        } catch (error) {
+            console.error(`Error updating amenity with ID ${id}:`, error);
+            throw error;
+        }
+    },
+
+    deleteAmenity: async (id) => {
+        try {
+            const response = await api.delete(`${ENDPOINT}/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error(`Error deleting amenity with ID ${id}:`, error);
             throw error;
         }
     }

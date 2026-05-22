@@ -1,0 +1,536 @@
+/* --- Khung Layout Tổng Quan Định Danh Theo Tiện Nghi --- */
+.amenity-main-wrapper {
+  padding: 0;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.amenity-content-canvas {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.amenity-loading-canvas {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* --- Tiêu Đề & Nhóm Nút Header --- */
+.amenity-flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 20px 0;
+}
+
+.amenity-page-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.5px;
+}
+
+.amenity-page-desc {
+  font-size: 13.5px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.amenity-header-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.amenity-search-box-wrapper {
+  position: relative;
+  width: 280px;
+}
+
+.amenity-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 18px;
+}
+
+.amenity-search-input {
+  width: 100%;
+  padding: 10px 14px 10px 42px;
+  font-size: 13.5px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background-color: #ffffff;
+  outline: none;
+  color: #334155;
+  transition: all 0.2s ease;
+}
+
+.amenity-search-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+.amenity-btn-primary-add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #6366f1;
+  color: #ffffff;
+  border: none;
+  padding: 10px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  transition: all 0.2s ease;
+}
+
+.amenity-btn-primary-add span {
+  font-size: 18px;
+}
+
+.amenity-btn-primary-add:hover {
+  background-color: #4f46e5;
+  transform: translateY(-1px);
+}
+
+/* --- Bento Grid Thống Kê Sinh Động --- */
+.amenity-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 280px);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.amenity-stat-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.amenity-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+/* Gradients nhẹ cho các khối Bento Sinh động */
+.card-gradient-purple { background: linear-gradient(to bottom right, #ffffff, #faf5ff); border-left: 4px solid #a855f7; }
+.card-gradient-blue { background: linear-gradient(to bottom right, #ffffff, #f0f9ff); border-left: 4px solid #3b82f6; }
+
+.amenity-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.amenity-icon-box span { font-size: 22px; }
+
+.bg-purple-light { background: #f3e8ff; color: #a855f7; }
+.bg-blue-light { background: #e0f2fe; color: #3b82f6; }
+
+.amenity-card-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.8px;
+}
+
+.amenity-card-number {
+  font-size: 30px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 4px 0;
+}
+
+.amenity-card-trend {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+.amenity-card-trend span { font-size: 16px; }
+.text-purple { color: #a855f7; }
+.text-blue { color: #3b82f6; }
+
+/* --- Table Container & Bộ Lọc --- */
+.amenity-table-container {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+  margin-bottom: 32px;
+  overflow: hidden;
+}
+
+.amenity-table-filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.amenity-filter-info-text {
+  font-size: 13.5px;
+  color: #475569;
+}
+
+.amenity-filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.amenity-filter-actions button {
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: #475569;
+  transition: all 0.15s ease;
+}
+
+.amenity-filter-actions button:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.amenity-filter-actions button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* --- Thiết kế dữ liệu Table độc lập --- */
+.amenity-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13.5px;
+  table-layout: fixed; /* Cố định chiều rộng cột chống vỡ layout */
+}
+
+.amenity-table th {
+  padding: 14px 20px;
+  background: #f8fafc;
+  font-weight: 600;
+  color: #475569;
+  font-size: 11.5px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.amenity-table td {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Tạo dấu ... nếu text quá dài */
+}
+
+.amenity-table tbody tr:hover {
+  background-color: #fdfdfd;
+}
+
+/* Định dạng các ô dữ liệu */
+.amenity-id-code {
+  font-family: monospace;
+  font-size: 12.5px;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.amenity-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.amenity-avatar-icon-wrapper {
+  width: 34px;
+  height: 34px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #dcfce7;
+}
+
+.amenity-cell-icon {
+  color: #16a34a;
+  font-size: 18px;
+}
+
+.amenity-text-name {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 14px;
+}
+
+.amenity-date {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.text-right { text-align: right; }
+
+/* Các nút Thao tác hành động */
+.amenity-actions-cell .amenity-icon-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  color: #475569;
+  cursor: pointer;
+  margin-left: 6px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  transition: all 0.15s ease;
+}
+
+.amenity-actions-cell .amenity-icon-btn span { font-size: 18px; }
+
+.amenity-actions-cell .amenity-edit-btn:hover {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #bbf7d0;
+}
+
+.amenity-actions-cell .amenity-delete-btn:hover {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+/* Empty State */
+.amenity-empty-table-state {
+  text-align: center !important;
+  padding: 48px !important;
+  color: #94a3b8;
+}
+.amenity-empty-table-state .empty-icon {
+  font-size: 36px;
+  color: #cbd5e1;
+  margin-bottom: 8px;
+}
+
+/* --- Phân trang bên dưới --- */
+.amenity-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-top: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.amenity-page-size { font-size: 13px; color: #64748b; }
+.amenity-page-numbers { display: flex; gap: 6px; }
+
+.amenity-page-numbers button {
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 6px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #475569;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.15s ease;
+}
+
+.amenity-page-numbers button:hover:not(.amenity-active):not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.amenity-page-numbers button.amenity-active {
+  background: #6366f1;
+  color: #ffffff;
+  border-color: #6366f1;
+  font-weight: 600;
+}
+
+.amenity-page-numbers button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* --- DIALOG MODAL THÊM / SỬA HỒ SƠ --- */
+.amenity-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.amenity-modal-content {
+  background: #ffffff;
+  width: 100%;
+  max-width: 460px;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  animation: amenityModalSlideUp 0.2s ease-out;
+}
+
+@keyframes amenityModalSlideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.amenity-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.amenity-modal-header h2 { font-size: 17px; font-weight: 700; color: #0f172a; }
+
+.amenity-close-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.amenity-close-btn:hover { color: #0f172a; }
+
+.amenity-modal-body { padding: 24px; }
+.amenity-form-group-block { display: flex; flex-direction: column; gap: 8px; }
+.amenity-form-label { font-size: 13px; font-weight: 600; color: #334155; }
+.amenity-required-star { color: #ef4444; }
+
+.amenity-input-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.amenity-input-inner-icon {
+  position: absolute;
+  left: 12px;
+  color: #a855f7;
+  font-size: 18px;
+}
+
+.amenity-form-input-text {
+  width: 100%;
+  padding: 11px 12px 11px 38px;
+  font-size: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  color: #334155;
+  transition: border-color 0.2s;
+}
+
+.amenity-form-input-text:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.amenity-form-input-tip {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.5;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-top: 4px;
+}
+
+.amenity-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 14px 24px;
+  background: #f8fafc;
+  border-top: 1px solid #f1f5f9;
+}
+
+.amenity-modal-footer button {
+  padding: 9px 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.amenity-btn-secondary {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+}
+.amenity-btn-secondary:hover { background: #f1f5f9; }
+
+.amenity-btn-submit-save {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #6366f1;
+  color: #ffffff;
+  border: none;
+}
+.amenity-btn-submit-save span { font-size: 18px; }
+.amenity-btn-submit-save:hover { background: #4f46e5; }
+
+/* --- Responsive Layout --- */
+@media (max-width: 768px) {
+  .amenity-flex-between { flex-direction: column; align-items: flex-start; }
+  .amenity-header-actions-group { width: 100%; flex-direction: column; }
+  .amenity-search-box-wrapper { width: 100%; }
+  .amenity-btn-primary-add { width: 100%; justify-content: center; }
+  .amenity-stats-grid { grid-template-columns: 1fr; width: 100%; }
+}

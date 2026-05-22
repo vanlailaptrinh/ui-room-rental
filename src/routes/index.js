@@ -23,15 +23,16 @@ import MyBookings from '../pages/MyBookings';
 
 import PostRoom from '../pages/PostRoom';
 import LandlordDashboard from '../pages/LandlordDashboard';
+import PaymentCallback from '../pages/PaymentCallback';
 
 import AdminDashboard from '../pages/Admin/AdminDashboard';
-import FinanceManagement from '../pages/Admin/FinanceManagement';
 import AccountManagement from '../pages/Admin/AccountManagement';
-import Blacklist from '../pages/Blacklist';
+import AmenityManagement from '../pages/Admin/AmenityManagement';
+import FinanceManagement from '../pages/Admin/FinanceManagement';
+import PackageManagement from '../pages/Admin/PackageManagement';
 import PostManagement from '../pages/Admin/PostManagement';
 import VoucherManagement from '../pages/Admin/VoucherManagement';
-import PackageManagement from '../pages/Admin/PackageManagement';
-import PaymentCallback from '../pages/PaymentCallback';
+import Blacklist from '../pages/Blacklist';
 
 export const publicRoutes = [
     {
@@ -140,6 +141,11 @@ export const adminRoutes = [
         layout: AdminLayout
     },
     {
+        path: config.routes.adminAmenities,
+        component: AmenityManagement,
+        layout: AdminLayout
+    },
+    {
         path: config.routes.adminBlacklist,
         component: Blacklist,
         layout: AdminLayout
@@ -147,6 +153,11 @@ export const adminRoutes = [
     {
         path: config.routes.adminFinance,
         component: FinanceManagement,
+        layout: AdminLayout
+    },
+    {
+        path: config.routes.adminPackages,
+        component: PackageManagement,
         layout: AdminLayout
     },
     {
@@ -159,9 +170,4 @@ export const adminRoutes = [
         component: VoucherManagement,
         layout: AdminLayout
     },
-    {
-        path: config.routes.adminPackages,
-        component: PackageManagement,
-        layout: AdminLayout
-    }
 ];
