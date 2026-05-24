@@ -57,9 +57,11 @@ function Chat() {
         try {
             setLoading(true);
             setError('');
-            const all = await UserService.getAllUsers();
-            const filtered = all.filter(
-                (u) => u.role === targetRole && u.id !== user?.id
+            const res = await UserService.getAllUsers();
+            // getAllUsers trả về ApiResponse: { code, message, data: [...] }
+            const all = res?.data || res || [];
+            const filtered = (Array.isArray(all) ? all : []).filter(
+                (u) => u.role === targetRole && String(u.id) !== String(user?.id)
             );
             setContacts(filtered);
         } catch (err) {
@@ -72,9 +74,13 @@ function Chat() {
     async function startChat(targetUser) {
         try {
             setConnecting(targetUser.id);
-            const room = await ChatService.getOrCreateChatRoom(targetUser.id);
-            navigate(`/chat/${room.roomId}`, {
-                state: { roomId: room.roomId, targetUser },
+            const res = await ChatService.getOrCreateChatRoom(targetUser.id);
+            // getOrCreateChatRoom trả về ApiResponse: { code, data: { roomId, ... } }
+            const roomData = res?.data || res;
+            const roomId = roomData?.roomId;
+            if (!roomId) throw new Error('Không nhận được roomId từ server');
+            navigate(`/chat/${roomId}`, {
+                state: { roomId, targetUser },
             });
         } catch (err) {
             alert('Không thể tạo phòng chat: ' + (err?.response?.data?.message || err.message));

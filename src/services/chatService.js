@@ -27,6 +27,23 @@ const ChatService = {
             console.error('Error calling AI Chat Service:', error);
             throw error;
         }
+    },
+
+    // ========================================================
+    // [POST] /chat/notify-message - Gửi thông báo tin nhắn mới
+    // Gửi notification cho người nhận khi có tin nhắn mới
+    // ========================================================
+    sendMessageNotification: async (recipientId, messagePreview) => {
+        try {
+            const response = await api.post(`${ENDPOINT}/notify-message`, {
+                recipientId,
+                messagePreview,
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error sending message notification:', error);
+            throw error;
+        }
     }
 };
 

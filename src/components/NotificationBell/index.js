@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotification, NOTI_CONFIG } from '../../context/notificationContext';
+import { useAuth } from '../../context/authContext';
 import './NotificationBell.css';
 
 // ─── Helper format thời gian tương đối ──────────────────────────────────────
@@ -18,6 +19,7 @@ function timeAgo(isoStr) {
 
 function NotificationBell() {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const { notifications, unreadCount, markRead, markAllRead } = useNotification();
     const [isOpen, setIsOpen] = useState(false);
     const panelRef = useRef(null);
@@ -33,10 +35,38 @@ function NotificationBell() {
         return () => document.removeEventListener('mousedown', handler);
     }, []);
 
+    // ── Build roomId giống backend: sort 2 userId rồi nối bằng '_' ──
+    const buildRoomId = (id1, id2) => {
+        const ids = [String(id1), String(id2)].sort();
+        return ids[0] + '_' + ids[1];
+    };
+
+    // ── Navigate đúng chỗ khi click notification ──
+    const getNavTarget = (noti) => {
+        if (noti.type === 'NEW_MESSAGE' && noti.senderId) {
+            const isLandlord = user?.role === 'LANDLORD';
+            if (isLandlord) {
+                // Landlord dùng embedded chat trong dashboard → navigate vào /landlord + mở tab messages
+                return { path: '/landlord', state: { openTab: 'messages', contactId: noti.senderId } };
+            } else {
+                // User navigate đến trang /chat/{roomId}
+                const roomId = buildRoomId(user?.id, noti.senderId);
+                return { path: `/chat/${roomId}`, state: { roomId, targetUserId: noti.senderId } };
+            }
+        }
+        // BOOKING_* → my-bookings
+        if (noti.refId || noti.type?.startsWith('BOOKING')) {
+            const isLandlord = user?.role === 'LANDLORD';
+            return { path: isLandlord ? '/landlord' : '/my-bookings', state: isLandlord ? { openTab: 'appointments' } : undefined };
+        }
+        return null;
+    };
+
     const handleClickNoti = async (noti) => {
         if (!noti.isRead) await markRead(noti.id);
         setIsOpen(false);
-        if (noti.refId) navigate('/my-bookings');
+        const target = getNavTarget(noti);
+        if (target) navigate(target.path, { state: target.state });
     };
 
     return (
@@ -108,9 +138,12 @@ function NotificationBell() {
                         <div className="noti-panel-footer">
                             <button
                                 className="noti-view-all"
-                                onClick={() => { setIsOpen(false); navigate('/my-bookings'); }}
+                                onClick={() => {
+                                    setIsOpen(false);
+                                    navigate(user?.role === 'LANDLORD' ? '/landlord' : '/my-bookings');
+                                }}
                             >
-                                Xem tất cả lịch hẹn →
+                                {user?.role === 'LANDLORD' ? 'Xem lịch hẹn →' : 'Xem tất cả lịch hẹn →'}
                             </button>
                         </div>
                     )}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './Detail.css';
 import {
@@ -113,9 +113,13 @@ function Detail() {
         if (chatLoading) return;
         try {
             setChatLoading(true);
-            const room = await ChatService.getOrCreateChatRoom(landlord.id);
-            navigate(`/chat/${room.roomId}`, {
-                state: { roomId: room.roomId, targetUser: landlord },
+            const res = await ChatService.getOrCreateChatRoom(landlord.id);
+            // getOrCreateChatRoom trả về ApiResponse qua axios: response.data = { code, data: { roomId, ... } }
+            const roomData = res?.data || res;
+            const roomId = roomData?.roomId;
+            if (!roomId) throw new Error('Không nhận được roomId từ server');
+            navigate(`/chat/${roomId}`, {
+                state: { roomId, targetUser: landlord },
             });
         } catch (err) {
             console.error('Chat error:', err);

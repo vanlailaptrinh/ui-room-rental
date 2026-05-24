@@ -319,6 +319,23 @@
 
 .toast-close:hover { color: #374151; }
 
+.toast-item-clickable {
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.toast-item-clickable:hover {
+    transform: translateX(-4px);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.2);
+}
+
+.toast-click-hint {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 4px;
+    font-style: italic;
+}
+
 /* Responsive */
 @media (max-width: 480px) {
     .noti-panel {

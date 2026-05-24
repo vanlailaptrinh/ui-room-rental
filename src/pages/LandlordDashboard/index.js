@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './Landlord.css';
 import BookingService from '../../services/bookingService';
 import NotificationBell from '../../components/NotificationBell';
 import { db } from '../../services/firebase';
-import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, getDocs, limit } from 'firebase/firestore';
 import { useAuth } from '../../context/authContext';
 import ChatService from '../../services/chatService';
 import UserService from '../../services/userService';
@@ -14,7 +14,7 @@ import OrderService from '../../services/orderService';
 import PaymentService from '../../services/paymentService';
 import PacketCard from '../../components/PacketCard'
 import PostService from '../../services/postService';
-import { FiEdit2, FiArrowUpCircle, FiTrash2, FiMapPin, FiEye } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiMapPin, FiEye } from 'react-icons/fi';
 
 /* ─── Helper: format thời gian ─── */
 const fmtDate = (iso) => {
@@ -64,6 +64,7 @@ function ChatAvatar({ username, avatar, size = 40 }) {
 
 function LandlordDashboard() {
     const { user } = useAuth();
+    const location = useLocation();
     const [activeTab, setActiveTab] = useState('dashboard');
 
     /* ─── Booking states ─── */
@@ -104,6 +105,45 @@ function LandlordDashboard() {
     useEffect(() => {
         if (activeTab === 'appointments') fetchBookings();
     }, [activeTab, fetchBookings]);
+
+    /* ─── Xử lý navigate từ notification click ─── */
+    useEffect(() => {
+        const state = location.state;
+        if (!state?.openTab) return;
+
+        // Mở đúng tab
+        setActiveTab(state.openTab);
+
+        // Nếu là tab messages và có contactId → tự động mở chat với contact đó
+        if (state.openTab === 'messages' && state.contactId) {
+            // chatContacts có thể chưa load → đợi load xong rồi mở
+            const tryOpenContact = (contacts) => {
+                const found = contacts.find(c => String(c.id) === String(state.contactId));
+                if (found) openChat(found);
+            };
+
+            if (chatContacts.length > 0) {
+                tryOpenContact(chatContacts);
+            } else {
+                // contacts chưa load: load trước rồi mở
+                (async () => {
+                    try {
+                        const res = await UserService.getAllUsers();
+                        const all = res?.data || res || [];
+                        const tenants = (Array.isArray(all) ? all : []).filter(
+                            u => u.role === 'USER' && String(u.id) !== String(user?.id)
+                        );
+                        tryOpenContact(tenants);
+                    } catch (e) {
+                        console.warn('Auto-open chat contact failed:', e);
+                    }
+                })();
+            }
+        }
+        // Xóa state để không re-trigger khi re-render
+        window.history.replaceState({}, '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [location.state]);
 
     /* ─── Approve ─── */
     const handleApprove = async (id) => {
@@ -167,11 +207,51 @@ function LandlordDashboard() {
         try {
             setChatLoading(true);
             setChatError('');
-            const all = await UserService.getAllUsers();
+            const res = await UserService.getAllUsers();
+            // getAllUsers trả về ApiResponse: { code, message, data: [...] }
+            const all = res?.data || res || [];
             // LANDLORD chỉ thấy USER (người thuê)
-            const tenants = all.filter(u => u.role === 'USER' && String(u.id) !== String(user?.id));
-            setChatContacts(tenants);
+            const tenants = (Array.isArray(all) ? all : []).filter(u => u.role === 'USER' && String(u.id) !== String(user?.id));
+
+            // Lấy tin nhắn cuối cùng cho mỗi contact từ Firestore
+            const contactsWithLastMsg = await Promise.all(
+                tenants.map(async (contact) => {
+                    try {
+                        // Build roomId giống backend: min_max
+                        const ids = [String(user?.id), String(contact.id)].sort();
+                        const roomId = ids[0] + '_' + ids[1];
+                        const messagesRef = collection(db, 'chat_rooms', roomId, 'messages');
+                        const q = query(messagesRef, orderBy('timestamp', 'desc'), limit(1));
+                        const snap = await getDocs(q);
+                        if (!snap.empty) {
+                            const lastMsg = snap.docs[0].data();
+                            return {
+                                ...contact,
+                                lastMessage: lastMsg.content,
+                                lastMessageTime: lastMsg.timestamp,
+                                hasUnread: String(lastMsg.senderId) !== String(user?.id),
+                            };
+                        }
+                    } catch (e) {
+                        // Ignore — phòng chat chưa tồn tại
+                    }
+                    return { ...contact, lastMessage: null, lastMessageTime: null, hasUnread: false };
+                })
+            );
+
+            // Sắp xếp: người có tin nhắn gần nhất lên đầu
+            contactsWithLastMsg.sort((a, b) => {
+                if (!a.lastMessageTime && !b.lastMessageTime) return 0;
+                if (!a.lastMessageTime) return 1;
+                if (!b.lastMessageTime) return -1;
+                const tA = a.lastMessageTime?.toDate ? a.lastMessageTime.toDate() : new Date(a.lastMessageTime);
+                const tB = b.lastMessageTime?.toDate ? b.lastMessageTime.toDate() : new Date(b.lastMessageTime);
+                return tB - tA;
+            });
+
+            setChatContacts(contactsWithLastMsg);
         } catch (err) {
+            console.error('loadChatContacts error:', err);
             setChatError(err?.response?.data?.message || err.message || 'Không thể tải danh sách');
         } finally {
             setChatLoading(false);
@@ -186,12 +266,19 @@ function LandlordDashboard() {
     const openChat = async (contact) => {
         try {
             setConnecting(contact.id);
-            const room = await ChatService.getOrCreateChatRoom(contact.id);
+            const res = await ChatService.getOrCreateChatRoom(contact.id);
+            // getOrCreateChatRoom trả về ApiResponse: { code, data: { roomId, participantIds, ... } }
+            const roomData = res?.data || res;
+            const roomId = roomData?.roomId;
+            if (!roomId) {
+                throw new Error('Không nhận được roomId từ server');
+            }
             setActiveContact(contact);
-            setChatRoomId(room.roomId);
+            setChatRoomId(roomId);
             setMessages([]);
             setMsgLoading(true);
         } catch (err) {
+            console.error('openChat error:', err);
             alert('Không thể mở phòng chat: ' + (err?.response?.data?.message || err.message));
         } finally {
             setConnecting(null);
@@ -232,6 +319,16 @@ function LandlordDashboard() {
                 content:    trimmed,
                 timestamp:  serverTimestamp(),
             });
+
+            // Gửi thông báo tin nhắn mới cho người nhận qua backend
+            if (activeContact?.id) {
+                try {
+                    await ChatService.sendMessageNotification(activeContact.id, trimmed);
+                } catch (notiErr) {
+                    // Không block UX nếu notification fail
+                    console.warn('Gửi thông báo tin nhắn thất bại:', notiErr);
+                }
+            }
         } catch (err) {
             console.error('Send failed:', err);
             setText(trimmed);
@@ -274,8 +371,16 @@ function LandlordDashboard() {
                                         <span className="landlord-chat-online-dot" />
                                     </div>
                                     <div style={{ flex: 1, minWidth: 0 }}>
-                                        <div style={{ fontWeight: 700, fontSize: 14, color: '#2d3748', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{contact.username}</div>
-                                        <div style={{ fontSize: 12, color: '#a0aec0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{contact.email}</div>
+                                        <div style={{ fontWeight: 700, fontSize: 14, color: '#2d3748', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            {contact.username}
+                                            {contact.hasUnread && <span className="landlord-chat-unread-dot" />}
+                                        </div>
+                                        <div style={{ fontSize: 12, color: contact.lastMessage ? '#718096' : '#a0aec0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            {contact.lastMessage
+                                                ? (contact.lastMessage.length > 30 ? contact.lastMessage.slice(0, 30) + '...' : contact.lastMessage)
+                                                : contact.email
+                                            }
+                                        </div>
                                     </div>
                                     {connecting === contact.id
                                         ? <div className="landlord-ld-spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
@@ -500,6 +605,7 @@ function LandlordDashboard() {
     // State quản lý Popup & Dữ liệu đang sửa
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingPost, setEditingPost] = useState(null);
+    // eslint-disable-next-line no-unused-vars
     const [selectedImage, setSelectedImage] = useState(null); // Quản lý file ảnh mới nếu có
 
 

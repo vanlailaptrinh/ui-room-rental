@@ -8,6 +8,7 @@ export const NOTI_CONFIG = {
     BOOKING_APPROVED:  { icon: '✅', color: '#16a34a', bg: '#f0fdf4', label: 'Lịch hẹn được duyệt' },
     BOOKING_REJECTED:  { icon: '❌', color: '#dc2626', bg: '#fef2f2', label: 'Lịch hẹn bị từ chối' },
     BOOKING_CANCELLED: { icon: '🚫', color: '#d97706', bg: '#fffbeb', label: 'Lịch hẹn đã hủy' },
+    NEW_MESSAGE:       { icon: '💬', color: '#8b5cf6', bg: '#f5f3ff', label: 'Tin nhắn mới' },
 };
 
 const POLL_INTERVAL_MS = 30000; // 30s polling fallback khi SSE lỗi

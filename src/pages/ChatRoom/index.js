@@ -4,6 +4,7 @@ import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from 
 import { db } from '../../services/firebase';
 import { useAuth } from '../../context/authContext';
 import UserService from '../../services/userService';
+import ChatService from '../../services/chatService';
 import './ChatRoom.css';
 
 // ── Helpers ──────────────────────────────────────────────
@@ -70,17 +71,24 @@ function ChatRoom() {
     const messagesEndRef = useRef(null);
     const textareaRef = useRef(null);
 
-    // Load targetUser nếu chưa có (trường hợp user truy cập trực tiếp URL)
+    // Load targetUser nếu chưa có
+    // Ưu tiên: state.targetUser → state.targetUserId → parse roomId
     useEffect(() => {
-        if (!targetUser && roomId && user) {
-            const parts = roomId.split('_');
-            const otherId = parts.find((p) => String(p) !== String(user.id));
-            if (otherId) {
-                UserService
-                    .getUserById(otherId)
-                    .then((res) => setTargetUser(res.data || res))
-                    .catch(() => {});
-            }
+        if (targetUser) return; // đã có
+        if (!roomId || !user) return;
+
+        // Lấy ID người kia: từ state.targetUserId hoặc parse roomId
+        const otherId = location.state?.targetUserId
+            || roomId.split('_').find((p) => String(p) !== String(user.id));
+
+        if (otherId) {
+            UserService
+                .getUserById(otherId)
+                .then((res) => {
+                    // getUserById trả về ApiResponse: { code, data: { ...user } }
+                    setTargetUser(res?.data || res);
+                })
+                .catch(() => {});
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [roomId, user]);
@@ -132,6 +140,16 @@ function ChatRoom() {
                 content: trimmed,
                 timestamp: serverTimestamp(),
             });
+
+            // Gửi thông báo tin nhắn mới cho người nhận qua backend SSE
+            if (targetUser?.id) {
+                try {
+                    await ChatService.sendMessageNotification(targetUser.id, trimmed);
+                } catch (notiErr) {
+                    // Không block UX nếu notification fail
+                    console.warn('Gửi thông báo tin nhắn thất bại:', notiErr);
+                }
+            }
         } catch (err) {
             console.error('Send failed:', err);
             setText(trimmed); // restore
