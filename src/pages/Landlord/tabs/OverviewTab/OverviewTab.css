@@ -1,0 +1,62 @@
+/* --- Dashboard Stats Grid --- */
+.landlord-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.landlord-stat-card {
+    background: #fff;
+    padding: 24px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    transition: transform 0.3s;
+}
+
+.landlord-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.landlord-stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.landlord-stat-info {
+    flex: 1;
+}
+
+.landlord-stat-label {
+    display: block;
+    color: #8c8c8c;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.landlord-stat-value {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #262626;
+}
+
+/* --- Dashboard Grid (Cho tab thanh toán/báo cáo) --- */
+.landlord-dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+}
+
+.landlord-chart-card {
+    min-height: 300px;
+}

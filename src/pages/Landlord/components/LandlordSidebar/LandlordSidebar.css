@@ -1,0 +1,52 @@
+/* --- Sidebar --- */
+.landlord-sidebar {
+    width: 260px;
+    background: #001529; /* Màu tối sang trọng */
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+}
+
+.landlord-logo {
+    height: 64px;
+    line-height: 64px;
+    padding: 0 24px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1890ff;
+    background: #002140;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+}
+
+.landlord-nav-menu {
+    flex: 1;
+    padding: 16px 0;
+}
+
+.landlord-nav-item {
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.65);
+    transition: all 0.3s;
+    font-size: 14px;
+}
+
+.landlord-nav-item:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.landlord-active {
+    background-color: #1890ff !important;
+    color: #ffffff !important;
+}
