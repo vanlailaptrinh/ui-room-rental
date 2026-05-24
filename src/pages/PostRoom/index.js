@@ -2,10 +2,8 @@ import React, { useState, useEffect } from 'react';
 import PostService from '../../services/postService';
 import AmenityService from '../../services/amenityService';
 import roomService from '../../services/roomService';
-import inventoryService from '../../services/inventoryService';
+import InventoryService from '../../services/inventoryService';
 import packageService from '../../services/packageService';
-
-// Tích hợp các thành phần của bản đồ Leaflet
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -185,7 +183,7 @@ function PostRoom() {
                 const packageRes = await packageService.getPackages();
                 const allPackages = packageRes.data || packageRes.result || packageRes || [];
 
-                const inventoryRes = await inventoryService.getMyInventories();
+                const inventoryRes = await InventoryService.getMyInventories();
                 const inventoryList = inventoryRes.data || inventoryRes.result || inventoryRes || [];
 
                 const safeInventory = Array.isArray(inventoryList) ? inventoryList : [];

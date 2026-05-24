@@ -1,6 +1,6 @@
 import api from './axios';
 
-const inventoryService = {
+const InventoryService = {
     getMyInventories: async () => {
         try {
             // Gọi đến API lấy kho gói cước của cá nhân Landlord
@@ -13,4 +13,4 @@ const inventoryService = {
     }
 };
 
-export default inventoryService;
+export default InventoryService;

@@ -15,6 +15,7 @@ import PaymentService from '../../services/paymentService';
 import PacketCard from '../../components/PacketCard'
 import PostService from '../../services/postService';
 import { FiEdit2, FiTrash2, FiMapPin, FiEye } from 'react-icons/fi';
+import InventoryService from '../../services/inventoryService'
 
 /* ─── Helper: format thời gian ─── */
 const fmtDate = (iso) => {
@@ -964,9 +965,27 @@ function LandlordDashboard() {
     // Thêm state để lưu thông tin gói hiện tại
     const [currentPackage, setCurrentPackage] = useState(null);
     const [loadingCurrentPkg, setLoadingCurrentPkg] = useState(false);
+    const [myInventories, setMyInventories] = useState([]);
+    useEffect(() => {
+        const fetchInventories = async () => {
+            try {
+                const res = await InventoryService.getMyInventories();
+                // Vì backend trả về ApiResponse<List<InventoryResponse>> có cấu trúc: { code, message, data }
+                if (res && res.code === 200) {
+                    setMyInventories(res.data);
+                }
+            } catch (error) {
+                console.error("Lỗi khi tải thông tin tồn kho:", error);
+            }
+        };
 
+        // Chỉ gọi API lấy kho khi đang ở tab 'current' (Gói của tôi)
+        if (subTab === 'current') {
+            fetchInventories();
+        }
+    }, [subTab]); // Hook sẽ chạy lại mỗi khi subTab thay đổi
 
-    // 4. RENDER GIAO DIỆN CHÍNH
+    // Goi tin
     const renderPayments = () => {
         if (loading) return <div className="nexus-pricing-loading">Đang tải dữ liệu...</div>;
         if (error) return <div className="nexus-pricing-error">{error}</div>;
@@ -1091,8 +1110,18 @@ function LandlordDashboard() {
                                             <strong>{currentPackage.activeDays} ngày</strong>
                                         </div>
                                         <div className="stat-card-item">
-                                            <span>📊 Hạn mức đăng tin</span>
-                                            <strong>{currentPackage.limitQuota} bài viết</strong>
+                                            <span>📊 Số lượt còn lại (Tồn kho)</span>
+                                            <strong>
+                                                {(() => {
+                                                    // Tìm inventory khớp với Type và Tier của currentPackage
+                                                    const matchedInventory = myInventories?.find(
+                                                        inv => inv.type === currentPackage.type?.value && inv.tier === currentPackage.tier?.value
+                                                    );
+                                                    return matchedInventory && matchedInventory.balance !== null
+                                                        ? `${matchedInventory.balance} lượt`
+                                                        : '0 lượt';
+                                                })()}
+                                            </strong>
                                         </div>
                                         <div className="stat-card-item">
                                             <span>🏷️ Loại dịch vụ</span>
