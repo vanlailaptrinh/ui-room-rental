@@ -22,7 +22,7 @@ import ChatRoom from '../pages/ChatRoom';
 import MyBookings from '../pages/MyBookings';
 
 import PostRoom from '../pages/PostRoom';
-import LandlordDashboard from '../pages/LandlordDashboard';
+import Landlord from '../pages/Landlord';
 import PaymentCallback from '../pages/PaymentCallback';
 
 import AdminDashboard from '../pages/Admin/AdminDashboard';
@@ -120,8 +120,8 @@ export const landlordRoutes = [
         layout: MainLayout
     },
     {
-        path: config.routes.landlordDashboard,
-        component: LandlordDashboard
+        path: config.routes.landlord,
+        component: Landlord
     },
     {
         path: config.routes.paymentCallback,

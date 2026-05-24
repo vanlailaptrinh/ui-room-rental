@@ -1,0 +1,30 @@
+/* --- reset & base --- */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f0f2f5; /* Nền xám nhạt đặc trưng admin */
+    color: #262626;
+}
+
+/* --- Layout Container --- */
+.landlord-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* --- Main Content Area --- */
+.landlord-main {
+    flex: 1;
+    margin-left: 260px; /* Bằng độ rộng sidebar */
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Content Area --- */
+.landlord-content-area {
+    padding: 24px;
+}

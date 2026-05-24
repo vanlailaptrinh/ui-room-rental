@@ -1,0 +1,51 @@
+/* --- Header (Admin Style) --- */
+.landlord-main-header {
+    height: 64px;
+    background: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+    box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.landlord-main-header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #000000d9;
+    margin: 0;
+}
+
+.landlord-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.landlord-user-info:hover {
+    background: #f5f5f5;
+}
+
+.landlord-badge-verified {
+    background: #f6ffed;
+    color: #52c41a;
+    border: 1px solid #b7eb8f;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.landlord-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #d9d9d9;
+}

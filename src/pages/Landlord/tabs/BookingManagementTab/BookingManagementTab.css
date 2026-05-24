@@ -1,0 +1,198 @@
+/* ========================================================
+   BOOKING MANAGEMENT TAB STYLES (Quản lý lịch hẹn)
+======================================================== */
+
+/* --- 1. BỐ CỤC DANH SÁCH & HÀNG (Flexbox Fix) --- */
+.landlord-appointment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.landlord-appointment-item {
+    display: flex;
+    align-items: center; /* Căn giữa các khối theo chiều dọc */
+    padding: 16px;
+    background: #ffffff;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.landlord-appointment-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: #1890ff;
+}
+
+/* --- 2. KHỐI NGÀY THÁNG (Trái) --- */
+.landlord-date-tag {
+    background: #ffffff;
+    border: 1px solid #d9d9d9;
+    padding: 10px;
+    border-radius: 6px;
+    text-align: center;
+    min-width: 65px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1890ff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    flex-shrink: 0; /* Ngăn không cho khối này bị ép nhỏ lại */
+}
+
+.landlord-date-tag span {
+    display: block;
+    font-size: 12px;
+    color: #8c8c8c;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+/* --- 3. KHỐI THÔNG TIN CHI TIẾT (Giữa) --- */
+.landlord-apt-details {
+    flex: 1; /* Tự động giãn ra chiếm hết không gian trống */
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.landlord-apt-details h4 {
+    margin: 0;
+    font-size: 16px;
+    color: #262626;
+}
+
+.landlord-apt-details p {
+    margin: 0;
+    font-size: 13px;
+    color: #595959;
+}
+
+/* --- 4. KHỐI NÚT HÀNH ĐỘNG (Phải) --- */
+.landlord-apt-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-left: 16px;
+    align-items: center;
+}
+
+.landlord-btn-approve {
+    background: #52c41a;
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.landlord-btn-approve:hover:not(:disabled) {
+    background: #389e0d;
+}
+
+.landlord-btn-approve:disabled {
+    background: #b7eb8f;
+    cursor: not-allowed;
+}
+
+/* --- 5. HUY HIỆU TRẠNG THÁI (Badges) --- */
+.landlord-ld-status-badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.landlord-sb-pending {
+    background: #fffbe6;
+    color: #faad14;
+    border: 1px solid #ffe58f;
+}
+
+.landlord-sb-approved {
+    background: #f6ffed;
+    color: #52c41a;
+    border: 1px solid #b7eb8f;
+}
+
+.landlord-sb-rejected {
+    background: #fff2f0;
+    color: #ff4d4f;
+    border: 1px solid #ffccc7;
+}
+
+.landlord-sb-cancelled {
+    background: #f5f5f5;
+    color: #8c8c8c;
+    border: 1px solid #d9d9d9;
+}
+
+/* Đổi màu viền trái theo từng trạng thái */
+.landlord-ld-item-pending { border-left: 4px solid #faad14; }
+.landlord-ld-item-approved { border-left: 4px solid #52c41a; }
+.landlord-ld-item-rejected,
+.landlord-ld-item-cancelled {
+    opacity: 0.7;
+    background: #fbfbfb;
+}
+
+/* --- 6. CÁC THÀNH PHẦN PHỤ TRỢ --- */
+.landlord-ld-count-badge {
+    background: #e6f7ff;
+    color: #1890ff;
+    font-size: 12px;
+    padding: 2px 10px;
+    border-radius: 10px;
+    margin-left: 8px;
+    font-weight: 600;
+}
+
+.landlord-ld-error {
+    text-align: center;
+    padding: 30px;
+    color: #ff4d4f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.landlord-ld-empty {
+    text-align: center;
+    padding: 50px 20px;
+    color: #8c8c8c;
+}
+
+.landlord-ld-empty span {
+    font-size: 40px;
+    display: block;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+/* --- 7. RESPONSIVE (Cho màn hình nhỏ/điện thoại) --- */
+@media (max-width: 640px) {
+    .landlord-appointment-item {
+        flex-direction: column; /* Đẩy khối xuống hàng dọc trên mobile */
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .landlord-apt-details, .landlord-apt-actions {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .landlord-apt-actions {
+        justify-content: flex-end;
+        border-top: 1px dashed #e5e7eb;
+        padding-top: 12px;
+    }
+}

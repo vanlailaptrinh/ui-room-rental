@@ -22,7 +22,7 @@ const routes = {
 
     // LANDLORD
     post: '/post',
-    landlordDashboard: '/landlord',
+    landlord: '/landlord',
     paymentCallback: '/payment-callback',
 
     // ADMIN
