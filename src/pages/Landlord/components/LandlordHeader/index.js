@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import NotificationBell from '../../../../components/NotificationBell';
 import UserService from '../../../../services/userService';
 import './LandlordHeader.css'
+import HeaderAuthSection from '../../../../components/HeaderAuthSection'
 
 const tabTitle = {
     dashboard:    'Bảng điều khiển',
@@ -40,23 +41,7 @@ const LandlordHeader = ({ activeTab }) => {
             <h1>{tabTitle[activeTab]}</h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <NotificationBell />
-                <div className="landlord-user-info">
-                    <div className="detail-avatar-wrapper">
-                        {landlord?.avatar ? (
-                            <img src={landlord.avatar} className="detail-avatar-img" alt="Host" />
-                        ) : (
-                            <div className="detail-avatar-circle">{landlordInitials}</div>
-                        )}
-                    </div>
-                    <div className="detail-landlord-info">
-                        <h4 className="landlord-name-display">
-                            {landlord?.fullName || landlord?.username || 'Đang tải...'}
-                        </h4>
-                        <div className="detail-verified-badge">
-                            <span className="badge-icon">✓</span> Chủ trọ
-                        </div>
-                    </div>
-                </div>
+                <HeaderAuthSection />
             </div>
         </header>
     );

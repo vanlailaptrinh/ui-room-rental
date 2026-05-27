@@ -1,5 +1,6 @@
 import React from 'react';
 import './HeaderAdmin.css';
+import HeaderAuthSection from '../HeaderAuthSection'
 
 const HeaderAdmin = () => {
   return (
@@ -10,10 +11,7 @@ const HeaderAdmin = () => {
         <button><span className="material-symbols-outlined">settings</span></button>
       </div>
       <div className="divider"></div>
-      <div className="profile-group">
-        <span>Admin Console</span>
-        <img src="https://i.pravatar.cc/150?img=11" alt="Admin" />
-      </div>
+      <HeaderAuthSection />
     </header>
   );
 };

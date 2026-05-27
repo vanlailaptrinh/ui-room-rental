@@ -20,6 +20,7 @@ const PostManagementTab = ({ activeTab }) => {
                 setLoading(true);
                 try {
                     const res = await PostService.getMyPosts();
+                    console.log("DỮ LIỆU BÀI ĐĂNG TỪ API:", res.data);
                     if (res?.code === 200) setListings(res.data);
                 } catch (err) {
                     console.error("Lỗi:", err);
@@ -123,6 +124,34 @@ const PostManagementTab = ({ activeTab }) => {
         }
     };
 
+    const getPackageDetails = (type, tier) => {
+        // Chuẩn hóa chuỗi về chữ in hoa để tránh sai sót viết hoa/thường từ DB
+        const packageType = type?.toUpperCase() || '';
+        const packageTier = tier?.toUpperCase() || '';
+
+        // 1. Trường hợp gói ĐĂNG TIN (POST)
+        if (packageType === 'POST' || packageType.includes('ĐĂNG TIN')) {
+            if (packageTier === 'PRO') {
+                return { text: 'Đăng tin PRO', className: 'badge-post-pro' };
+            }
+            return { text: 'Đăng tin Thường', className: 'badge-post-normal' };
+        }
+
+        // 2. Trường hợp gói ĐẨY TIN (BOOST)
+        if (packageType === 'BOOST' || packageType.includes('ĐẨY TIN')) {
+            if (packageTier === 'PRO') {
+                return { text: 'Đẩy tin PRO', className: 'badge-boost-pro' };
+            }
+            return { text: 'Đẩy tin Thường', className: 'badge-boost-normal' };
+        }
+
+        // Dự phòng: Nếu backend trả về cấu trúc khác hoặc chưa có gói
+        return {
+            text: packageTier ? `${packageType} ${packageTier}` : 'Gói thường',
+            className: 'badge-package-normal'
+        };
+    };
+
     return (
         <section className="landlord-card landlord-full-width landlord-fade-in">
             <div className="landlord-section-header">
@@ -136,11 +165,21 @@ const PostManagementTab = ({ activeTab }) => {
             <div className="landlord-table-responsive">
                 <table className="landlord-table">
                     <thead>
-                    <tr><th>Hình ảnh</th><th>Thông tin phòng</th><th>Giá thuê</th><th>Lượt xem</th><th>Ngày đăng</th><th>Trạng thái</th><th style={{ textAlign: 'right' }}>Thao tác</th></tr>
+                    <tr>
+                        <th>Hình ảnh</th>
+                        <th>Thông tin phòng</th>
+                        <th>Giá thuê</th>
+                        <th>Lượt xem</th>
+                        <th>Ngày đăng</th>
+                        <th>Gói tin</th>
+                        <th>Trạng thái</th>
+                        <th style={{ textAlign: 'right' }}>Thao tác</th>
+                    </tr>
                     </thead>
                     <tbody>
-                    {loading ? <tr><td colSpan="7" style={{textAlign: 'center'}}>Đang tải...</td></tr> : listings.length === 0 ? (
-                        <tr><td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>Bạn chưa có bài đăng nào.</td></tr>
+                    {/* Tăng colSpan lên 8 để không bị lệch giao diện khi load/trống */}
+                    {loading ? <tr><td colSpan="8" style={{textAlign: 'center'}}>Đang tải...</td></tr> : listings.length === 0 ? (
+                        <tr><td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>Bạn chưa có bài đăng nào.</td></tr>
                     ) : listings.map((item) => (
                         <tr key={item.id}>
                             <td><img src={item.imageUrl || item.image || (Array.isArray(item.images) && item.images[0]) || "https://placehold.co/80x60?text=No+Image"} alt="room" style={{width: 80, height: 60, objectFit: 'cover', borderRadius: 4}} /></td>
@@ -153,6 +192,49 @@ const PostManagementTab = ({ activeTab }) => {
                             <td>{item.price ? `${(item.price / 1000000).toFixed(1)}tr` : 'Liên hệ'}/tháng</td>
                             <td><div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><FiEye /> {item.views || 0}</div></td>
                             <td>{item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : 'N/A'}</td>
+
+                            {/* HIỂN THỊ GÓI TIN TẠI ĐÂY */}
+                            <td>
+                                {(() => {
+                                    // 1. Lấy dữ liệu từ API của bạn
+                                    const boostingTier = item.boostingTier;
+
+                                    // Đoán trường đăng tin còn lại (bạn kiểm tra trong dấu ... xem là 'tier' hay 'postingTier' nhé)
+                                    const postingTier = item.tier || item.postingTier || 'NORMAL';
+
+                                    // 2. Logic phân loại để hiển thị
+                                    let packageText = 'Gói NORMAL';
+                                    let packageClass = 'badge-package-normal';
+
+                                    // TRƯỜNG HỢP 1: Nếu có gói ĐẨY TIN (boostingTier không phải null)
+                                    if (boostingTier) {
+                                        if (boostingTier.toUpperCase() === 'PRO') {
+                                            packageText = 'Đẩy tin PRO';
+                                            packageClass = 'badge-boost-pro';
+                                        } else {
+                                            packageText = 'Đẩy tin NORMAL';
+                                            packageClass = 'badge-boost-normal';
+                                        }
+                                    }
+                                    // TRƯỜNG HỢP 2: Nếu không đẩy tin (boostingTier = null), hiển thị theo gói ĐĂNG TIN
+                                    else {
+                                        if (postingTier.toUpperCase() === 'PRO') {
+                                            packageText = 'Đăng tin PRO';
+                                            packageClass = 'badge-post-pro';
+                                        } else {
+                                            packageText = 'Đăng tin NORMAL';
+                                            packageClass = 'badge-post-normal';
+                                        }
+                                    }
+
+                                    return (
+                                        <span className={`landlord-package-badge ${packageClass}`}>
+                                            {packageText}
+                                        </span>
+                                    );
+                                })()}
+                            </td>
+
                             <td><span className={`landlord-status-dot ${item.status === 'ACTIVE' || item.status === 'Đang hiển thị' ? 'active' : 'inactive'}`}>{item.status || 'Chờ duyệt'}</span></td>
                             <td style={{ textAlign: 'right' }}>
                                 <button className="landlord-list-btn-action edit" onClick={() => handleEditClick(item)}><FiEdit2 size={20}/></button>
@@ -164,7 +246,7 @@ const PostManagementTab = ({ activeTab }) => {
                 </table>
             </div>
 
-            {/* MODAL EDIT (UI DO BẠN THIẾT KẾ) */}
+            {/* MODAL EDIT */}
             {isEditModalOpen && editingPost && (
                 <div className="landlord-modal-overlay" onClick={handleCloseModal}>
                     <div className="landlord-modal-container layout-large" onClick={(e) => e.stopPropagation()}>
