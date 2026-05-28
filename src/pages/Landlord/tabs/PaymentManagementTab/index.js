@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import PackageService from '../../../../services/packageService';
 import VoucherService from '../../../../services/voucherService';
 import InventoryService from '../../../../services/inventoryService';
 import OrderService from '../../../../services/orderService';
 import PaymentService from '../../../../services/paymentService';
 import PacketCard from '../../../../components/PacketCard';
+import LandlordFilterBar from '../../components/LandlordFilterBar';
 import './PaymentManagementTab.css'
 
 const PaymentManagementTab = ({ activeTab }) => {
@@ -21,6 +22,17 @@ const PaymentManagementTab = ({ activeTab }) => {
     const [selectedVoucher, setSelectedVoucher] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
+    // Thêm các bộ lọc dành riêng cho danh sách "Gói của tôi"
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterStatus, setFilterStatus] = useState('ALL');
+
+    // Cấu hình danh sách phân loại Loại gói dịch vụ (Tận dụng prop statusOptions của FilterBar)
+    const statusOptions = [
+        { value: 'ALL', label: 'Tất cả dịch vụ' },
+        { value: 'POSTING', label: '📝 Gói đăng tin' },
+        { value: 'BOOSTING', label: '🚀 Gói đẩy tin' },
+    ];
+
     useEffect(() => {
         if (activeTab !== 'payments') return;
 
@@ -33,8 +45,6 @@ const PaymentManagementTab = ({ activeTab }) => {
                 ]);
                 if (pkgRes?.code === 200) setPackages(pkgRes.data || []);
                 if (voucherRes?.code === 200) setVouchers(voucherRes.data || []);
-
-                // ĐÃ XÓA ĐOẠN CODE "Set Current Package Demo" Ở ĐÂY
             } catch (err) {
                 setError("Không thể kết nối đến hệ thống.");
             } finally {
@@ -98,17 +108,31 @@ const PaymentManagementTab = ({ activeTab }) => {
     const postPackages = packages.filter(pkg => pkg.type?.value === 'POSTING');
     const pushPackages = packages.filter(pkg => pkg.type?.value === 'BOOSTING');
 
-    // TÍNH TOÁN DANH SÁCH GÓI ĐANG SỞ HỮU (Kết hợp Inventory và Packages)
-    const myActivePackages = myInventories.map(inv => {
-        // Tìm thông tin gốc của gói từ mảng packages dựa vào type và tier
-        const pkgDetails = packages.find(p => p.type?.value === inv.type && p.tier?.value === inv.tier);
-        return {
-            ...pkgDetails, // Lấy name, price, activeDays...
-            inventoryType: inv.type,
-            inventoryTier: inv.tier,
-            balance: inv.balance // Số lượt còn lại trong kho
-        };
-    }).filter(pkg => pkg.id); // Lọc bỏ những inventory bị rác không khớp với package nào
+    // Kết hợp và tính toán danh sách gói gốc
+    const myActivePackages = useMemo(() => {
+        return myInventories.map(inv => {
+            const pkgDetails = packages.find(p => p.type?.value === inv.type && p.tier?.value === inv.tier);
+            return {
+                ...pkgDetails,
+                inventoryType: inv.type,
+                inventoryTier: inv.tier,
+                balance: inv.balance
+            };
+        }).filter(pkg => pkg.id);
+    }, [myInventories, packages]);
+
+    // Xử lý Lọc tìm kiếm động gói dịch vụ đang sở hữu
+    const filteredMyPackages = useMemo(() => {
+        return myActivePackages.filter((pkg) => {
+            const matchStatus = filterStatus === 'ALL' || pkg.inventoryType === filterStatus;
+
+            const name = (pkg.name || '').toLowerCase();
+            const keyword = searchTerm.toLowerCase().trim();
+            const matchKeyword = name.includes(keyword);
+
+            return matchStatus && matchKeyword;
+        });
+    }, [myActivePackages, filterStatus, searchTerm]);
 
     return (
         <div className="landlord-fade-in landlord-payment-wrapper">
@@ -195,74 +219,103 @@ const PaymentManagementTab = ({ activeTab }) => {
             </div>
 
             {subTab === 'current' ? (
-                <div className="landlord-active-card">
-                    <div className="landlord-card-header">
-                        <h3>Gói đang hoạt động</h3>
+                <div className="landlord-active-card inventory-unified-form">
+                    <div className="landlord-card-header unified-form-header">
+                        <div className="header-left">
+                            <h3>Gói đang hoạt động</h3>
+                            {myActivePackages.length > 0 && (
+                                <span className="landlord-ld-count-badge">
+                                    {filteredMyPackages.length} gói
+                                </span>
+                            )}
+                        </div>
                         {myActivePackages.length > 0 && (
-                            <span className="status-badge-active">
-                                ● Đang hoạt động
-                            </span>
+                            <span className="status-badge-active">● Đang chạy</span>
                         )}
                     </div>
 
-                    {loadingCurrentPkg ? (
-                        <p className="loading-text">Đang tải thông tin gói dịch vụ...</p>
-                    ) : myActivePackages.length > 0 ? (
-                        // Lặp qua tất cả các gói trong Inventory của người dùng
-                        myActivePackages.map((pkg, index) => (
-                            <div key={index} className="landlord-current-pkg-item landlord-current-pkg-box" style={{ marginBottom: '20px' }}>
-                                <div className="pkg-info">
-                                    <h4 className="pkg-title-row">
-                                        🚀 {pkg.name || 'Gói dịch vụ'}
-                                        {pkg.inventoryTier && (
-                                            <span className="tier-badge">
-                                                {pkg.inventoryTier}
-                                            </span>
-                                        )}
-                                    </h4>
-
-                                    <div className="info-stats-grid">
-                                        <div className="stat-card-item">
-                                            <span>📅 Hạn sử dụng gói</span>
-                                            <strong>{pkg.activeDays} ngày</strong>
-                                        </div>
-                                        <div className="stat-card-item">
-                                            <span>📊 Số lượt còn lại (Tồn kho)</span>
-                                            <strong>{pkg.balance !== null ? pkg.balance : 0} lượt</strong>
-                                        </div>
-                                        <div className="stat-card-item">
-                                            <span>🏷️ Loại dịch vụ</span>
-                                            <strong>
-                                                {pkg.inventoryType === 'POSTING' ? 'Gói đăng tin' : pkg.inventoryType === 'BOOSTING' ? 'Gói đẩy tin' : pkg.inventoryType || 'Đăng tin'}
-                                            </strong>
-                                        </div>
-                                        <div className="stat-card-item">
-                                            <span>💰 Giá trị gói</span>
-                                            <strong>{pkg.price?.toLocaleString()}đ</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="landlord-empty-pkg-state">
-                            <div className="icon">📦</div>
-                            <p>Bạn hiện chưa có gói dịch vụ nào đang hoạt động.</p>
-                            <button
-                                className="btn-buy-now-trigger"
-                                onClick={() => setSubTab('buy')}
-                            >
-                                Mua gói dịch vụ ngay
-                            </button>
+                    {/* Khối thanh bộ lọc nhúng phẳng đồng bộ */}
+                    {myActivePackages.length > 0 && (
+                        <div className="unified-filter-wrapper">
+                            <LandlordFilterBar
+                                searchTerm={searchTerm}
+                                setSearchTerm={setSearchTerm}
+                                searchPlaceholder="🔍 Tìm kiếm theo tên gói dịch vụ..."
+                                filterStatus={filterStatus}
+                                setFilterStatus={setFilterStatus}
+                                statusOptions={statusOptions}
+                                sortBy="" /* Bỏ qua sắp xếp ở tab này */
+                                sortOptions={[]}
+                            />
                         </div>
                     )}
+
+                    <div className="unified-list-container">
+                        {loadingCurrentPkg ? (
+                            <div className="inventory-loading-box">
+                                <div className="landlord-ld-spinner" />
+                                <p className="loading-text">Đang tải thông tin kho gói dịch vụ...</p>
+                            </div>
+                        ) : filteredMyPackages.length > 0 ? (
+                            <div className="inventory-packages-list">
+                                {filteredMyPackages.map((pkg, index) => (
+                                    <div key={index} className={`landlord-current-pkg-item landlord-current-pkg-box type-${pkg.inventoryType?.toLowerCase()}`}>
+                                        <div className="pkg-info">
+                                            <h4 className="pkg-title-row">
+                                                {pkg.inventoryType === 'POSTING' ? '📝' : '🚀'} {pkg.name || 'Gói dịch vụ'}
+                                                {pkg.inventoryTier && (
+                                                    <span className={`tier-badge ${pkg.inventoryTier?.toLowerCase()}`}>
+                                                        {pkg.inventoryTier}
+                                                    </span>
+                                                )}
+                                            </h4>
+
+                                            <div className="info-stats-grid">
+                                                <div className="stat-card-item">
+                                                    <span>📅 Hạn tồn tại bài đăng</span>
+                                                    <strong>{pkg.activeDays} ngày/ lượt</strong>
+                                                </div>
+                                                <div className="stat-card-item highlight-balance">
+                                                    <span>📊 Lượt khả dụng còn lại</span>
+                                                    <strong>{pkg.balance !== null ? pkg.balance : 0} lượt</strong>
+                                                </div>
+                                                <div className="stat-card-item">
+                                                    <span>🏷️ Phân loại dịch vụ</span>
+                                                    <strong>
+                                                        {pkg.inventoryType === 'POSTING' ? 'Gói đăng tin' : pkg.inventoryType === 'BOOSTING' ? 'Gói đẩy tin' : pkg.inventoryType}
+                                                    </strong>
+                                                </div>
+                                                <div className="stat-card-item">
+                                                    <span>💰 Giá trị mua gốc</span>
+                                                    <strong>{pkg.price?.toLocaleString()}đ</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="landlord-empty-pkg-state">
+                                <div className="icon">📦</div>
+                                <p>
+                                    {myActivePackages.length === 0
+                                        ? "Bạn hiện chưa có gói dịch vụ nào trong kho lưu trữ."
+                                        : "Không tìm thấy gói dịch vụ nào khớp với bộ lọc."}
+                                </p>
+                                {myActivePackages.length === 0 && (
+                                    <button className="btn-buy-now-trigger" onClick={() => setSubTab('buy')}>
+                                        Mua gói dịch vụ ngay
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
             ) : (
                 <div className="landlord-pricing-container">
-                    {/* Phần mua gói mới giữ nguyên */}
                     <div className="landlord-pricing-header">
-                        <h2>Bảng giá dịch vụ</h2>
-                        <p>Lựa chọn gói dịch vụ phù hợp để tối ưu hiệu quả cho thuê</p>
+                        <h2>Bảng giá dịch vụ hệ thống</h2>
+                        <p>Lựa chọn gói dịch vụ phù hợp để tối ưu hiệu quả hiển thị phòng trọ</p>
                     </div>
 
                     <div className="landlord-pricing-section">

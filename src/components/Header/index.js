@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import './Header.css';
 import { useAuth } from '../../context/authContext';
 import NotificationBell from '../NotificationBell';
+import HeaderAuthSection from '../HeaderAuthSection'
 
 function Header() {
     const navigate = useNavigate();
@@ -101,101 +102,7 @@ function Header() {
                 {user && <NotificationBell />}
 
                 {/* ── Phải: Avatar / Đăng nhập ── */}
-                <div className="header-auth-section">
-                    {user ? (
-                        <div className="user-dropdown-wrapper" ref={dropdownRef}>
-
-                            {/* Nút avatar */}
-                            <button
-                                id="user-avatar-btn"
-                                className="user-avatar-btn"
-                                onClick={() => setIsDropdownOpen(v => !v)}
-                                aria-expanded={isDropdownOpen}
-                            >
-                                <div className="avatar-circle">{initials}</div>
-                                <span className="avatar-name">
-                                    {user.username || user.email?.split('@')[0]}
-                                </span>
-                                <span className={`avatar-chevron ${isDropdownOpen ? 'open' : ''}`}>▾</span>
-                            </button>
-
-                            {/* Dropdown menu */}
-                            {isDropdownOpen && (
-                                <div className="user-dropdown-menu" id="user-dropdown-menu">
-
-                                    {/* Phần đầu: thông tin user */}
-                                    <div className="dropdown-header">
-                                        <div className="dropdown-avatar-large">{initials}</div>
-                                        <div>
-                                            <p className="dropdown-name">{user.username || 'Người dùng'}</p>
-                                            <p className="dropdown-email">{user.email}</p>
-                                            <span className="dropdown-role-badge">
-                                                {isLandlord ? '🏠 Chủ trọ' : '👤 Người thuê'}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="dropdown-divider" />
-
-                                    {/* Menu chung */}
-                                    <Link to="/profile" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
-                                        <span className="di-icon">👤</span> Thông tin cá nhân
-                                    </Link>
-
-                                    {/* ─ Lịch hẹn của tôi (Tenant) ─ */}
-                                    <Link
-                                        to="/my-bookings"
-                                        id="link-my-bookings"
-                                        className="dropdown-item dropdown-item-highlight"
-                                        onClick={() => setIsDropdownOpen(false)}
-                                    >
-                                        <span className="di-icon">📅</span> Lịch hẹn của tôi
-                                    </Link>
-
-                                    <Link to="/favorites" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
-                                        <span className="di-icon">❤️</span> Phòng yêu thích
-                                    </Link>
-
-                                    {/* ─ Khu vực Chủ trọ ─ */}
-                                    {isLandlord && (
-                                        <>
-                                            <div className="dropdown-divider" />
-                                            <p className="dropdown-section-label">Quản lý chủ trọ</p>
-                                            <Link
-                                                to="/landlord"
-                                                id="link-landlord-dashboard"
-                                                className="dropdown-item dropdown-item-landlord"
-                                                onClick={() => setIsDropdownOpen(false)}
-                                            >
-                                                <span className="di-icon">🏘️</span> Dashboard chủ trọ
-                                            </Link>
-                                            <Link to="/post" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
-                                                <span className="di-icon">📝</span> Đăng tin phòng
-                                            </Link>
-                                            <Link to="/packet" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
-                                                <span className="di-icon">💳</span> Gói Tin
-                                            </Link>
-                                        </>
-                                    )}
-
-                                    <div className="dropdown-divider" />
-
-                                    <button
-                                        id="btn-logout"
-                                        className="dropdown-item dropdown-item-logout"
-                                        onClick={handleLogout}
-                                    >
-                                        <span className="di-icon">🚪</span> Đăng xuất
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    ) : (
-                        <button id="btn-login" className="btn-login" onClick={() => navigate('/login')}>
-                            Đăng nhập
-                        </button>
-                    )}
-                </div>
+                <HeaderAuthSection />
 
             </div>
         </nav>

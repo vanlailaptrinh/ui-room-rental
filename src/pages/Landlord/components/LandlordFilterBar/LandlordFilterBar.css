@@ -1,0 +1,145 @@
+/* ==========================================================================
+   LANDLORD FILTER BAR (UNIFIED & SLIM STYLE)
+   ========================================================================== */
+
+/* Container bọc ngoài: thiết kế phẳng, gọn, tiệp màu với form chung */
+.landlord-filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 16px; /* Thu nhỏ padding dọc để thanh gọn gàng hơn */
+    background-color: #f8fafc; /* Nền xám nhẹ dịu mắt */
+    border: 1px solid #e2e8f0;
+    border-radius: 8px; /* Bo góc vừa phải đồng bộ với card lớn */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* 🔍 Nhóm tìm kiếm bên trái */
+.filter-group.filter-search {
+    flex: 1;
+    min-width: 260px;
+}
+
+/* Ô Input tìm kiếm tinh chỉnh mỏng và gọn */
+.filter-input {
+    width: 100%;
+    padding: 8px 14px; /* Giảm padding để ô tìm kiếm thanh mảnh hơn */
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13.5px;
+    color: #0f172a;
+    background-color: #ffffff;
+    outline: none;
+    transition: all 0.2s ease-in-out;
+    box-sizing: border-box;
+}
+
+.filter-input:focus {
+    border-color: #3b82f6; /* Xanh dương hiện đại làm điểm nhấn */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filter-input::placeholder {
+    color: #94a3b8;
+}
+
+/* ⚙️ Nhóm các bộ lọc Select bên phải */
+.filter-group-right {
+    display: flex;
+    align-items: center;
+    gap: 16px; /* Thu hẹp khoảng cách giữa các select */
+    flex-wrap: wrap;
+}
+
+/* Từng cụm (Nhãn + Thẻ Select) */
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    white-space: nowrap;
+}
+
+/* Thẻ Select tùy chọn được chuốt lại cực gọn */
+.filter-select {
+    padding: 7px 32px 7px 10px; /* Thu hẹp chiều cao */
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #334155;
+    background-color: #ffffff;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 150px;
+
+    /* Khử giao diện select mặc định của hệ điều hành */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    /* Chèn icon mũi tên xuống tinh tế, sắc nét */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+}
+
+.filter-select:hover {
+    border-color: #94a3b8;
+}
+
+.filter-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+}
+
+/* ==========================================================================
+   RESPONSIVE (Tự động co giãn mượt mà trên Mobile)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .landlord-filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .filter-group.filter-search {
+        width: 100%;
+    }
+
+    .filter-group-right {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .filter-group-right {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        display: flex;
+        justify-content: space-between; /* Đẩy text sang trái, select sang phải trên màn hình siêu nhỏ */
+        width: 100%;
+    }
+
+    .filter-select {
+        width: 65%;
+        min-width: unset;
+    }
+}

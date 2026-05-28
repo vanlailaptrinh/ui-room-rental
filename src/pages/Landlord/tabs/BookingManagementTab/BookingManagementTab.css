@@ -1,198 +1,270 @@
 /* ========================================================
-   BOOKING MANAGEMENT TAB STYLES (Quản lý lịch hẹn)
+   BOOKING MANAGEMENT TAB STYLES (Giao diện Form tập trung)
 ======================================================== */
 
-/* --- 1. BỐ CỤC DANH SÁCH & HÀNG (Flexbox Fix) --- */
+/* --- KHỐI FORM TẬP TRUNG (Unified Form) --- */
+.appointment-unified-form {
+    padding: 24px !important;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.unified-form-header {
+    margin-bottom: 16px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 12px;
+}
+
+.unified-form-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+}
+
+/* Đè (override) lại thanh filter bar để nó hòa nhập phẳng vào card trắng */
+.unified-filter-wrapper .landlord-filter-bar {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 14px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+}
+
+/* --- HỆ THỐNG DANH SÁCH & ITEM --- */
 .landlord-appointment-list {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    margin-top: 24px;
+    gap: 12px; /* Khoảng cách vừa phải giữa các card con */
 }
 
 .landlord-appointment-item {
     display: flex;
-    align-items: center; /* Căn giữa các khối theo chiều dọc */
+    align-items: stretch; /* Đảm bảo các khối có chiều cao bằng nhau */
     padding: 16px;
     background: #ffffff;
-    border: 1px solid #f0f0f0;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    transition: all 0.2s ease-in-out;
+    position: relative;
 }
 
 .landlord-appointment-item:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border-color: #1890ff;
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.06);
+    transform: translateY(-1px);
 }
 
-/* --- 2. KHỐI NGÀY THÁNG (Trái) --- */
+/* --- KHỐI NGÀY THÁNG (Cột trái) --- */
 .landlord-date-tag {
-    background: #ffffff;
-    border: 1px solid #d9d9d9;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
     padding: 10px;
     border-radius: 6px;
     text-align: center;
-    min-width: 65px;
-    font-size: 18px;
-    font-weight: 700;
-    color: #1890ff;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-    flex-shrink: 0; /* Ngăn không cho khối này bị ép nhỏ lại */
+    min-width: 75px;
+    max-width: 75px;
+    font-size: 22px;
+    font-weight: 800;
+    color: #1e293b;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
 }
 
 .landlord-date-tag span {
     display: block;
-    font-size: 12px;
-    color: #8c8c8c;
+    font-size: 11px;
+    color: #64748b;
     text-transform: uppercase;
-    font-weight: 500;
+    font-weight: 700;
     margin-top: 2px;
+    letter-spacing: 0.5px;
 }
 
-/* --- 3. KHỐI THÔNG TIN CHI TIẾT (Giữa) --- */
+/* --- KHỐI THÔNG TIN CHI TIẾT (Cột giữa) --- */
 .landlord-apt-details {
-    flex: 1; /* Tự động giãn ra chiếm hết không gian trống */
+    flex: 1;
     margin-left: 20px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    justify-content: center;
 }
 
 .landlord-apt-details h4 {
-    margin: 0;
-    font-size: 16px;
-    color: #262626;
+    margin: 0 0 6px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.4;
 }
 
-.landlord-apt-details p {
-    margin: 0;
-    font-size: 13px;
-    color: #595959;
+.apt-time-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
 }
 
-/* --- 4. KHỐI NÚT HÀNH ĐỘNG (Phải) --- */
+.time-highlight {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #2563eb;
+}
+
+.apt-address-row {
+    margin: 0 0 4px 0 !important;
+    font-size: 13px !important;
+    color: #475569 !important;
+}
+
+.apt-created-row {
+    margin: 0 !important;
+    font-size: 12px !important;
+    color: #94a3b8 !important;
+}
+
+/* --- KHỐI NÚT HÀNH ĐỘNG / TRẠNG THÁI (Cột phải) --- */
 .landlord-apt-actions {
     display: flex;
-    gap: 8px;
-    flex-shrink: 0;
-    margin-left: 16px;
     align-items: center;
+    justify-content: flex-end;
+    min-width: 160px;
+    margin-left: 16px;
+    flex-shrink: 0;
+}
+
+.action-button-group {
+    display: flex;
+    gap: 8px;
 }
 
 .landlord-btn-approve {
-    background: #52c41a;
+    background: #10b981;
     color: white;
     border: none;
-    padding: 6px 16px;
+    padding: 7px 14px;
     border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background 0.2s;
 }
 
-.landlord-btn-approve:hover:not(:disabled) {
-    background: #389e0d;
+.landlord-btn-approve:hover:not(:disabled) { background: #059669; }
+.landlord-btn-approve:disabled { background: #a7f3d0; cursor: not-allowed; }
+
+.landlord-btn-danger {
+    background: #f1f5f9;
+    color: #475569;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.landlord-btn-approve:disabled {
-    background: #b7eb8f;
-    cursor: not-allowed;
+.landlord-btn-danger:hover {
+    background: #e2e8f0;
+    color: #0f172a;
 }
 
-/* --- 5. HUY HIỆU TRẠNG THÁI (Badges) --- */
+/* Style cho chữ trạng thái cuối cùng */
+.status-text-final {
+    font-size: 13.5px;
+    font-weight: 600;
+}
+.status-text-final.status-approved { color: #10b981; }
+.status-text-final.status-rejected { color: #ef4444; }
+.status-text-final.status-cancelled { color: #64748b; }
+
+/* --- BADGES TRẠNG THÁI --- */
 .landlord-ld-status-badge {
-    padding: 4px 10px;
+    padding: 1px 8px;
     border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-    display: inline-block;
-}
-
-.landlord-sb-pending {
-    background: #fffbe6;
-    color: #faad14;
-    border: 1px solid #ffe58f;
-}
-
-.landlord-sb-approved {
-    background: #f6ffed;
-    color: #52c41a;
-    border: 1px solid #b7eb8f;
-}
-
-.landlord-sb-rejected {
-    background: #fff2f0;
-    color: #ff4d4f;
-    border: 1px solid #ffccc7;
-}
-
-.landlord-sb-cancelled {
-    background: #f5f5f5;
-    color: #8c8c8c;
-    border: 1px solid #d9d9d9;
-}
-
-/* Đổi màu viền trái theo từng trạng thái */
-.landlord-ld-item-pending { border-left: 4px solid #faad14; }
-.landlord-ld-item-approved { border-left: 4px solid #52c41a; }
-.landlord-ld-item-rejected,
-.landlord-ld-item-cancelled {
-    opacity: 0.7;
-    background: #fbfbfb;
-}
-
-/* --- 6. CÁC THÀNH PHẦN PHỤ TRỢ --- */
-.landlord-ld-count-badge {
-    background: #e6f7ff;
-    color: #1890ff;
-    font-size: 12px;
-    padding: 2px 10px;
-    border-radius: 10px;
-    margin-left: 8px;
+    font-size: 11.5px;
     font-weight: 600;
 }
 
-.landlord-ld-error {
-    text-align: center;
-    padding: 30px;
-    color: #ff4d4f;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
+.landlord-sb-pending { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
+.landlord-sb-approved { background: #ecfdf5; color: #047857; border: 1px solid #d1fae5; }
+.landlord-sb-rejected { background: #fef2f2; color: #b91c1c; border: 1px solid #fee2e2; }
+.landlord-sb-cancelled { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+
+/* Viền chỉ thị màu sắc bên trái */
+.landlord-appointment-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 4px;
+    border-radius: 8px 0 0 8px;
+}
+.landlord-ld-item-pending::after { background: #f59e0b; }
+.landlord-ld-item-approved::after { background: #10b981; }
+.landlord-ld-item-rejected::after { background: #ef4444; }
+.landlord-ld-item-cancelled::after { background: #64748b; }
+
+/* --- PHỤ TRỢ --- */
+.landlord-ld-count-badge {
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 13px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    margin-left: 8px;
 }
 
 .landlord-ld-empty {
     text-align: center;
-    padding: 50px 20px;
-    color: #8c8c8c;
+    padding: 40px 10px;
+    color: #64748b;
 }
 
 .landlord-ld-empty span {
-    font-size: 40px;
+    font-size: 36px;
     display: block;
-    margin-bottom: 12px;
-    opacity: 0.5;
+    margin-bottom: 8px;
+    opacity: 0.7;
 }
 
-/* --- 7. RESPONSIVE (Cho màn hình nhỏ/điện thoại) --- */
-@media (max-width: 640px) {
+/* --- MOBILE RESPONSIVE --- */
+@media (max-width: 768px) {
     .landlord-appointment-item {
-        flex-direction: column; /* Đẩy khối xuống hàng dọc trên mobile */
-        align-items: flex-start;
-        gap: 16px;
+        flex-direction: column;
+        gap: 14px;
     }
 
-    .landlord-apt-details, .landlord-apt-actions {
-        margin-left: 0;
-        width: 100%;
+    .landlord-date-tag {
+        flex-direction: row;
+        min-width: 100%;
+        max-width: 100%;
+        justify-content: flex-start;
+        gap: 6px;
+        padding: 6px 10px;
     }
+
+    .landlord-date-tag span { margin-top: 0; }
+
+    .landlord-apt-details { margin-left: 0; }
 
     .landlord-apt-actions {
-        justify-content: flex-end;
-        border-top: 1px dashed #e5e7eb;
+        margin-left: 0;
+        width: 100%;
+        justify-content: flex-start;
+        border-top: 1px dashed #e2e8f0;
         padding-top: 12px;
     }
+
+    .action-button-group { width: 100%; }
+    .landlord-btn-approve, .landlord-btn-danger { flex: 1; text-align: center; }
 }

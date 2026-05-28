@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import OrderService from '../../../../services/orderService';
-import './OrderManagementTab.css'
+import './OrderManagementTab.css';
+import LandlordFilterBar from '../../components/LandlordFilterBar';
 
 /* ─── Helper: format thời gian ─── */
 const fmtDate = (iso) => {
@@ -11,7 +12,6 @@ const fmtDate = (iso) => {
 
 /* ─── Helper: Badge trạng thái đơn hàng ─── */
 const OrderStatusBadge = ({ status }) => {
-    // Mapping các trạng thái thường gặp khi thanh toán/mua gói
     const map = {
         PENDING:   { label: 'Chờ thanh toán', cls: 'landlord-sb-pending' },
         PAID:      { label: 'Đã thanh toán',  cls: 'landlord-sb-approved' },
@@ -20,7 +20,6 @@ const OrderStatusBadge = ({ status }) => {
         CANCELLED: { label: 'Đã hủy',         cls: 'landlord-sb-cancelled' },
     };
 
-    // Đảm bảo chữ hoa để map chuẩn xác
     const upperStatus = status ? status.toUpperCase() : '';
     const { label, cls } = map[upperStatus] || { label: status || 'Không rõ', cls: '' };
 
@@ -32,47 +31,124 @@ const OrderManagementTab = ({ activeTab }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    // Các state phục vụ bộ lọc tìm kiếm
+    const [filterStatus, setFilterStatus] = useState('ALL');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sortBy, setSortBy] = useState('newest');
+
+    // Cấu hình danh sách option riêng cho tab Đơn hàng
+    const statusOptions = [
+        { value: 'ALL', label: 'Tất cả trạng thái' },
+        { value: 'PENDING', label: '⏳ Chờ thanh toán' },
+        { value: 'PAID', label: '✅ Đã thanh toán' },
+        { value: 'SUCCESS', label: '🎉 Thành công' },
+        { value: 'FAILED', label: '❌ Thất bại' },
+        { value: 'CANCELLED', label: '🚫 Đã hủy' },
+    ];
+
+    const sortOptions = [
+        { value: 'newest', label: '🗓️ Mới nhất trước' },
+        { value: 'oldest', label: '🗓️ Cũ nhất trước' },
+        { value: 'priceDesc', label: '💰 Số tiền giảm dần' },
+        { value: 'priceAsc', label: '💰 Số tiền tăng dần' },
+    ];
+
+    const fetchOrders = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await OrderService.getMyOrders();
+            setOrders(res?.data || res || []);
+        } catch (err) {
+            console.error("Lỗi tải đơn hàng:", err);
+            setError('Không thể tải lịch sử giao dịch. Vui lòng thử lại sau.');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     useEffect(() => {
-        // Chỉ gọi API khi user click vào tab đơn hàng
         if (activeTab === 'orders') {
-            const fetchOrders = async () => {
-                setLoading(true);
-                setError(null);
-                try {
-                    // Lưu ý: Đổi tên hàm getMyOrders() dưới đây cho khớp với tên hàm thực tế trong OrderService của bạn
-                    const res = await OrderService.getMyOrders();
-                    // Tuỳ vào response trả về (res.data hay res) mà ta set state
-                    setOrders(res?.data || res || []);
-                } catch (err) {
-                    console.error("Lỗi tải đơn hàng:", err);
-                    setError('Không thể tải lịch sử giao dịch. Vui lòng thử lại sau.');
-                } finally {
-                    setLoading(false);
-                }
-            };
             fetchOrders();
         }
-    }, [activeTab]);
+    }, [activeTab, fetchOrders]);
+
+    // Xử lý tính toán lọc và sắp xếp dữ liệu (useMemo tối ưu hiệu năng)
+    const filteredAndSortedOrders = useMemo(() => {
+        return orders
+            .filter((order) => {
+                const orderStatus = order.status ? order.status.toUpperCase() : '';
+                const matchStatus = filterStatus === 'ALL' || orderStatus === filterStatus;
+
+                const idString = String(order.id).toLowerCase();
+                const packageName = (order.packageName || order.description || '').toLowerCase();
+                const keyword = searchTerm.toLowerCase().trim();
+
+                const matchKeyword = idString.includes(keyword) || packageName.includes(keyword);
+                return matchStatus && matchKeyword;
+            })
+            .sort((a, b) => {
+                if (sortBy === 'newest' || sortBy === 'oldest') {
+                    const timeA = new Date(a.createdAt || 0).getTime();
+                    const timeB = new Date(b.createdAt || 0).getTime();
+                    return sortBy === 'newest' ? timeB - timeA : timeA - timeB;
+                }
+                if (sortBy === 'priceDesc' || sortBy === 'priceAsc') {
+                    const priceA = a.totalPrice || a.amount || a.price || 0;
+                    const priceB = b.totalPrice || b.amount || b.price || 0;
+                    return sortBy === 'priceDesc' ? priceB - priceA : priceA - priceB;
+                }
+                return 0;
+            });
+    }, [orders, filterStatus, searchTerm, sortBy]);
+
+    if (loading) return (
+        <section className="landlord-card landlord-full-width">
+            <h3>Lịch sử giao dịch / Đơn hàng</h3>
+            <div className="landlord-ld-loading" style={{ padding: '40px 0', textAlign: 'center' }}>
+                <div className="landlord-ld-spinner" />
+                <span>Đang tải danh sách đơn hàng...</span>
+            </div>
+        </section>
+    );
+
+    if (error) return (
+        <section className="landlord-card landlord-full-width">
+            <h3>Lịch sử giao dịch / Đơn hàng</h3>
+            <div className="landlord-ld-error" style={{ padding: '30px', textAlign: 'center' }}>
+                <span>⚠️ {error}</span>
+                <button className="landlord-btn-text" onClick={fetchOrders} style={{ marginTop: '12px', display: 'block', margin: '12px auto 0' }}>Thử lại</button>
+            </div>
+        </section>
+    );
 
     return (
-        <section className="landlord-card landlord-full-width landlord-fade-in">
-            <div className="landlord-section-header">
-                <div className="header-left">
-                    <h3>Lịch sử giao dịch / Đơn hàng</h3>
-                    <span className="landlord-ld-count-badge">{orders.length} đơn</span>
-                </div>
+        <section className="landlord-card landlord-full-width landlord-fade-in order-unified-form">
+            {/* Tiêu đề gom chung form */}
+            <div className="unified-form-header">
+                <h3>
+                    Lịch sử giao dịch / Đơn hàng
+                    <span className="landlord-ld-count-badge">{filteredAndSortedOrders.length} đơn</span>
+                </h3>
             </div>
 
-            {loading ? (
-                <div className="landlord-ld-loading" style={{ padding: '40px 0', textAlign: 'center' }}>
-                    <div className="landlord-ld-spinner" />
-                    <span>Đang tải danh sách đơn hàng...</span>
-                </div>
-            ) : error ? (
-                <div className="landlord-ld-error" style={{ padding: '20px', textAlign: 'center', color: '#e53e3e' }}>
-                    <span>⚠️ {error}</span>
-                </div>
-            ) : (
+            {/* Khối thanh bộ lọc nhúng trực tiếp phẳng mịn */}
+            <div className="unified-filter-wrapper">
+                <LandlordFilterBar
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    searchPlaceholder="🔍 Tìm theo mã đơn, tên gói dịch vụ..."
+                    filterStatus={filterStatus}
+                    setFilterStatus={setFilterStatus}
+                    statusOptions={statusOptions}
+                    sortBy={sortBy}
+                    setSortBy={setSortBy}
+                    sortOptions={sortOptions}
+                />
+            </div>
+
+            {/* Bảng dữ liệu gom gọn lọt lòng */}
+            <div className="unified-list-container">
                 <div className="landlord-table-responsive">
                     <table className="landlord-table">
                         <thead>
@@ -85,44 +161,50 @@ const OrderManagementTab = ({ activeTab }) => {
                         </tr>
                         </thead>
                         <tbody>
-                        {orders.length === 0 ? (
+                        {filteredAndSortedOrders.length === 0 ? (
                             <tr>
-                                <td colSpan="5" style={{ textAlign: 'center', padding: '40px' }}>
-                                    <div style={{ fontSize: '40px', marginBottom: '10px' }}>🧾</div>
-                                    <div style={{ color: '#888' }}>Bạn chưa có giao dịch nào.</div>
+                                <td colSpan="5" className="order-empty-td">
+                                    <div className="order-empty-icon">🧾</div>
+                                    <div className="order-empty-text">
+                                        {orders.length === 0 ? "Bạn chưa có giao dịch nào trên hệ thống." : "Không tìm thấy đơn hàng phù hợp bộ lọc."}
+                                    </div>
                                 </td>
                             </tr>
                         ) : (
-                            orders.map((order) => (
-                                <tr key={order.id}>
-                                    {/* Rút gọn mã ID nếu nó là dạng UUID quá dài */}
-                                    <td style={{ fontWeight: 'bold', color: '#1890ff' }}>
-                                        #{String(order.id).substring(0, 8).toUpperCase()}
-                                    </td>
+                            filteredAndSortedOrders.map((order) => {
+                                const finalPrice = order.totalPrice || order.amount || order.price || 0;
+                                return (
+                                    <tr key={order.id} className={`order-row-status-${order.status ? order.status.toLowerCase() : 'unknown'}`}>
+                                        {/* Mã đơn */}
+                                        <td className="order-id-cell">
+                                            #{String(order.id).substring(0, 8).toUpperCase()}
+                                        </td>
 
-                                    <td>
-                                        <div style={{ fontWeight: '500' }}>
+                                        {/* Tên gói dịch vụ */}
+                                        <td className="order-name-cell">
                                             {order.packageName || order.description || 'Thanh toán dịch vụ hệ thống'}
-                                        </div>
-                                    </td>
+                                        </td>
 
-                                    <td style={{ fontWeight: 'bold' }}>
-                                        {(order.totalPrice || order.amount || order.price)
-                                            ? (order.totalPrice || order.amount || order.price).toLocaleString('vi-VN') + ' đ'
-                                            : '0 đ'
-                                        }
-                                    </td>
+                                        {/* Số tiền */}
+                                        <td className="order-price-cell">
+                                            {finalPrice.toLocaleString('vi-VN')} đ
+                                        </td>
 
-                                    <td>{fmtDate(order.createdAt)}</td>
+                                        {/* Ngày giao dịch */}
+                                        <td className="order-date-cell">{fmtDate(order.createdAt)}</td>
 
-                                    <td><OrderStatusBadge status={order.status} /></td>
-                                </tr>
-                            ))
+                                        {/* Badge Trạng thái */}
+                                        <td className="order-badge-cell">
+                                            <OrderStatusBadge status={order.status} />
+                                        </td>
+                                    </tr>
+                                );
+                            })
                         )}
                         </tbody>
                     </table>
                 </div>
-            )}
+            </div>
         </section>
     );
 };

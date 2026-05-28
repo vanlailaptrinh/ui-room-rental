@@ -1,159 +1,168 @@
 /* ========================================================
-   ORDER MANAGEMENT TAB STYLES (Lịch sử giao dịch)
+   ORDER MANAGEMENT TAB STYLES (Form Tập Trung Đồng Bộ)
 ======================================================== */
 
-/* Hiệu ứng mượt mà khi chuyển tab */
-.landlord-fade-in {
-    animation: fadeIn 0.4s ease-in-out;
+/* --- KHỐI FORM TẬP TRUNG (Gom chung một khối phẳng) --- */
+.order-unified-form {
+    padding: 24px !important;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+.unified-form-header {
+    margin-bottom: 16px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 12px;
 }
 
-/* --- Phần Header của tab --- */
-.landlord-section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-    border-bottom: 1px solid #f0f0f0;
-    padding-bottom: 16px;
-}
-
-.landlord-section-header .header-left {
-    display: flex;
-    align-items: center;
-}
-
-.landlord-section-header h3 {
+.unified-form-header h3 {
     margin: 0;
     font-size: 18px;
-    color: #262626;
-    border-left: none; /* Bỏ border mặc định của card nếu có */
-    padding-left: 0;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
 }
 
-/* Badge đếm số lượng đơn hàng */
-.landlord-ld-count-badge {
-    background: #e6f7ff;
-    color: #1890ff;
-    font-size: 13px;
-    padding: 4px 12px;
-    border-radius: 12px;
-    margin-left: 12px;
-    font-weight: 600;
-    border: 1px solid #91d5ff;
+/* Đè phẳng thanh filter bar vào lọt lòng card trắng */
+.unified-filter-wrapper .landlord-filter-bar {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 14px;
+    margin-bottom: 16px;
+    border-radius: 8px;
 }
 
-/* --- Bảng dữ liệu giao dịch (Table) --- */
+/* --- HỆ THỐNG BẢNG HIỂN THỊ HIỆN ĐẠI --- */
+.unified-list-container {
+    margin-top: 8px;
+}
+
 .landlord-table-responsive {
     width: 100%;
     overflow-x: auto;
     border-radius: 8px;
-    border: 1px solid #f0f0f0;
+    border: 1px solid #e2e8f0;
 }
 
 .landlord-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    background: #ffffff;
+    font-size: 14px;
 }
 
+/* Tiêu đề bảng gọn gàng sạch sẽ */
 .landlord-table th {
-    background-color: #fafafa;
-    color: #595959;
+    background: #f8fafc;
+    color: #475569;
     font-weight: 600;
-    padding: 16px;
-    font-size: 14px;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 14px 16px;
+    border-bottom: 1px solid #e2e8f0;
     white-space: nowrap;
 }
 
+/* Các ô dữ liệu tròng trĩnh */
 .landlord-table td {
-    padding: 16px;
-    font-size: 14px;
-    color: #262626;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
     vertical-align: middle;
 }
 
-/* Hiệu ứng hover khi di chuột qua từng hàng */
+/* Hiệu ứng hover hàng mượt mà */
 .landlord-table tbody tr {
-    transition: background-color 0.2s;
+    transition: background-color 0.15s ease-out;
 }
 
 .landlord-table tbody tr:hover {
-    background-color: #f6fbff;
+    background-color: #f8fafc;
 }
 
-/* --- Huy hiệu Trạng thái (Status Badges) --- */
+/* --- TÙY CHỈNH TỪNG CỘT TẾ BÀO (CELL) --- */
+.order-id-cell {
+    font-weight: 700;
+    color: #2563eb; /* Tone xanh dương hiện đại */
+}
+
+.order-name-cell {
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.order-price-cell {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.order-date-cell {
+    color: #64748b;
+}
+
+/* Trạng thái hàng mờ đi nếu thất bại/hủy */
+.order-row-status-failed,
+.order-row-status-cancelled {
+    background-color: #fafafa;
+}
+.order-row-status-failed td,
+.order-row-status-cancelled td {
+    color: #94a3b8;
+}
+.order-row-status-failed .order-id-cell,
+.order-row-status-cancelled .order-id-cell {
+    color: #94a3b8;
+}
+
+/* --- TRẠNG THÁI TRỐNG --- */
+.order-empty-td {
+    text-align: center !important;
+    padding: 50px 20px !important;
+}
+
+.order-empty-icon {
+    font-size: 44px;
+    margin-bottom: 10px;
+    opacity: 0.6;
+}
+
+.order-empty-text {
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* --- CÁC HUY HIỆU TRẠNG THÁI (Gốc từ Tab Lịch hẹn) --- */
 .landlord-ld-status-badge {
-    padding: 6px 12px;
+    padding: 3px 10px;
     border-radius: 6px;
     font-size: 12px;
     font-weight: 600;
     display: inline-block;
-    text-align: center;
-    min-width: 110px; /* Cố định độ rộng để các badge xếp thẳng hàng nhau */
+    white-space: nowrap;
 }
 
-/* Màu cho từng trạng thái */
-.landlord-sb-pending {
-    background: #fffbe6;
-    color: #faad14;
-    border: 1px solid #ffe58f;
+.landlord-sb-pending { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
+.landlord-sb-approved { background: #ecfdf5; color: #047857; border: 1px solid #d1fae5; }
+.landlord-sb-rejected { background: #fef2f2; color: #b91c1c; border: 1px solid #fee2e2; }
+.landlord-sb-cancelled { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+
+.landlord-ld-count-badge {
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 13px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    margin-left: 8px;
+    font-weight: 700;
 }
 
-.landlord-sb-approved { /* Dùng chung cho PAID và SUCCESS */
-    background: #f6ffed;
-    color: #52c41a;
-    border: 1px solid #b7eb8f;
+/* --- ANIMATION --- */
+.landlord-fade-in {
+    animation: fadeIn 0.3s ease-out;
 }
 
-.landlord-sb-rejected { /* Dùng cho FAILED */
-    background: #fff2f0;
-    color: #ff4d4f;
-    border: 1px solid #ffccc7;
-}
-
-.landlord-sb-cancelled {
-    background: #f5f5f5;
-    color: #8c8c8c;
-    border: 1px solid #d9d9d9;
-}
-
-/* --- Trạng thái Loading --- */
-.landlord-ld-loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #8c8c8c;
-    font-size: 14px;
-}
-
-.landlord-ld-spinner {
-    width: 36px;
-    height: 36px;
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid #1890ff;
-    border-radius: 50%;
-    animation: spinner 1s linear infinite;
-    margin-bottom: 12px;
-}
-
-@keyframes spinner {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Responsive cho bảng trên điện thoại */
-@media (max-width: 768px) {
-    .landlord-table th, .landlord-table td {
-        padding: 12px 8px;
-        font-size: 13px;
-    }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
 }

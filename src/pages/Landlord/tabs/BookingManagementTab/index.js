@@ -1,10 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import BookingService from '../../../../services/bookingService';
-import './BookingManagementTab.css'
+import './BookingManagementTab.css';
+import LandlordFilterBar from '../../components/LandlordFilterBar';
 
 const fmtDate = (iso) => {
     if (!iso) return '—';
-    return new Date(iso).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return new Date(iso).toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 };
 
 const StatusBadge = ({ status }) => {
@@ -24,6 +31,23 @@ const BookingManagementTab = ({ activeTab }) => {
     const [error, setError] = useState(null);
     const [processing, setProcessing] = useState(null);
 
+    const [filterStatus, setFilterStatus] = useState('ALL');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sortBy, setSortBy] = useState('newest');
+
+    const statusOptions = [
+        { value: 'ALL', label: 'Tất cả lịch hẹn' },
+        { value: 'PENDING', label: '⏳ Chờ duyệt' },
+        { value: 'APPROVED', label: '✅ Đã duyệt' },
+        { value: 'REJECTED', label: '❌ Từ chối' },
+        { value: 'CANCELLED', label: '🚫 Đã hủy' },
+    ];
+
+    const sortOptions = [
+        { value: 'newest', label: '🗓️ Ngày hẹn gần nhất' },
+        { value: 'oldest', label: '🗓️ Ngày hẹn xa nhất' },
+    ];
+
     const fetchBookings = useCallback(async () => {
         try {
             setLoading(true); setError(null);
@@ -37,7 +61,6 @@ const BookingManagementTab = ({ activeTab }) => {
     }, []);
 
     useEffect(() => {
-        // Load data khi ở tab appointment HOẶC dashboard (do dashboard có nhúng tab này)
         if (activeTab === 'appointments' || activeTab === 'dashboard') fetchBookings();
     }, [activeTab, fetchBookings]);
 
@@ -66,43 +89,102 @@ const BookingManagementTab = ({ activeTab }) => {
         }
     };
 
+    const filteredAndSortedBookings = useMemo(() => {
+        return bookings
+            .filter((b) => {
+                const matchStatus = filterStatus === 'ALL' || b.status === filterStatus;
+                const title = b.post?.title?.toLowerCase() || '';
+                const address = b.post?.address?.toLowerCase() || '';
+                const keyword = searchTerm.toLowerCase().trim();
+                return matchStatus && (title.includes(keyword) || address.includes(keyword));
+            })
+            .sort((a, b) => {
+                const timeA = new Date(a.bookingTime || 0).getTime();
+                const timeB = new Date(b.bookingTime || 0).getTime();
+                return sortBy === 'newest' ? timeB - timeA : timeA - timeB;
+            });
+    }, [bookings, filterStatus, searchTerm, sortBy]);
+
     if (loading) return <section className="landlord-card landlord-full-width"><h3>Lịch hẹn từ khách thuê</h3><div className="landlord-ld-loading"><div className="landlord-ld-spinner" /><span>Đang tải...</span></div></section>;
     if (error) return <section className="landlord-card landlord-full-width"><h3>Lịch hẹn từ khách thuê</h3><div className="landlord-ld-error"><span>⚠️ {error}</span><button className="landlord-btn-text" onClick={fetchBookings}>Thử lại</button></div></section>;
 
     return (
-        <section className="landlord-card landlord-full-width">
-            <h3>Lịch hẹn từ khách thuê <span className="landlord-ld-count-badge">{bookings.length}</span></h3>
-            {bookings.length === 0 ? (
-                <div className="landlord-ld-empty"><span>🗓️</span><p>Chưa có lịch hẹn nào được gửi đến.</p></div>
-            ) : (
-                <div className="landlord-appointment-list">
-                    {bookings.map((b) => {
-                        const dt = b.bookingTime ? new Date(b.bookingTime) : null;
-                        return (
-                            <div key={b.id} className={`landlord-appointment-item landlord-ld-item-${b.status?.toLowerCase()}`}>
-                                <div className="landlord-date-tag">
-                                    {dt ? dt.getDate() : '?'}<br /><span>{dt ? dt.toLocaleString('vi-VN', { month: 'short' }) : ''}</span>
+        <section className="landlord-card landlord-full-width appointment-unified-form">
+            {/* Phần tiêu đề chính */}
+            <div className="unified-form-header">
+                <h3>Lịch hẹn từ khách thuê <span className="landlord-ld-count-badge">{filteredAndSortedBookings.length}</span></h3>
+            </div>
+
+            {/* Thanh bộ lọc nhúng trực tiếp liền mạch */}
+            <div className="unified-filter-wrapper">
+                <LandlordFilterBar
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    searchPlaceholder="🔍 Tìm theo tiêu đề lịch hẹn, địa chỉ..."
+                    filterStatus={filterStatus}
+                    setFilterStatus={setFilterStatus}
+                    statusOptions={statusOptions}
+                    sortBy={sortBy}
+                    setSortBy={setSortBy}
+                    sortOptions={sortOptions}
+                />
+            </div>
+
+            {/* Danh sách các cuộc hẹn được gói gọn gàng */}
+            <div className="unified-list-container">
+                {filteredAndSortedBookings.length === 0 ? (
+                    <div className="landlord-ld-empty">
+                        <span>🗓️</span>
+                        <p>{bookings.length === 0 ? "Chưa có lịch hẹn nào được gửi đến." : "Không có lịch hẹn nào khớp với bộ lọc hiện tại."}</p>
+                    </div>
+                ) : (
+                    <div className="landlord-appointment-list">
+                        {filteredAndSortedBookings.map((b) => {
+                            const dt = b.bookingTime ? new Date(b.bookingTime) : null;
+                            return (
+                                <div key={b.id} className={`landlord-appointment-item landlord-ld-item-${b.status?.toLowerCase()}`}>
+
+                                    {/* Cột 1: Thẻ ngày tháng */}
+                                    <div className="landlord-date-tag">
+                                        {dt ? dt.getDate() : '?'}<br />
+                                        <span>{dt ? dt.toLocaleString('vi-VN', { month: 'short' }) : ''}</span>
+                                    </div>
+
+                                    {/* Cột 2: Nội dung chi tiết bài đăng & Thời gian */}
+                                    <div className="landlord-apt-details">
+                                        <h4>{b.post?.title || 'Phòng chưa có tiêu đề'}</h4>
+                                        <div className="apt-time-row">
+                                            <span className="time-highlight">⏰ {dt ? dt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : ''}</span>
+                                            <StatusBadge status={b.status} />
+                                        </div>
+                                        <p className="apt-address-row">📍 {b.post?.address || '—'}</p>
+                                        <p className="apt-created-row">Đặt lúc: {fmtDate(b.createdAt)}</p>
+                                    </div>
+
+                                    {/* Cột 3: Nút điều hướng duyệt hoặc thông báo trạng thái */}
+                                    <div className="landlord-apt-actions">
+                                        {b.status === 'PENDING' ? (
+                                            <div className="action-button-group">
+                                                <button className="landlord-btn-approve" onClick={() => handleApprove(b.id)} disabled={processing === b.id}>
+                                                    {processing === b.id ? '...' : '✓ Duyệt'}
+                                                </button>
+                                                <button className="landlord-btn-danger" onClick={() => handleReject(b.id)} disabled={processing === b.id}>
+                                                    {processing === b.id ? '...' : 'Từ chối'}
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <span className={`status-text-final status-${b.status?.toLowerCase()}`}>
+                                                {b.status === 'APPROVED' ? '✓ Đã đồng ý' : b.status === 'REJECTED' ? '✕ Đã từ chối' : '🚫 Đã hủy'}
+                                            </span>
+                                        )}
+                                    </div>
+
                                 </div>
-                                <div className="landlord-apt-details">
-                                    <h4>{b.post?.title || 'Phòng chưa có tiêu đề'}</h4>
-                                    <p>⏰ {dt ? dt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : ''} &nbsp;•&nbsp; <StatusBadge status={b.status} /></p>
-                                    <p style={{ marginTop: 4, fontSize: 13, color: '#9ca3af' }}>📍 {b.post?.address || '—'} &nbsp;|&nbsp; Đặt lúc: {fmtDate(b.createdAt)}</p>
-                                </div>
-                                <div className="landlord-apt-actions">
-                                    {b.status === 'PENDING' ? (
-                                        <>
-                                            <button className="landlord-btn-approve" onClick={() => handleApprove(b.id)} disabled={processing === b.id}>{processing === b.id ? '...' : '✓ Duyệt'}</button>
-                                            <button className="landlord-btn-danger" onClick={() => handleReject(b.id)} disabled={processing === b.id}>{processing === b.id ? '...' : 'Từ chối'}</button>
-                                        </>
-                                    ) : (
-                                        <span style={{ fontSize: 13, color: '#9ca3af' }}>Đã xử lý</span>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
         </section>
     );
 };
