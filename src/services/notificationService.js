@@ -1,6 +1,6 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 
-const BASE_URL = 'http://localhost:8080/room-rental/api';
+const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 // ─── SSE ─────────────────────────────────────────────────────────────────────
 /**
