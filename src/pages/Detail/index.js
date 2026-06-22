@@ -268,7 +268,17 @@ function Detail() {
                                     <IconFavorite style={{ color: isFav ? '#ef4444' : undefined }} />
                                     {favLoading ? '...' : isFav ? 'Đã lưu' : 'Yêu thích'}
                                 </button>
-                                <button className="detail-btn-outline"><IconReport /> Báo cáo</button>
+                                {user?.role !== 'LANDLORD' && user?.role !== 'ADMIN' && (
+                                    <button className="detail-btn-outline" onClick={() => {
+                                        if (!user) {
+                                            navigate('/login');
+                                            return;
+                                        }
+                                        navigate('/reports', { state: { targetId: post.id } });
+                                    }}>
+                                        <IconReport /> Báo cáo
+                                    </button>
+                                )}
                             </div>
                         </div>
 

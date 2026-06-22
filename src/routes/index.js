@@ -20,6 +20,7 @@ import Favorites from '../pages/Favorites';
 import Chat from '../pages/Chat';
 import ChatRoom from '../pages/ChatRoom';
 import MyBookings from '../pages/MyBookings';
+import Reports from '../pages/Reports';
 
 import PostRoom from '../pages/PostRoom';
 import Landlord from '../pages/Landlord';
@@ -32,6 +33,7 @@ import FinanceManagement from '../pages/Admin/FinanceManagement';
 import PackageManagement from '../pages/Admin/PackageManagement';
 import PostManagement from '../pages/Admin/PostManagement';
 import VoucherManagement from '../pages/Admin/VoucherManagement';
+import ReportManagement from '../pages/Admin/ReportManagement';
 import Blacklist from '../pages/Blacklist';
 
 export const publicRoutes = [
@@ -110,6 +112,11 @@ export const userRoutes = [
         path: config.routes.myBookings,
         component: MyBookings,
         layout: MainLayout
+    },
+    {
+        path: config.routes.reports,
+        component: Reports,
+        layout: MainLayout
     }
 ];
 
@@ -168,6 +175,11 @@ export const adminRoutes = [
     {
         path: config.routes.adminVouchers,
         component: VoucherManagement,
+        layout: AdminLayout
+    },
+    {
+        path: config.routes.adminReports,
+        component: ReportManagement,
         layout: AdminLayout
     },
 ];

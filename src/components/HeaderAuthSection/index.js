@@ -102,6 +102,11 @@ function HeaderAuthSection() {
                         <Link to="/profile" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
                             <span className="di-icon">👤</span> Thông tin cá nhân
                         </Link>
+                        {!isAdmin && (
+                            <Link to="/reports" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
+                                <span className="di-icon">⚑</span> Báo cáo tài khoản
+                            </Link>
+                        )}
 
                         {/* 2. 👤 MENU DÀNH CHO USER THƯỜNG (TENANT) */}
                         {isTenant && (
