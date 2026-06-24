@@ -16,7 +16,7 @@ export const provinceMap = {
     "Đà Nẵng": "đà nẵng",
     "Bình Dương": "bình dương",
     "Cần Thơ": "cần thơ",
-    "Huế": "huế",
+    "Huế": "khánh hòa",
     "Khánh Hòa": "khánh hòa",
     "Đồng Nai": "đồng nai",
     "Long An": "long an",
@@ -31,8 +31,8 @@ export const normalizeProvince = (value) => {
 };
 
 function PostList() {
-    const [posts, setPosts] = useState([]);                 // Dữ liệu gốc từ API
-    const [filteredPosts, setFilteredPosts] = useState([]); // Dữ liệu sau khi lọc & sort
+    const [posts, setPosts] = useState([]);
+    const [filteredPosts, setFilteredPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const location = useLocation();
 
@@ -40,29 +40,25 @@ function PostList() {
     const provinceParam = queryParams.get("province");
     const priceParam = queryParams.get("price");
     const searchTerm = queryParams.get('search') || '';
-    // State cho Lọc
+    const typeParam = queryParams.get('type');
+
     const [filters, setFilters] = useState({
         province: null,
         price: null,
         area: null,
-        amenities: []
+        amenities: [],
+        roomType: null
     });
 
-    // State cho Sắp xếp
     const [sortType, setSortType] = useState('popular');
-
-    // State cho Phân trang
     const [currentPage, setCurrentPage] = useState(1);
     const postsPerPage = 6;
 
-    // --- LOGIC PHÂN TRANG ---
     const indexOfLastPost = currentPage * postsPerPage;
     const indexOfFirstPost = indexOfLastPost - postsPerPage;
-    // Đây là danh sách bài đăng thực tế sẽ hiển thị trên 1 trang
     const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
     const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
 
-    // 1. Gọi API lấy dữ liệu lần đầu khi vào trang
     useEffect(() => {
         const fetchPosts = async () => {
             try {
@@ -84,10 +80,15 @@ function PostList() {
     }, [searchTerm]);
 
     useEffect(() => {
-        let initialFilters = { province: null, price: null, area: null, amenities: [] };
+        let initialFilters = { province: null, price: null, area: null, amenities: [], roomType: null };
 
         if (provinceParam) {
             initialFilters.province = provinceParam;
+        }
+
+        // Đọc giá trị từ URL (ví dụ: "APARTMENT") gán vào bộ lọc roomType
+        if (typeParam && typeParam !== 'undefined' && typeParam !== 'null') {
+            initialFilters.roomType = decodeURIComponent(typeParam);
         }
 
         if (priceParam) {
@@ -109,12 +110,12 @@ function PostList() {
             }
         }
         setFilters(initialFilters);
-    }, [provinceParam, priceParam]);
+    }, [provinceParam, priceParam, typeParam]);
 
     useEffect(() => {
         let data = [...posts];
 
-        if (filters.province || filters.price || filters.area || filters.amenities.length > 0) {
+        if (filters.province || filters.price || filters.area || filters.amenities.length > 0 || filters.roomType) {
             data = data.filter(p => {
                 const provinceNorm = normalizeProvince(filters.province);
                 const addrNorm = normalizeProvince(p.address);
@@ -137,12 +138,19 @@ function PostList() {
                     )
                     : false;
 
-                // OR logic: chỉ cần một điều kiện đúng
-                return matchProvince || matchPrice || matchArea || matchAmenities;
+                // Xử lý dữ liệu roomType của từng bài viết (nếu là Object thì lấy .value, nếu là chuỗi thuần thì lấy chính nó)
+                const postRoomTypeValue = p.roomType && typeof p.roomType === 'object'
+                    ? (p.roomType.value || p.roomType.id)
+                    : p.roomType;
+
+                const matchRoomType = filters.roomType && postRoomTypeValue
+                    ? String(postRoomTypeValue).toUpperCase() === String(filters.roomType).toUpperCase()
+                    : false;
+
+                return matchProvince || matchPrice || matchArea || matchAmenities || matchRoomType;
             });
         }
 
-        // Sắp xếp dữ liệu
         switch (sortType) {
             case 'price-asc':
                 data.sort((a, b) => a.price - b.price);
@@ -164,13 +172,17 @@ function PostList() {
         setCurrentPage(1);
     }, [filters, posts, sortType]);
 
-    // 3. Các hàm điều khiển
     const handleFilterChange = (type, value) => {
         setFilters(prev => ({ ...prev, [type]: value }));
     };
 
     const handleReset = () => {
-        setFilters({ price: null, area: null, amenities: [] });
+        setFilters(prev => ({
+            ...prev,
+            price: null,
+            area: null,
+            amenities: []
+        }));
         setSortType('popular');
     };
 
@@ -213,7 +225,6 @@ function PostList() {
                     onReset={handleReset}
                 />
 
-
                 <section className="room-listing-section">
                     {loading ? (
                         <div className="loading-state">Đang tải danh sách phòng...</div>
@@ -231,7 +242,6 @@ function PostList() {
                         </div>
                     )}
 
-                    {/* Chỉ hiển thị phân trang nếu có nhiều hơn 1 trang */}
                     {totalPages >= 1 && (
                         <Pagination
                             currentPage={currentPage}
