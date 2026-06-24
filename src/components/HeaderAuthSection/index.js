@@ -2,6 +2,7 @@ import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
 import './HeaderAuthSection.css';
+import config from '../../config';
 
 function HeaderAuthSection() {
     const navigate = useNavigate();
@@ -23,7 +24,7 @@ function HeaderAuthSection() {
     const handleLogout = () => {
         logout();
         setIsDropdownOpen(false);
-        navigate('/login');
+        navigate(config.routes.login);
     };
 
     // ── 🌟 Phân loại Role rõ ràng ──
@@ -49,7 +50,7 @@ function HeaderAuthSection() {
     // Trả về nút Đăng nhập nếu chưa có user session
     if (!user) {
         return (
-            <button id="btn-login" className="btn-login" onClick={() => navigate('/login')}>
+            <button id="btn-login" className="btn-login" onClick={() => navigate(config.routes.login)}>
                 Đăng nhập
             </button>
         );
@@ -99,11 +100,11 @@ function HeaderAuthSection() {
                         <div className="dropdown-divider" />
 
                         {/* Mục xem thông tin cá nhân (Tất cả các role đều có) */}
-                        <Link to="/profile" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
+                        <Link to={config.routes.profile} className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
                             <span className="di-icon">👤</span> Thông tin cá nhân
                         </Link>
                         {!isAdmin && (
-                            <Link to="/reports" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
+                            <Link to={config.routes.reports} className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
                                 <span className="di-icon">⚑</span> Báo cáo tài khoản
                             </Link>
                         )}
@@ -111,10 +112,10 @@ function HeaderAuthSection() {
                         {/* 2. 👤 MENU DÀNH CHO USER THƯỜNG (TENANT) */}
                         {isTenant && (
                             <>
-                                <Link to="/my-bookings" className="dropdown-item dropdown-item-highlight" onClick={() => setIsDropdownOpen(false)}>
+                                <Link to={config.routes.myBookings} className="dropdown-item dropdown-item-highlight" onClick={() => setIsDropdownOpen(false)}>
                                     <span className="di-icon">📅</span> Lịch sử xem phòng
                                 </Link>
-                                <Link to="/favorites" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
+                                <Link to={config.routes.favorites} className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
                                     <span className="di-icon">❤️</span> Phòng yêu thích
                                 </Link>
                             </>
@@ -125,13 +126,13 @@ function HeaderAuthSection() {
                             <>
                                 <div className="dropdown-divider" />
                                 <p className="dropdown-section-label">Quản lý chủ trọ</p>
-                                <Link to="/landlord" className="dropdown-item dropdown-item-landlord" onClick={() => setIsDropdownOpen(false)}>
+                                <Link to={config.routes.landlord} className="dropdown-item dropdown-item-landlord" onClick={() => setIsDropdownOpen(false)}>
                                     <span className="di-icon">🏘️</span> Dashboard chủ trọ
                                 </Link>
-                                <Link to="/post" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
+                                <Link to={config.routes.post} className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
                                     <span className="di-icon">📝</span> Đăng tin phòng
                                 </Link>
-                                <Link to="/packet" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
+                                <Link to={config.routes.packet} className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
                                     <span className="di-icon">💳</span> Gói Tin
                                 </Link>
                             </>
@@ -142,7 +143,7 @@ function HeaderAuthSection() {
                             <>
                                 <div className="dropdown-divider" />
                                 <p className="dropdown-section-label">Quản lý hệ thống</p>
-                                <Link to="/admin" className="dropdown-item dropdown-item-landlord" onClick={() => setIsDropdownOpen(false)} style={{ color: '#d46b08' }}>
+                                <Link to={config.routes.adminDashboard} className="dropdown-item dropdown-item-landlord" onClick={() => setIsDropdownOpen(false)} style={{ color: '#d46b08' }}>
                                     <span className="di-icon">⚙️</span> Dashboard Admin
                                 </Link>
                             </>

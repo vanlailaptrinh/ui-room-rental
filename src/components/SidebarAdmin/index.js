@@ -16,7 +16,7 @@ const SidebarAdmin = () => {
     { path: config.routes.adminVouchers, icon: 'confirmation_number', label: 'Quản lý Voucher' },
     { path: config.routes.adminBlacklist, icon: 'block', label: 'Quản lý Danh sách đen' },
     { path: config.routes.adminReports, icon: 'report', label: 'Quản lý Báo cáo' },
-    { path: config.routes.adminDisputes, icon: 'gavel', label: 'Xử lý tranh chấp' },
+    // { path: config.routes.adminDisputes, icon: 'gavel', label: 'Xử lý tranh chấp' },
     { path: config.routes.adminStatistics, icon: 'analytics', label: 'Thống kê hệ thống' },
 ];
 
