@@ -3,14 +3,11 @@ import './Pagination.css';
 import { IconChevronRight } from '../../assets/Icons';
 
 function Pagination({ currentPage, totalPages, onPageChange }) {
-
-    // Hàm tạo mảng các số trang hiển thị
     const getPageNumbers = () => {
         const pages = [];
         if (totalPages <= 5) {
             for (let i = 1; i <= totalPages; i++) pages.push(i);
         } else {
-            // Logic hiển thị có dấu ba chấm (Đơn giản hóa)
             if (currentPage <= 3) {
                 pages.push(1, 2, 3, '...', totalPages);
             } else if (currentPage >= totalPages - 2) {
@@ -23,25 +20,23 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
     };
 
     return (
-        <div className="pagination-container">
-            {/* Nút Quay lại */}
+        <div className="app-pagination__wrapper">
             <button
-                className={`page-nav-btn prev ${currentPage === 1 ? 'disabled' : ''}`}
+                className="app-pagination__btn app-pagination__btn--nav"
                 onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
                 disabled={currentPage === 1}
             >
                 <IconChevronRight width="20" style={{ transform: 'rotate(180deg)' }} />
             </button>
 
-            {/* Cụm số trang */}
-            <div className="page-numbers-group">
+            <div className="app-pagination__list">
                 {getPageNumbers().map((number, index) => (
                     number === '...' ? (
-                        <span key={`dots-${index}`} className="page-dots">...</span>
+                        <span key={`dots-${index}`} className="app-pagination__dots">...</span>
                     ) : (
                         <button
                             key={index}
-                            className={`page-num-btn ${currentPage === number ? 'active' : ''}`}
+                            className={`app-pagination__btn app-pagination__btn--number ${currentPage === number ? 'app-pagination__btn--active' : ''}`}
                             onClick={() => onPageChange(number)}
                         >
                             {number}
@@ -50,9 +45,8 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
                 ))}
             </div>
 
-            {/* Nút Tiếp */}
             <button
-                className={`page-nav-btn next ${currentPage === totalPages ? 'disabled' : ''}`}
+                className="app-pagination__btn app-pagination__btn--nav"
                 onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
             >
