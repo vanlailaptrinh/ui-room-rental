@@ -1,10 +1,10 @@
-/* Thiết lập container chính */
 .header-container {
     margin: 0;
     padding: 0 24px;
     height: 84px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     position: fixed;
     top: 0;
     left: 0;
@@ -14,7 +14,6 @@
     background-color: #F3F4F6;
 }
 
-/* --- Khối bên trái: Logo & Menu --- */
 .brand-and-nav {
     display: flex;
     align-items: center;
@@ -36,74 +35,34 @@
     gap: 32px;
 }
 
-/* Các link menu */
 .nav-link, .nav-link-active {
     font-size: 18px;
     font-weight: 600;
-    text-decoration: none;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    font-family: inherit;
     color: #6b7280;
+    white-space: nowrap;
+    transition: color 0.15s ease;
+}
+
+.nav-link:hover {
+    color: #1a73e8;
 }
 
 .nav-link-active {
     color: #1a73e8;
 }
 
-/* --- Khối bên giữa: Thanh tìm kiếm --- */
-.header-search-container {
+.header-right-actions {
     display: flex;
     align-items: center;
-    background-color: #E5E7EB;
-    border-radius: 9999px;
-    padding: 0 24px 0 20px;
-    transition: all 0.2s ease;
-    height: 54px;
-
-    width: 100%;
-    max-width: 650px;
-
-    margin: 0 auto;
-    gap: 12px;
-    border: 1px solid transparent;
+    gap: 16px;
 }
 
-.search-icon {
-    font-size: 22px;
-    color: #6b7280;
-    flex-shrink: 0;
-
-    position: static !important;
-    margin: 0 !important;
-    transform: none !important;
-}
-
-.header-search-container:focus-within {
-    background-color: #ffffff;
-    border-color: #1a73e8;
-    box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1);
-}
-
-.header-search-input {
-    background: transparent !important;
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-    font-size: 15px;
-    color: #111827;
-    width: 100%;
-    font-weight: 500;
-    padding: 0;
-}
-
-.header-search-input:focus,
-.header-search-input:focus-visible,
-.header-search-input:active {
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    background-color: transparent !important;
-}
-
-/* --- NÚT MENU MOBILE --- */
 .mobile-menu-btn {
     display: none;
     background: transparent;
@@ -120,16 +79,9 @@
     align-items: center;
 }
 
-/* =========================================
-   RESPONSIVE CHO HEADER (MEDIA QUERIES)
-========================================= */
-
 @media screen and (max-width: 1200px) {
     .brand-and-nav {
         gap: 40px;
-    }
-    .search-container {
-        margin-right: 20px;
     }
 }
 
@@ -138,30 +90,20 @@
         gap: 24px;
     }
     .header-nav-links {
-        gap: 16px;
+        gap: 20px;
     }
     .nav-link, .nav-link-active {
-        font-size: 15px;
-    }
-    .search-container {
-        width: 200px;
-        margin-right: 16px;
+        font-size: 16px;
     }
 }
 
 @media screen and (max-width: 768px) {
     .header-container {
         padding: 0 16px;
-        justify-content: space-between;
-    }
-
-    .search-container {
-        display: none;
     }
 
     .brand-and-nav {
         gap: 0;
-        align-items: center;
     }
 
     .header-logo {
@@ -171,7 +113,7 @@
     .header-nav-links {
         display: none;
         position: absolute;
-        top: 72px;
+        top: 84px;
         left: 0;
         width: 100%;
         background-color: #ffffff;
@@ -181,7 +123,7 @@
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         border-top: 1px solid #E5E7EB;
         gap: 24px;
-        z-index: 999;
+        z-index: 998;
     }
 
     .header-nav-links.open {
@@ -191,7 +133,9 @@
     .nav-link, .nav-link-active {
         font-size: 16px;
         width: 100%;
+        text-align: left;
         display: block;
+        padding: 4px 0;
     }
 
     .mobile-menu-btn {

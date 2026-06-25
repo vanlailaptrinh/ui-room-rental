@@ -1,69 +1,51 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './Header.css';
 import { useAuth } from '../../context/authContext';
 import NotificationBell from '../NotificationBell';
-import HeaderAuthSection from '../HeaderAuthSection'
+import HeaderAuthSection from '../HeaderAuthSection';
+import roomService from '../../services/roomService';
 
 function Header() {
+    const { user } = useAuth();
     const navigate = useNavigate();
-    const [searchQuery, setSearchQuery] = useState('');
-    const { user, logout } = useAuth();
+    const location = useLocation();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [roomTypes, setRoomTypes] = useState([]);
 
-    const [isMenuOpen,     setIsMenuOpen]     = useState(false);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const dropdownRef = useRef(null);
+    const searchParams = new URLSearchParams(location.search);
+    const activeTypeValue = searchParams.get('type');
 
-    // Đóng dropdown khi click ra ngoài
     useEffect(() => {
-        const handleOutside = (e) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-                setIsDropdownOpen(false);
+        const fetchRoomTypes = async () => {
+            try {
+                const result = await roomService.getRoomTypes();
+                if (result && result.code === 200 && Array.isArray(result.data)) {
+                    setRoomTypes(result.data);
+                }
+            } catch (error) {
+                console.error("Lỗi khi tải danh sách loại phòng ở Header:", error);
             }
         };
-        document.addEventListener('mousedown', handleOutside);
-        return () => document.removeEventListener('mousedown', handleOutside);
+        fetchRoomTypes();
     }, []);
 
-    const handleLogout = () => {
-        logout();
-        setIsDropdownOpen(false);
-        navigate('/login');
+    const handleRoomTypeClick = (type) => {
+        // Lấy trường "value" (ví dụ: APARTMENT, SINGLE) để truyền lên URL
+        const typeValue = type && typeof type === 'object' ? type.value : type;
+
+        if (typeValue) {
+            navigate(`/postlist?type=${encodeURIComponent(typeValue)}`);
+        } else {
+            navigate(`/postlist`);
+        }
+        setIsMenuOpen(false);
     };
 
-    // Kiểm tra role — BE có thể trả 'ROLE_LANDLORD' hoặc 'LANDLORD'
-    const role = user?.role || '';
-    const isLandlord = role.includes('LANDLORD') || role.includes('ADMIN');
-
-    // Chữ cái đại diện cho avatar
-    const initials = useMemo(() => {
-        const name = user?.fullName || user?.username || user?.email || 'User';
-        const parts = name.trim().split(/\s+/);
-
-        if (parts.length === 1) {
-            return parts[0].slice(0, 2).toUpperCase();
-        }
-        // Lấy chữ cái đầu của từ đầu tiên và từ cuối cùng
-        const firstChar = parts[0][0];
-        const lastChar = parts[parts.length - 1][0];
-
-        return (firstChar + lastChar).toUpperCase();
-    }, [user]);
-
-    // Hàm xử lý tìm kiếm
-    const handleSearch = (e) => {
-        if (e.key === 'Enter' || e.type === 'click') {
-            if (searchQuery.trim()) {
-                navigate(`/postlist?search=${encodeURIComponent(searchQuery.trim())}`);
-                setIsMenuOpen(false);
-            }
-        }
-    };
     return (
         <nav className="header-nav">
             <div className="header-container">
 
-                {/* ── Trái: Logo + Nav links ── */}
                 <div className="brand-and-nav">
                     <button className="mobile-menu-btn" onClick={() => setIsMenuOpen(v => !v)}>
                         <span className="material-symbols-outlined">
@@ -74,35 +56,32 @@ function Header() {
                     <Link to="/" className="header-logo">TroSinhVien</Link>
 
                     <div className={`header-nav-links ${isMenuOpen ? 'open' : ''}`}>
-                        <NavLink to="/postlist" className={({ isActive }) => isActive ? "nav-link-active" : "nav-link"}>Phòng</NavLink>
-                        <NavLink to="/uudai"    className={({ isActive }) => isActive ? "nav-link-active" : "nav-link"}>Ưu Đãi</NavLink>
+                        {roomTypes.map((type, index) => {
+                            const currentEncoding = type && typeof type === 'object' ? type.value : type;
+                            const displayName = type && typeof type === 'object' ? type.name : type;
+
+                            // So sánh khớp chính xác chữ viết hoa/thường (ví dụ: APARTMENT)
+                            const isActive = location.pathname === '/postlist' &&
+                                activeTypeValue &&
+                                decodeURIComponent(activeTypeValue).toUpperCase() === String(currentEncoding).toUpperCase();
+
+                            return (
+                                <button
+                                    key={currentEncoding || index}
+                                    className={isActive ? "nav-link-active" : "nav-link"}
+                                    onClick={() => handleRoomTypeClick(type)}
+                                >
+                                    {displayName}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
 
-                {/* ── Giữa: Thanh tìm kiếm ── */}
-                <div className="header-search-container">
-                    <span
-                        className="material-symbols-outlined search-icon"
-                        onClick={handleSearch}
-                        style={{ cursor: 'pointer' }}
-                    >
-                        search
-                    </span>
-                    <input
-                        className="header-search-input"
-                        placeholder="Tìm phòng..."
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyDown={handleSearch}
-                    />
+                <div className="header-right-actions">
+                    {user && <NotificationBell />}
+                    <HeaderAuthSection />
                 </div>
-
-                {/* ── Chuông thông báo (chỉ khi đã đăng nhập) ── */}
-                {user && <NotificationBell />}
-
-                {/* ── Phải: Avatar / Đăng nhập ── */}
-                <HeaderAuthSection />
 
             </div>
         </nav>
