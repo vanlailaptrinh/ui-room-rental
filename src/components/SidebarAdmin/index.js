@@ -8,6 +8,7 @@ const SidebarAdmin = () => {
 
   const menuItems = [
     { path: config.routes.adminDashboard, icon: 'dashboard', label: 'Bảng điều khiển' },
+    { path: config.routes.adminStatistics, icon: 'analytics', label: 'Thống kê hệ thống' },
     { path: config.routes.adminAccounts, icon: 'group', label: 'Quản lý Tài khoản' },
     { path: config.routes.adminAmenities, icon: 'widgets', label: 'Quản lý Tiện nghi' },
     { path: config.routes.adminFinance, icon: 'payments', label: 'Quản lý Tài chính' },
@@ -17,7 +18,6 @@ const SidebarAdmin = () => {
     { path: config.routes.adminBlacklist, icon: 'block', label: 'Quản lý Danh sách đen' },
     { path: config.routes.adminReports, icon: 'report', label: 'Quản lý Báo cáo' },
     // { path: config.routes.adminDisputes, icon: 'gavel', label: 'Xử lý tranh chấp' },
-    { path: config.routes.adminStatistics, icon: 'analytics', label: 'Thống kê hệ thống' },
 ];
 
   return (
