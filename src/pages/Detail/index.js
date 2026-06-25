@@ -10,6 +10,7 @@ import BookingService from '../../services/bookingService';
 import ChatService from '../../services/chatService';
 import FavoriteService from '../../services/favoriteService';
 import UserService from '../../services/userService';
+import ReviewService from '../../services/reviewService';
 import { useAuth } from '../../context/authContext';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -35,28 +36,31 @@ function Detail() {
     const [bookingTime, setBookingTime] = useState('10:00');
     const [bookingLoading, setBookingLoading] = useState(false);
     const [bookingResult, setBookingResult] = useState(null);
-    // Favorite state
+
     const [isFav, setIsFav] = useState(false);
     const [favLoading, setFavLoading] = useState(false);
     const [chatLoading, setChatLoading] = useState(false);
+
+    const [reviews, setReviews] = useState([]);
+    const [reviewLoading, setReviewLoading] = useState(false);
+    const [newRating, setNewRating] = useState(5);
+    const [newComment, setNewComment] = useState('');
+    const [submitReviewLoading, setSubmitReviewLoading] = useState(false);
 
     useEffect(() => {
         const fetchFullData = async () => {
             if (!id || id === ":1") return;
             try {
                 setLoading(true);
-                // 1. Lấy chi tiết bài đăng
                 const postRes = await api.get(`/posts/${id}`);
                 const postData = postRes.data?.data;
 
                 if (postData) {
                     setPost(postData);
 
-                    // 2. Lấy thông tin chủ nhà từ landlordId trong postData
                     if (postData.landlordId) {
                         try {
                             const landlordRes = await UserService.getUserById(postData.landlordId);
-                            // Theo BE của bạn, ApiResponse trả về data là UserResponse
                             setLandlord(landlordRes.data);
                         } catch (err) {
                             console.error("Lỗi lấy thông tin chủ nhà:", err);
@@ -80,6 +84,53 @@ function Detail() {
             .catch(() => {});
     }, [id, user]);
 
+    useEffect(() => {
+        if (!landlord?.id) return;
+
+        const fetchReviews = async () => {
+            try {
+                setReviewLoading(true);
+                const res = await ReviewService.getReviewsByLandlord(landlord.id);
+
+                if (res.code === 200) {
+                    const fetchedReviews = res.data || [];
+
+                    // 1. Lấy danh sách userId duy nhất từ các bài đánh giá để tránh gọi API trùng lặp
+                    const uniqueUserIds = [...new Set(fetchedReviews.map(rv => rv.userId).filter(Boolean))];
+
+                    // 2. Gọi API lấy thông tin chi tiết cho từng userId
+                    const userPromises = uniqueUserIds.map(userId =>
+                        UserService.getUserById(userId)
+                            .then(userRes => ({ id: userId, data: userRes.data }))
+                            .catch(() => ({ id: userId, data: null }))
+                    );
+
+                    const usersData = await Promise.all(userPromises);
+
+                    // 3. Tạo một object map userId => thông tin user
+                    const userMap = usersData.reduce((acc, curr) => {
+                        if (curr.data) acc[curr.id] = curr.data;
+                        return acc;
+                    }, {});
+
+                    // 4. Ghép thông tin user vào danh sách review
+                    const reviewsWithUsers = fetchedReviews.map(rv => ({
+                        ...rv,
+                        user: userMap[rv.userId] || null
+                    }));
+
+                    setReviews(reviewsWithUsers);
+                }
+            } catch (err) {
+                console.error("Lỗi lấy danh sách đánh giá:", err);
+            } finally {
+                setReviewLoading(false);
+            }
+        };
+
+        fetchReviews();
+    }, [landlord?.id]);
+
     const handleToggleFavorite = async () => {
         if (!user) { alert('Vui lòng đăng nhập để lưu yêu thích!'); return; }
         if (favLoading) return;
@@ -100,7 +151,6 @@ function Detail() {
         }
     };
 
-    // Nhắn tin cho chủ trọ
     const handleStartChat = async () => {
         if (!user) {
             alert('Vui lòng đăng nhập để nhắn tin!');
@@ -114,7 +164,6 @@ function Detail() {
         try {
             setChatLoading(true);
             const res = await ChatService.getOrCreateChatRoom(landlord.id);
-            // getOrCreateChatRoom trả về ApiResponse qua axios: response.data = { code, data: { roomId, ... } }
             const roomData = res?.data || res;
             const roomId = roomData?.roomId;
             if (!roomId) throw new Error('Không nhận được roomId từ server');
@@ -126,6 +175,40 @@ function Detail() {
             alert(err?.response?.data?.message || 'Không thể mở phòng chat. Vui lòng thử lại.');
         } finally {
             setChatLoading(false);
+        }
+    };
+
+    const handleSubmitReview = async (e) => {
+        e.preventDefault();
+        if (!user) {
+            alert('Vui lòng đăng nhập để đánh giá!');
+            return;
+        }
+        if (!newComment.trim()) {
+            alert('Vui lòng nhập nội dung đánh giá!');
+            return;
+        }
+        if (submitReviewLoading) return;
+
+        try {
+            setSubmitReviewLoading(true);
+            const res = await ReviewService.createReview({
+                rating: newRating,
+                comment: newComment,
+                landlordId: landlord.id
+            });
+
+            if (res.code === 200) {
+                alert('Gửi đánh giá thành công!');
+                setNewComment('');
+                setNewRating(5);
+                setReviews(prev => [{ ...res.data, user: user }, ...prev]);
+            }
+        } catch (err) {
+            console.error('Lỗi gửi đánh giá:', err);
+            alert(err?.response?.data?.message || 'Không thể gửi đánh giá. Vui lòng thử lại.');
+        } finally {
+            setSubmitReviewLoading(false);
         }
     };
 
@@ -143,7 +226,6 @@ function Detail() {
         const name = landlord.fullName || landlord.username || 'User';
         const parts = name.trim().split(' ');
         if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-        // Lấy chữ cái đầu của từ đầu tiên và từ cuối cùng
         return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }, [landlord]);
 
@@ -312,6 +394,82 @@ function Detail() {
                                 {chatLoading ? 'Đang kết nối...' : 'Nhắn tin'}
                             </button>
                         </div>
+
+                        {/* --- KHU VỰC ĐÁNH GIÁ CHỦ TRỌ ĐÃ ĐƯỢC TỐI ƯU UX/UI --- */}
+                        <section className="detail-section" style={{ marginTop: '24px', borderTop: '1px solid #edf2f7', paddingTop: '20px' }}>
+                            <div className="detail-section-title" style={{ marginBottom: '16px' }}>
+                                <span className="detail-title-line"></span> Đánh giá chủ trọ
+                            </div>
+
+                            <div className="detail-reviews-list" style={{ maxBoundedHeight: '280px', maxHeight: '280px', overflowY: 'auto', paddingRight: '4px' }}>
+                                {reviewLoading ? (
+                                    <p style={{ color: '#718096', fontSize: '14px' }}>Đang tải đánh giá...</p>
+                                ) : reviews.length > 0 ? (
+                                    reviews.map((rv) => (
+                                        <div key={rv.id} className="detail-review-card" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px', marginBottom: '10px' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                                                <div>
+                                                    <div style={{ fontWeight: '600', color: '#1a202c', fontSize: '14px', lineHeight: '1.2', marginBottom: '2px' }}>
+                                                        {rv.user?.fullName || rv.user?.username || 'Người dùng'}
+                                                    </div>
+                                                    <div style={{ color: '#ecc94b', fontSize: '13px', letterSpacing: '1px' }}>
+                                                        {"★".repeat(rv.rating)}{"☆".repeat(5 - rv.rating)}
+                                                    </div>
+                                                </div>
+                                                {rv.createdAt && (
+                                                    <span style={{ fontSize: '11px', color: '#a0aec0' }}>
+                                                {new Date(rv.createdAt).toLocaleDateString('vi-VN')}
+                                            </span>
+                                                )}
+                                            </div>
+                                            <p style={{ margin: 0, color: '#4a5568', fontSize: '13px', lineHeight: '1.4', whiteSpace: 'pre-line' }}>{rv.comment}</p>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p style={{ color: '#718096', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>Chưa có đánh giá nào.</p>
+                                )}
+                            </div>
+
+                            {user ? (
+                                <form onSubmit={handleSubmitReview} className="detail-review-form" style={{ marginTop: '16px', padding: '14px', backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                                    <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <label style={{ fontWeight: '500', fontSize: '13px', color: '#4a5568' }}>Chất lượng:</label>
+                                        <select
+                                            value={newRating}
+                                            onChange={(e) => setNewRating(Number(e.target.value))}
+                                            style={{ padding: '4px 8px', borderRadius: '6px', border: '1px solid #cbd5e0', fontSize: '13px', color: '#2d3748', outline: 'none' }}
+                                        >
+                                            <option value={5}>⭐⭐⭐⭐⭐</option>
+                                            <option value={4}>⭐⭐⭐⭐</option>
+                                            <option value={3}>⭐⭐⭐</option>
+                                            <option value={2}>⭐⭐</option>
+                                            <option value={1}>⭐</option>
+                                        </select>
+                                    </div>
+                                    <textarea
+                                        value={newComment}
+                                        onChange={(e) => setNewComment(e.target.value)}
+                                        placeholder="Viết phản hồi của bạn về chủ trọ..."
+                                        style={{ width: '100%', minHeight: '65px', maxHeight: '120px', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e0', marginBottom: '10px', boxSizing: 'border-box', fontFamily: 'inherit', fontSize: '13px', resize: 'vertical', outline: 'none' }}
+                                        required
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="detail-btn-primary"
+                                        disabled={submitReviewLoading}
+                                        style={{ width: '100%', padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: '500' }}
+                                    >
+                                        {submitReviewLoading ? 'Đang gửi...' : 'Gửi đánh giá'}
+                                    </button>
+                                </form>
+                            ) : (
+                                <div style={{ marginTop: '16px', padding: '12px 16px', textAlign: 'center', backgroundColor: '#f0f7ff', borderRadius: '8px', border: '1px solid #e1f0ff' }}>
+                                    <p style={{ margin: 0, color: '#4a5568', fontSize: '13px' }}>
+                                        Vui lòng <span style={{ color: '#2b6cb0', cursor: 'pointer', fontWeight: '600', textDecoration: 'underline' }} onClick={() => navigate('/login')}>đăng nhập</span> để để lại đánh giá.
+                                    </p>
+                                </div>
+                            )}
+                        </section>
                     </div>
                 </div>
             </div>
