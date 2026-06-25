@@ -4,23 +4,51 @@ import { IconChevronRight } from '../../assets/Icons';
 import PropertyCard from "../../components/PropertyCard";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
+import { useNotification, NOTI_CONFIG } from '../../context/notificationContext';
 import UserService from '../../services/userService';
 import PostService from '../../services/postService';
+import FavoriteService from '../../services/favoriteService';
+import BookingService from '../../services/bookingService';
+
+const formatDateTime = (isoStr) => {
+    if (!isoStr) return '—';
+    const d = new Date(isoStr);
+    return d.toLocaleString('vi-VN', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+    });
+};
+
+const getStatusInfo = (status) => {
+    const map = {
+        PENDING:   { label: 'Chờ xác nhận', cls: 'badge-pending' },
+        APPROVED:  { label: 'Đã duyệt',     cls: 'badge-approved' },
+        REJECTED:  { label: 'Từ chối',       cls: 'badge-rejected' },
+        CANCELLED: { label: 'Đã hủy',        cls: 'badge-cancelled' },
+    };
+    return map[status] || { label: status, cls: '' };
+};
 
 function Profile() {
     const [activeTab, setActiveTab] = useState('personal');
     const { user, logout, refreshUserProfile } = useAuth();
+    const { notifications, unreadCount, markRead, markAllRead } = useNotification();
     const navigate = useNavigate();
+
     const [isSaving, setIsSaving] = useState(false);
     const [viewHistory, setViewHistory] = useState([]);
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+    const [favorites, setFavorites] = useState([]);
+    const [isLoadingFavorites, setIsLoadingFavorites] = useState(false);
+    const [bookings, setBookings] = useState([]);
+    const [isLoadingBookings, setIsLoadingBookings] = useState(false);
+    const [cancellingId, setCancellingId] = useState(null);
 
     const [formData, setFormData] = useState({
         username: '',
         phone: ''
     });
 
-    // 2. Load dữ liệu khởi tạo
     useEffect(() => {
         const fetchFullProfile = async () => {
             try {
@@ -32,64 +60,97 @@ function Profile() {
                     phone: userData.phone || ''
                 });
             } catch (error) {
-                console.error("Lỗi khi tải profile:", error);
+                console.error(error);
             }
         };
+
+        const fetchFavorites = async () => {
+            try {
+                setIsLoadingFavorites(true);
+                const response = await FavoriteService.getMyFavorites();
+                setFavorites(response.data || []);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setIsLoadingFavorites(false);
+            }
+        };
+
         fetchFullProfile();
+        fetchFavorites();
     }, []);
+
     useEffect(() => {
         if (activeTab === 'history') {
             const fetchHistory = async () => {
                 try {
                     setIsLoadingHistory(true);
                     const response = await PostService.getPostHistory();
-                    console.log("Dữ liệu lịch sử chuẩn bị gán:", response.data);
                     setViewHistory(response.data || []);
                 } catch (error) {
-                    console.error("Không thể tải lịch sử:", error);
+                    console.error(error);
                 } finally {
                     setIsLoadingHistory(false);
                 }
             };
             fetchHistory();
         }
+
+        if (activeTab === 'calendar') {
+            const fetchBookings = async () => {
+                try {
+                    setIsLoadingBookings(true);
+                    const response = await BookingService.getMyBookings();
+                    setBookings(response.data || []);
+                } catch (error) {
+                    console.error(error);
+                } finally {
+                    setIsLoadingBookings(false);
+                }
+            };
+            fetchBookings();
+        }
     }, [activeTab]);
 
-    // 3. Hàm cập nhật state khi nhập liệu
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    // 4. Hàm xử lý lưu
     const handleSaveChanges = async () => {
         try {
             setIsSaving(true);
-
-            // Tạo đối tượng FormData giống hệt cách Postman gửi
             const data = new FormData();
             data.append('username', formData.username);
             data.append('phone', formData.phone);
 
-            // Nếu bạn có xử lý ảnh avatar thì append vào đây,
-            // hiện tại nếu không có thì để trống hoặc không append.
-            // data.append('avatar', fileInput.files[0]);
-
-            console.log("Đang gửi dữ liệu kiểu FormData...");
             const response = await UserService.updateProfile(data);
 
             if (response.code === 200) {
-                alert("Cập nhật thành công!");
+                alert("Cập nhật thông tin thành công!");
                 await refreshUserProfile();
             }
         } catch (error) {
-            console.error("Lỗi cập nhật:", error);
-            alert("Cập nhật thất bại!");
+            console.error(error);
+            alert("Cập nhật thất bại. Vui lòng thử lại!");
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleCancelBooking = async (id) => {
+        if (!window.confirm("Bạn có chắc chắn muốn hủy lịch hẹn xem phòng này?")) return;
+        try {
+            setCancellingId(id);
+            await BookingService.cancelBooking(id);
+            setBookings(prev =>
+                prev.map(b => b.id === id ? { ...b, status: 'CANCELLED' } : b)
+            );
+        } catch (error) {
+            console.error(error);
+            alert("Hủy lịch hẹn không thành công. Có thể lịch hẹn đã được phía chủ nhà xử lý.");
+        } finally {
+            setCancellingId(null);
         }
     };
 
@@ -120,10 +181,6 @@ function Profile() {
                         <span className="material-symbols-outlined">person</span>
                         Thông tin cá nhân
                     </a>
-                    <a href="#password" className="nav-item">
-                        <span className="material-symbols-outlined">lock_reset</span>
-                        Đổi mật khẩu
-                    </a>
                     <a
                         href="#favorite"
                         className={`nav-item ${activeTab === 'favorite' ? 'active' : ''}`}
@@ -148,14 +205,17 @@ function Profile() {
                         <span className="material-symbols-outlined">calendar_month</span>
                         Lịch hẹn
                     </a>
-                    <a href="#Notification" className="nav-item">
+                    <a
+                        href="#Notification"
+                        className={`nav-item ${activeTab === 'Notification' ? 'active' : ''}`}
+                        onClick={(e) => handleTabChange(e, 'Notification')}
+                    >
                         <span className="material-symbols-outlined">notifications</span>
                         Thông báo
                     </a>
                 </nav>
 
                 <div className="sidebar-footer">
-                    {/* Gắn hàm Đăng xuất vào đây */}
                     <button onClick={handleLogoutClick} className="btn-secondary-full">Đăng xuất</button>
                 </div>
             </aside>
@@ -189,7 +249,7 @@ function Profile() {
                                     <label>Họ và tên</label>
                                     <input
                                         type="text"
-                                        name="username" // KHỚP VỚI STATE
+                                        name="username"
                                         value={formData.username}
                                         onChange={handleInputChange}
                                     />
@@ -202,12 +262,11 @@ function Profile() {
                                     <label>Số điện thoại</label>
                                     <input
                                         type="tel"
-                                        name="phone" // KHỚP VỚI STATE
+                                        name="phone"
                                         value={formData.phone}
                                         onChange={handleInputChange}
                                     />
                                 </div>
-                                {/* ĐÃ XÓA INPUT ADDRESS TẠI ĐÂY */}
                             </div>
 
                             <div className="form-actions">
@@ -218,201 +277,137 @@ function Profile() {
                             </div>
                         </div>
 
-                        {/* Section phòng đã lưu */}
                         <div className="saved-section">
                             <div className="section-flex-header">
                                 <h2>Phòng đã lưu gần đây</h2>
-                                <button className="btn-text">
+                                <button className="btn-text" onClick={(e) => handleTabChange(e, 'favorite')}>
                                     Xem tất cả <IconChevronRight width="16"/>
                                 </button>
                             </div>
 
                             <div className="saved-grid">
-                                <PropertyCard/>
-                                <PropertyCard/>
-                                <PropertyCard/>
+                                {favorites && favorites.length > 0 ? (
+                                    favorites.slice(0, 3).map((item) => (
+                                        <PropertyCard key={item.id} data={item.post} />
+                                    ))
+                                ) : (
+                                    <p className="txt-muted-sm">Chưa có phòng nào được lưu.</p>
+                                )}
                             </div>
                         </div>
                     </div>
                 )}
 
                 {activeTab === 'calendar' && (
-                    <div className="fade-in-animation apt-container">
-                        <header className="apt-header">
-                            <h1>Lịch Hẹn Của Tôi</h1>
-                            <p>Quản lý các buổi tham quan và trao đổi với chủ hộ của bạn.</p>
+                    <div className="fade-in-animation booking-tab-container">
+                        <header className="booking-tab-header">
+                            <div className="header-title-block">
+                                <h1>📅 Lịch hẹn của tôi</h1>
+                                <p className="header-subtitle">Theo dõi và quản lý tiến độ các buổi gặp mặt xem phòng trực tiếp.</p>
+                            </div>
+                            <span className="booking-count-indicator">
+                                {bookings.length} lịch hẹn
+                            </span>
                         </header>
 
-                        <div className="apt-dashboard">
-                            {/* Cột trái: Danh sách lịch hẹn */}
-                            <div className="apt-list-section">
-                                <div className="apt-section-header">
-                                    <h2>Lịch hẹn sắp tới</h2>
-                                    <button className="btn-view-all">Xem tất cả</button>
-                                </div>
+                        <div className="booking-dashboard-layout">
+                            <div className="booking-cards-list">
+                                {isLoadingBookings ? (
+                                    <div className="loading-spinner-box">
+                                        <div className="spinner-element"></div>
+                                        <span>Đang tải danh sách lịch hẹn...</span>
+                                    </div>
+                                ) : bookings && bookings.length > 0 ? (
+                                    bookings.map((item) => {
+                                        const statusInfo = getStatusInfo(item.status);
+                                        return (
+                                            <div className={`booking-item-card ${item.status?.toLowerCase()}`} key={item.id}>
+                                                <div className="booking-thumb-wrapper">
+                                                    <img
+                                                        alt={item.post?.title || 'Hình ảnh phòng'}
+                                                        src={item.post?.images?.[0] || item.post?.thumbnail || `https://picsum.photos/200/140?random=${item.id}`}
+                                                    />
+                                                </div>
 
-                                {/* Thẻ lịch hẹn 1 */}
-                                <div className="apt-card">
-                                    <div className="apt-card-image">
-                                        <img alt="Apartment interior"
-                                             src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267"/>
-                                    </div>
-                                    <div className="apt-card-content">
-                                        <div className="apt-card-top">
-                                            <div className="apt-title-row">
-                                                <h3>The Zenith Penthouse - Studio 402</h3>
-                                                <span className="apt-badge badge-success">Đã xác nhận</span>
-                                            </div>
-                                            <p className="apt-location">
-                                                <span className="material-symbols-outlined">location_on</span> Quận 1,
-                                                TP. Hồ Chí Minh
-                                            </p>
-                                            <div className="apt-time-tags">
-                                                <div className="apt-tag">
-                                                    <span className="material-symbols-outlined icon-blue">event</span>
-                                                    <span>Thứ Sáu, 24 Tháng 5</span>
-                                                </div>
-                                                <div className="apt-tag">
-                                                    <span
-                                                        className="material-symbols-outlined icon-blue">schedule</span>
-                                                    <span>14:30 - 15:30</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="apt-card-bottom">
-                                            <div className="apt-landlord">
-                                                <img alt="Landlord profile" src="https://i.pravatar.cc/150?u=minh"/>
-                                                <div className="apt-landlord-info">
-                                                    <span className="label">Chủ hộ</span>
-                                                    <span className="name">Ông Minh Trần</span>
-                                                </div>
-                                            </div>
-                                            <div className="apt-actions">
-                                                <button className="btn-apt-chat">
-                                                    <span className="material-symbols-outlined">chat_bubble</span> Nhắn
-                                                    tin
-                                                </button>
-                                                <button className="btn-apt-detail">Chi tiết</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                                <div className="booking-details-content">
+                                                    <div className="details-header-row">
+                                                        <h3 onClick={() => item.post?.id && navigate(`/detail/${item.post.id}`)}>
+                                                            {item.post?.title || 'Phòng chưa có tiêu đề'}
+                                                        </h3>
+                                                        <span className={`status-badge-pill ${statusInfo.cls}`}>
+                                                            {statusInfo.label}
+                                                        </span>
+                                                    </div>
 
-                                {/* Thẻ lịch hẹn 2 */}
-                                <div className="apt-card">
-                                    <div className="apt-card-image">
-                                        <img alt="Shared room interior"
-                                             src="https://images.unsplash.com/photo-1555854877-bab0e564b8d5"/>
-                                    </div>
-                                    <div className="apt-card-content">
-                                        <div className="apt-card-top">
-                                            <div className="apt-title-row">
-                                                <h3>Harmony Co-living - Phòng Đôi</h3>
-                                                <span className="apt-badge badge-pending">Chờ xác nhận</span>
-                                            </div>
-                                            <p className="apt-location">
-                                                <span className="material-symbols-outlined">location_on</span> Quận 7,
-                                                TP. Hồ Chí Minh
-                                            </p>
-                                            <div className="apt-time-tags">
-                                                <div className="apt-tag">
-                                                    <span className="material-symbols-outlined icon-blue">event</span>
-                                                    <span>Chủ Nhật, 26 Tháng 5</span>
-                                                </div>
-                                                <div className="apt-tag">
-                                                    <span
-                                                        className="material-symbols-outlined icon-blue">schedule</span>
-                                                    <span>10:00 - 11:00</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="apt-card-bottom">
-                                            <div className="apt-landlord">
-                                                <img alt="Landlord profile" src="https://i.pravatar.cc/150?u=linh"/>
-                                                <div className="apt-landlord-info">
-                                                    <span className="label">Chủ hộ</span>
-                                                    <span className="name">Bà Linh Nguyễn</span>
-                                                </div>
-                                            </div>
-                                            <div className="apt-actions">
-                                                <button className="btn-apt-chat">
-                                                    <span className="material-symbols-outlined">chat_bubble</span> Nhắn
-                                                    tin
-                                                </button>
-                                                <button className="btn-apt-detail">Chi tiết</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                                                    <p className="booking-location-text">
+                                                        <span className="material-symbols-outlined icon-red">location_on</span>
+                                                        {item.post?.address || 'Chưa cập nhật địa chỉ'}
+                                                    </p>
 
-                            {/* Cột phải: Mini Calendar */}
-                            <div className="apt-sidebar">
-                                <div className="apt-calendar-widget">
-                                    <div className="apt-cal-header">
-                                        <h3>Tháng 5, 2024</h3>
-                                        <div className="apt-cal-nav">
-                                            <button><span className="material-symbols-outlined">chevron_left</span>
-                                            </button>
-                                            <button><span className="material-symbols-outlined">chevron_right</span>
-                                            </button>
-                                        </div>
+                                                    <div className="booking-info-tags-grid">
+                                                        <div className="info-tag-line">
+                                                            <span className="material-symbols-outlined">schedule</span>
+                                                            <span>Thời gian hẹn: <strong>{formatDateTime(item.bookingTime)}</strong></span>
+                                                        </div>
+                                                        <div className="info-tag-line">
+                                                            <span className="material-symbols-outlined">calendar_today</span>
+                                                            <span>Ngày đăng ký: {formatDateTime(item.createdAt)}</span>
+                                                        </div>
+                                                        {item.post?.price && (
+                                                            <div className="info-tag-line price-highlight">
+                                                                <span className="material-symbols-outlined">payments</span>
+                                                                <span>{item.post.price.toLocaleString('vi-VN')}đ / tháng</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="booking-action-footer">
+                                                        {item.status === 'PENDING' && (
+                                                            <button
+                                                                className="btn-outline-danger"
+                                                                onClick={() => handleCancelBooking(item.id)}
+                                                                disabled={cancellingId === item.id}
+                                                            >
+                                                                {cancellingId === item.id ? 'Đang xử lý...' : 'Hủy lịch hẹn'}
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            className="btn-solid-primary"
+                                                            onClick={() => item.post?.id && navigate(`/detail/${item.post.id}`)}
+                                                        >
+                                                            Xem chi tiết phòng
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="booking-empty-state">
+                                        <span className="material-symbols-outlined empty-icon-large">calendar_today</span>
+                                        <h3>Danh sách lịch hẹn trống</h3>
+                                        <p>Bạn chưa thực hiện cuộc hẹn xem phòng nào. Khám phá các căn phòng phù hợp xung quanh bạn ngay!</p>
+                                        <button
+                                            className="btn-primary-action-lg"
+                                            onClick={() => navigate('/postlist')}
+                                        >
+                                            Tìm phòng ngay
+                                        </button>
                                     </div>
-                                    <div className="apt-cal-days">
-                                        <span>CN</span><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span>
-                                    </div>
-                                    <div className="apt-cal-dates">
-                                        <div className="date prev-month">28</div>
-                                        <div className="date prev-month">29</div>
-                                        <div className="date prev-month">30</div>
-                                        <div className="date">1</div>
-                                        <div className="date">2</div>
-                                        <div className="date">3</div>
-                                        <div className="date">4</div>
-                                        <div className="date">5</div>
-                                        <div className="date">6</div>
-                                        <div className="date">7</div>
-                                        <div className="date">8</div>
-                                        <div className="date">9</div>
-                                        <div className="date">10</div>
-                                        <div className="date">11</div>
-                                        <div className="date">12</div>
-                                        <div className="date">13</div>
-                                        <div className="date has-event event-blue">14</div>
-                                        <div className="date">15</div>
-                                        <div className="date">16</div>
-                                        <div className="date">17</div>
-                                        <div className="date">18</div>
-                                        <div className="date">19</div>
-                                        <div className="date">20</div>
-                                        <div className="date">21</div>
-                                        <div className="date">22</div>
-                                        <div className="date">23</div>
-                                        <div className="date active">24</div>
-                                        <div className="date has-event event-blue">25</div>
-                                        <div className="date has-event event-yellow">26</div>
-                                        <div className="date">27</div>
-                                        <div className="date">28</div>
-                                        <div className="date">29</div>
-                                        <div className="date">30</div>
-                                        <div className="date">31</div>
-                                    </div>
-                                </div>
+                                )}
                             </div>
                         </div>
                     </div>
                 )}
+
                 {activeTab === 'history' && (
                     <div className="saved-section fade-in-animation">
                         <div className="section-flex-header">
                             <h2>Lịch sử xem phòng</h2>
-                            <button className="btn-text">
-                                Xem tất cả <IconChevronRight width="16"/>
-                            </button>
                         </div>
 
                         {isLoadingHistory ? (
-                            <div className="loading-spinner">Đang tải lịch sử...</div>
+                            <div className="loading-spinner-box">Đang tải lịch sử...</div>
                         ) : viewHistory && viewHistory.length > 0 ? (
                             <div className="saved-grid">
                                 {viewHistory.map((item) => (
@@ -423,26 +418,102 @@ function Profile() {
                                 ))}
                             </div>
                         ) : (
-                            <div className="empty-state">
-                                <span className="material-symbols-outlined" style={{fontSize: '48px', color: '#ccc'}}>history</span>
-                                <p>Bạn chưa xem phòng nào gần đây.</p>
+                            <div className="booking-empty-state">
+                                <span className="material-symbols-outlined empty-icon-large">history</span>
+                                <p>Bạn chưa truy cập xem chi tiết phòng nào gần đây.</p>
                             </div>
                         )}
                     </div>
                 )}
+
                 {activeTab === 'favorite' && (
-                    <div className="saved-section">
+                    <div className="saved-section fade-in-animation">
                         <div className="section-flex-header">
-                            <h2>Phòng đã lưu gần đây</h2>
-                            <button className="btn-text">
-                                Xem tất cả <IconChevronRight width="16"/>
-                            </button>
+                            <h2>Phòng đã lưu điều hướng</h2>
                         </div>
 
-                        <div className="saved-grid">
-                            <PropertyCard/>
-                            <PropertyCard/>
-                            <PropertyCard/>
+                        {isLoadingFavorites ? (
+                            <div className="loading-spinner-box">Đang tải danh sách yêu thích...</div>
+                        ) : favorites && favorites.length > 0 ? (
+                            <div className="saved-grid">
+                                {favorites.map((item) => (
+                                    <PropertyCard
+                                        key={item.id}
+                                        data={item.post}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="booking-empty-state">
+                                <span className="material-symbols-outlined empty-icon-large">favorite_border</span>
+                                <p>Danh sách phòng yêu thích hiện tại đang trống.</p>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {activeTab === 'Notification' && (
+                    <div className="fade-in-animation notification-tab-container">
+                        <header className="booking-tab-header">
+                            <div className="header-title-block">
+                                <h1>🔔 Thông báo của bạn</h1>
+                                <p className="header-subtitle">Cập nhật trạng thái lịch hẹn và tin nhắn thời gian thực.</p>
+                            </div>
+                            {unreadCount > 0 && (
+                                <button className="btn-mark-all-read" onClick={markAllRead}>
+                                    <span className="material-symbols-outlined">done_all</span>
+                                    Đánh dấu đã đọc tất cả ({unreadCount})
+                                </button>
+                            )}
+                        </header>
+
+                        <div className="notification-list">
+                            {notifications && notifications.length > 0 ? (
+                                notifications.map((noti) => {
+                                    const config = NOTI_CONFIG[noti.type] || {
+                                        icon: '📢',
+                                        color: '#475569',
+                                        bg: '#f8fafc',
+                                        label: 'Hệ thống'
+                                    };
+
+                                    return (
+                                        <div
+                                            key={noti.id}
+                                            className={`notification-item-card ${noti.isRead ? 'read' : 'unread'}`}
+                                            onClick={() => !noti.isRead && markRead(noti.id)}
+                                        >
+                                            <div
+                                                className="noti-icon-badge"
+                                                style={{ backgroundColor: config.bg, color: config.color }}
+                                            >
+                                                <span className="noti-emoji">{config.icon}</span>
+                                            </div>
+
+                                            <div className="noti-main-content">
+                                                <div className="noti-meta-row">
+                                                    <span className="noti-type-tag" style={{ color: config.color }}>
+                                                        {config.label}
+                                                    </span>
+                                                    <span className="noti-time-text">
+                                                        {formatDateTime(noti.createdAt)}
+                                                    </span>
+                                                </div>
+                                                <h3 className="noti-title">{noti.title}</h3>
+                                                <p className="noti-message">{noti.message || noti.content}</p>
+                                            </div>
+
+                                            {!noti.isRead && <div className="unread-dot-indicator"></div>}
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <div className="booking-empty-state">
+                                    <span className="material-symbols-outlined empty-icon-large">notifications_off</span>
+                                    <h3>Hộp thư trống</h3>
+                                    <p>Bạn không có thông báo nào vào lúc này. Mọi cập nhật quan trọng sẽ xuất hiện ở đây.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

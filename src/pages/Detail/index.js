@@ -10,6 +10,7 @@ import BookingService from '../../services/bookingService';
 import ChatService from '../../services/chatService';
 import FavoriteService from '../../services/favoriteService';
 import UserService from '../../services/userService';
+import ReviewService from '../../services/reviewService';
 import { useAuth } from '../../context/authContext';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -35,28 +36,31 @@ function Detail() {
     const [bookingTime, setBookingTime] = useState('10:00');
     const [bookingLoading, setBookingLoading] = useState(false);
     const [bookingResult, setBookingResult] = useState(null);
-    // Favorite state
+
     const [isFav, setIsFav] = useState(false);
     const [favLoading, setFavLoading] = useState(false);
     const [chatLoading, setChatLoading] = useState(false);
+
+    const [reviews, setReviews] = useState([]);
+    const [reviewLoading, setReviewLoading] = useState(false);
+    const [newRating, setNewRating] = useState(5);
+    const [newComment, setNewComment] = useState('');
+    const [submitReviewLoading, setSubmitReviewLoading] = useState(false);
 
     useEffect(() => {
         const fetchFullData = async () => {
             if (!id || id === ":1") return;
             try {
                 setLoading(true);
-                // 1. Lấy chi tiết bài đăng
                 const postRes = await api.get(`/posts/${id}`);
                 const postData = postRes.data?.data;
 
                 if (postData) {
                     setPost(postData);
 
-                    // 2. Lấy thông tin chủ nhà từ landlordId trong postData
                     if (postData.landlordId) {
                         try {
                             const landlordRes = await UserService.getUserById(postData.landlordId);
-                            // Theo BE của bạn, ApiResponse trả về data là UserResponse
                             setLandlord(landlordRes.data);
                         } catch (err) {
                             console.error("Lỗi lấy thông tin chủ nhà:", err);
@@ -80,6 +84,53 @@ function Detail() {
             .catch(() => {});
     }, [id, user]);
 
+    useEffect(() => {
+        if (!landlord?.id) return;
+
+        const fetchReviews = async () => {
+            try {
+                setReviewLoading(true);
+                const res = await ReviewService.getReviewsByLandlord(landlord.id);
+
+                if (res.code === 200) {
+                    const fetchedReviews = res.data || [];
+
+                    // 1. Lấy danh sách userId duy nhất từ các bài đánh giá để tránh gọi API trùng lặp
+                    const uniqueUserIds = [...new Set(fetchedReviews.map(rv => rv.userId).filter(Boolean))];
+
+                    // 2. Gọi API lấy thông tin chi tiết cho từng userId
+                    const userPromises = uniqueUserIds.map(userId =>
+                        UserService.getUserById(userId)
+                            .then(userRes => ({ id: userId, data: userRes.data }))
+                            .catch(() => ({ id: userId, data: null }))
+                    );
+
+                    const usersData = await Promise.all(userPromises);
+
+                    // 3. Tạo một object map userId => thông tin user
+                    const userMap = usersData.reduce((acc, curr) => {
+                        if (curr.data) acc[curr.id] = curr.data;
+                        return acc;
+                    }, {});
+
+                    // 4. Ghép thông tin user vào danh sách review
+                    const reviewsWithUsers = fetchedReviews.map(rv => ({
+                        ...rv,
+                        user: userMap[rv.userId] || null
+                    }));
+
+                    setReviews(reviewsWithUsers);
+                }
+            } catch (err) {
+                console.error("Lỗi lấy danh sách đánh giá:", err);
+            } finally {
+                setReviewLoading(false);
+            }
+        };
+
+        fetchReviews();
+    }, [landlord?.id]);
+
     const handleToggleFavorite = async () => {
         if (!user) { alert('Vui lòng đăng nhập để lưu yêu thích!'); return; }
         if (favLoading) return;
@@ -100,7 +151,6 @@ function Detail() {
         }
     };
 
-    // Nhắn tin cho chủ trọ
     const handleStartChat = async () => {
         if (!user) {
             alert('Vui lòng đăng nhập để nhắn tin!');
@@ -114,7 +164,6 @@ function Detail() {
         try {
             setChatLoading(true);
             const res = await ChatService.getOrCreateChatRoom(landlord.id);
-            // getOrCreateChatRoom trả về ApiResponse qua axios: response.data = { code, data: { roomId, ... } }
             const roomData = res?.data || res;
             const roomId = roomData?.roomId;
             if (!roomId) throw new Error('Không nhận được roomId từ server');
@@ -126,6 +175,40 @@ function Detail() {
             alert(err?.response?.data?.message || 'Không thể mở phòng chat. Vui lòng thử lại.');
         } finally {
             setChatLoading(false);
+        }
+    };
+
+    const handleSubmitReview = async (e) => {
+        e.preventDefault();
+        if (!user) {
+            alert('Vui lòng đăng nhập để đánh giá!');
+            return;
+        }
+        if (!newComment.trim()) {
+            alert('Vui lòng nhập nội dung đánh giá!');
+            return;
+        }
+        if (submitReviewLoading) return;
+
+        try {
+            setSubmitReviewLoading(true);
+            const res = await ReviewService.createReview({
+                rating: newRating,
+                comment: newComment,
+                landlordId: landlord.id
+            });
+
+            if (res.code === 200) {
+                alert('Gửi đánh giá thành công!');
+                setNewComment('');
+                setNewRating(5);
+                setReviews(prev => [{ ...res.data, user: user }, ...prev]);
+            }
+        } catch (err) {
+            console.error('Lỗi gửi đánh giá:', err);
+            alert(err?.response?.data?.message || 'Không thể gửi đánh giá. Vui lòng thử lại.');
+        } finally {
+            setSubmitReviewLoading(false);
         }
     };
 
@@ -143,7 +226,6 @@ function Detail() {
         const name = landlord.fullName || landlord.username || 'User';
         const parts = name.trim().split(' ');
         if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-        // Lấy chữ cái đầu của từ đầu tiên và từ cuối cùng
         return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }, [landlord]);
 
@@ -175,15 +257,35 @@ function Detail() {
                         </div>
                     </section>
 
-                    <section className="detail-section">
-                        <div className="detail-section-title"><span className="detail-title-line"></span> Nội dung bài đăng</div>
+                    <div className="detail-mobile-hero-info">
+                        <h1 className="detail-mobile-title">{post.title}</h1>
+                        <div className="detail-mobile-address">
+                            <IconLocation width="16" />
+                            <span>{post.address}</span>
+                        </div>
+                        <div className="detail-mobile-price-row">
+                            <span className="detail-mobile-price">{post.price?.toLocaleString()}đ<small>/tháng</small></span>
+                        </div>
+                        <div className="detail-mobile-stats">
+                            <div className="detail-mobile-stat-box">
+                                <span className="detail-mobile-stat-lbl">Diện tích</span>
+                                <span className="detail-mobile-stat-val">{post.area} m²</span>
+                            </div>
+                            <div className="detail-mobile-stat-box">
+                                <span className="detail-mobile-stat-lbl">Lượt xem</span>
+                                <span className="detail-mobile-stat-val">{post.views}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <section className="detail-section detail-section-content">
+                        <div className="detail-section-title"><span className="detail-title-line"></span> Thông tin chi tiết</div>
                         <div className="detail-description-text">
-                            <h3>{post.title}</h3>
                             <p style={{ whiteSpace: 'pre-line' }}>{post.content}</p>
                         </div>
                     </section>
 
-                    <section className="detail-section">
+                    <section className="detail-section detail-section-amenities">
                         <div className="detail-section-title"><span className="detail-title-line"></span> Tiện ích phòng</div>
                         <div className="detail-amenities-grid">
                             {post.amenities && post.amenities.length > 0 ? (
@@ -193,16 +295,36 @@ function Detail() {
                                     </div>
                                 ))
                             ) : (
-                                <p>Chưa cập nhật tiện ích.</p>
+                                <p className="detail-empty-text">Chưa cập nhật tiện ích.</p>
                             )}
                         </div>
                     </section>
 
-                    <section className="detail-section">
-                        <div className="detail-section-title">
-                            <span className="detail-title-line"></span> Vị trí
+                    <div className="detail-mobile-landlord-wrapper">
+                        <div className="detail-landlord-card">
+                            <div className="detail-avatar-wrapper">
+                                {landlord?.avatar ? (
+                                    <img src={landlord.avatar} className="detail-avatar-img" alt="Host" />
+                                ) : (
+                                    <div className="detail-avatar-circle">{landlordInitials}</div>
+                                )}
+                            </div>
+                            <div className="detail-landlord-info">
+                                <h4>{landlord?.fullName || landlord?.username || 'Đang tải...'}</h4>
+                                <div className="detail-verified-badge">
+                                    <IconVerified width="12" />
+                                    Chủ trọ
+                                </div>
+                            </div>
+                            <button className="detail-btn-chat" onClick={handleStartChat} disabled={chatLoading}>
+                                {chatLoading ? '...' : 'Nhắn tin'}
+                            </button>
                         </div>
-                        <div className="detail-map-wrapper" style={{ height: '400px', width: '100%', borderRadius: '12px', overflow: 'hidden', marginTop: '15px', border: '1px solid #e0e0e0' }}>
+                    </div>
+
+                    <section className="detail-section detail-section-map">
+                        <div className="detail-section-title"><span className="detail-title-line"></span> Vị trí bản đồ</div>
+                        <div className="detail-map-wrapper">
                             {post.latitude && post.longitude ? (
                                 <MapContainer
                                     center={[post.latitude, post.longitude]}
@@ -215,17 +337,15 @@ function Detail() {
                                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                     />
                                     <Marker position={[post.latitude, post.longitude]}>
-                                        <Popup>
-                                            {post.address}
-                                        </Popup>
+                                        <Popup>{post.address}</Popup>
                                     </Marker>
                                 </MapContainer>
                             ) : (
                                 <div className="detail-no-map">Thông tin vị trí chưa được cập nhật</div>
                             )}
                         </div>
-                        <p className="detail-map-address-text" style={{ marginTop: '10px', color: '#666', fontSize: '14px' }}>
-                            <IconLocation width="14" style={{ marginRight: '5px' }} />
+                        <p className="detail-map-address-text">
+                            <IconLocation width="14" />
                             {post.address}
                         </p>
                     </section>
@@ -235,14 +355,14 @@ function Detail() {
                     <div className="detail-sticky-box">
                         <div className="detail-post-header-sidebar">
                             <h1 className="detail-post-title">{post.title}</h1>
-                            <div className="detail-address-row" style={{ display: 'flex', gap: '6px', color: '#747780', marginTop: '10px' }}>
+                            <div className="detail-address-row">
                                 <IconLocation width="18" />
                                 <span>{post.address}</span>
                             </div>
                         </div>
 
                         <div className="detail-price-card">
-                            <p className="detail-label">Giá thuê</p>
+                            <p className="detail-label">Giá thuê niêm yết</p>
                             <h2 className="detail-price-value">{post.price?.toLocaleString()}đ <small>/ tháng</small></h2>
 
                             <div className="detail-stats-row">
@@ -256,14 +376,13 @@ function Detail() {
                                 </div>
                             </div>
 
-                            <button className="detail-btn-primary" onClick={() => setIsBookingOpen(true)}>Đặt lịch ngay</button>
+                            <button className="detail-btn-primary" onClick={() => setIsBookingOpen(true)}>Đặt lịch xem phòng</button>
 
                             <div className="detail-action-buttons">
                                 <button
                                     className={`detail-btn-outline detail-btn-favorite ${isFav ? 'detail-favorited' : ''}`}
                                     onClick={handleToggleFavorite}
                                     disabled={favLoading}
-                                    title={isFav ? 'Bỏ yêu thích' : 'Thêm yêu thích'}
                                 >
                                     <IconFavorite style={{ color: isFav ? '#ef4444' : undefined }} />
                                     {favLoading ? '...' : isFav ? 'Đã lưu' : 'Yêu thích'}
@@ -282,37 +401,106 @@ function Detail() {
                             </div>
                         </div>
 
-                        <div className="detail-landlord-card">
-                            <div className="detail-avatar-wrapper">
-                                {landlord?.avatar ? (
-                                    <img
-                                        src={landlord.avatar}
-                                        className="detail-avatar-img"
-                                        alt="Host"
-                                    />
-                                ) : (
-                                    <div className="detail-avatar-circle">
-                                        {landlordInitials}
+                        <div className="detail-desktop-landlord-wrapper">
+                            <div className="detail-landlord-card">
+                                <div className="detail-avatar-wrapper">
+                                    {landlord?.avatar ? (
+                                        <img src={landlord.avatar} className="detail-avatar-img" alt="Host" />
+                                    ) : (
+                                        <div className="detail-avatar-circle">{landlordInitials}</div>
+                                    )}
+                                </div>
+                                <div className="detail-landlord-info">
+                                    <h4>{landlord?.fullName || landlord?.username || 'Đang tải...'}</h4>
+                                    <div className="detail-verified-badge">
+                                        <IconVerified width="14" />
+                                        Chủ trọ
                                     </div>
+                                </div>
+                                <button className="detail-btn-chat" onClick={handleStartChat} disabled={chatLoading}>
+                                    {chatLoading ? 'Đang kết nối...' : 'Nhắn tin'}
+                                </button>
+                            </div>
+                        </div>
+
+                        <section className="detail-section detail-section-reviews">
+                            <div className="detail-section-title">
+                                <span className="detail-title-line"></span> Đánh giá chủ trọ
+                            </div>
+
+                            <div className="detail-reviews-list">
+                                {reviewLoading ? (
+                                    <p className="detail-review-status">Đang tải đánh giá...</p>
+                                ) : reviews.length > 0 ? (
+                                    reviews.map((rv) => (
+                                        <div key={rv.id} className="detail-review-card">
+                                            <div className="detail-review-header">
+                                                <div>
+                                                    <div className="detail-review-user">
+                                                        {rv.user?.fullName || rv.user?.username || 'Người dùng'}
+                                                    </div>
+                                                    <div className="detail-review-stars">
+                                                        {"★".repeat(rv.rating)}{"☆".repeat(5 - rv.rating)}
+                                                    </div>
+                                                </div>
+                                                {rv.createdAt && (
+                                                    <span className="detail-review-date">
+                                                {new Date(rv.createdAt).toLocaleDateString('vi-VN')}
+                                            </span>
+                                                )}
+                                            </div>
+                                            <p className="detail-review-body">{rv.comment}</p>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="detail-review-empty">Chưa có đánh giá nào.</p>
                                 )}
                             </div>
 
-                            <div className="detail-landlord-info">
-                                <h4>{landlord?.fullName || landlord?.username || 'Đang tải...'}</h4>
-                                <div className="detail-verified-badge">
-                                    <IconVerified width="14" />
-                                    Chủ trọ
+                            {user ? (
+                                <form onSubmit={handleSubmitReview} className="detail-review-form">
+                                    <div className="detail-review-form-row">
+                                        <label>Chất lượng:</label>
+                                        <select value={newRating} onChange={(e) => setNewRating(Number(e.target.value))}>
+                                            <option value={5}>⭐⭐⭐⭐⭐</option>
+                                            <option value={4}>⭐⭐⭐⭐</option>
+                                            <option value={3}>⭐⭐⭐</option>
+                                            <option value={2}>⭐⭐</option>
+                                            <option value={1}>⭐</option>
+                                        </select>
+                                    </div>
+                                    <textarea
+                                        value={newComment}
+                                        onChange={(e) => setNewComment(e.target.value)}
+                                        placeholder="Viết phản hồi của bạn về chủ trọ..."
+                                        required
+                                    />
+                                    <button type="submit" className="detail-btn-primary detail-btn-review-submit" disabled={submitReviewLoading}>
+                                        {submitReviewLoading ? 'Đang gửi...' : 'Gửi đánh giá'}
+                                    </button>
+                                </form>
+                            ) : (
+                                <div className="detail-review-login-prompt">
+                                    <p>
+                                        Vui lòng <span onClick={() => navigate('/login')}>đăng nhập</span> để để lại đánh giá.
+                                    </p>
                                 </div>
-                            </div>
-                            <button
-                                className="detail-btn-chat"
-                                onClick={handleStartChat}
-                                disabled={chatLoading}
-                            >
-                                {chatLoading ? 'Đang kết nối...' : 'Nhắn tin'}
-                            </button>
-                        </div>
+                            )}
+                        </section>
                     </div>
+                </div>
+            </div>
+
+            <div className="detail-mobile-sticky-footer">
+                <div className="detail-mobile-footer-price">
+                    <span className="detail-mobile-footer-val">{post.price?.toLocaleString()}đ</span>
+                    <span className="detail-mobile-footer-lbl">/ tháng</span>
+                </div>
+                <div className="detail-mobile-footer-actions">
+                    <button className="detail-mobile-footer-btn-fav" onClick={handleToggleFavorite} disabled={favLoading}>
+                        <IconFavorite style={{ color: isFav ? '#ef4444' : '#64748b' }} />
+                    </button>
+                    <button className="detail-mobile-footer-btn-main" onClick={() => setIsBookingOpen(true)}>Đặt lịch ngay</button>
                 </div>
             </div>
 
@@ -356,25 +544,29 @@ function Detail() {
                                         }
                                     }}
                                 >
-                                    <label className="detail-form-label">Ngày xem phòng</label>
-                                    <input
-                                        type="date"
-                                        required
-                                        className="detail-form-input"
-                                        value={bookingDate}
-                                        onChange={e => setBookingDate(e.target.value)}
-                                        min={new Date().toISOString().split('T')[0]}
-                                    />
-                                    <label className="detail-form-label">Giờ xem phòng</label>
-                                    <select
-                                        className="detail-form-input"
-                                        value={bookingTime}
-                                        onChange={e => setBookingTime(e.target.value)}
-                                    >
-                                        {['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00','18:00'].map(t => (
-                                            <option key={t} value={t}>{t}</option>
-                                        ))}
-                                    </select>
+                                    <div className="detail-form-group">
+                                        <label className="detail-form-label">Ngày xem phòng</label>
+                                        <input
+                                            type="date"
+                                            required
+                                            className="detail-form-input"
+                                            value={bookingDate}
+                                            onChange={e => setBookingDate(e.target.value)}
+                                            min={new Date().toISOString().split('T')[0]}
+                                        />
+                                    </div>
+                                    <div className="detail-form-group">
+                                        <label className="detail-form-label">Giờ xem phòng</label>
+                                        <select
+                                            className="detail-form-input"
+                                            value={bookingTime}
+                                            onChange={e => setBookingTime(e.target.value)}
+                                        >
+                                            {['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00','18:00'].map(t => (
+                                                <option key={t} value={t}>{t}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                     <button type="submit" className="detail-btn-submit" disabled={bookingLoading}>
                                         {bookingLoading ? 'Đang gửi...' : 'Xác nhận đặt lịch'}
                                     </button>
