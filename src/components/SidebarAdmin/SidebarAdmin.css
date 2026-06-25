@@ -14,20 +14,37 @@
   box-sizing: border-box;
 }
 
-.sidebar-header {
-  margin-bottom: 40px;
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
 }
 
-.sidebar-header h2 {
+/* KHỐI BỌC LOGO & SUBTITLE MỚI TRONG VÒNG LẶP */
+.sidebar-logo-container {
+  margin-bottom: 35px; /* Tạo khoảng cách trống lớn với các menu phía dưới */
+  padding: 0 16px;     /* Canh lề thẳng hàng với text bên dưới */
+}
+
+/* CSS RIÊNG ĐỂ "TRO SINH VIÊN" TO RA THEO YÊU CẦU */
+.logo-item {
+  display: block;
   font-family: 'Manrope', sans-serif;
-  font-size: 20px;
-  font-weight: 800;
-  color: #005bbf;
-  margin: 0;
+  font-size: 24px;       /* Kích thước chữ to nổi bật hẳn lên */
+  font-weight: 800;      /* Độ đậm tối đa */
+  color: #005bbf;        /* Màu xanh thương hiệu gốc của bạn */
+  text-decoration: none; /* Xóa gạch chân mặc định của thẻ A */
   letter-spacing: -0.5px;
+  transition: color 0.2s ease;
 }
 
-.sidebar-header p {
+.logo-item:hover {
+  color: #1d4ed8;
+}
+
+/* Dòng chữ nhỏ "Quản trị hệ thống" đi kèm */
+.sidebar-subtitle {
   font-family: 'Manrope', sans-serif;
   font-size: 12px;
   font-weight: 700;
@@ -36,20 +53,13 @@
   margin: 5px 0 0 0;
 }
 
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-}
-
+/* CÁC MENU ĐIỀU HƯỚNG BÊN DƯỚI */
 .nav-item {
   display: flex;
   align-items: center;
   padding: 12px 16px;
   text-decoration: none;
   color: #414754;
-  font-weight: 500;
   font-size: 14px;
   border-radius: 12px;
   transition: all 0.2s ease;
