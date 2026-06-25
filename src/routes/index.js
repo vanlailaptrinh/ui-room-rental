@@ -32,6 +32,7 @@ import AmenityManagement from '../pages/Admin/AmenityManagement';
 import FinanceManagement from '../pages/Admin/FinanceManagement';
 import PackageManagement from '../pages/Admin/PackageManagement';
 import PostManagement from '../pages/Admin/PostManagement';
+import StatisticsManagement from '../pages/Admin/StatisticsManagement';
 import VoucherManagement from '../pages/Admin/VoucherManagement';
 import ReportManagement from '../pages/Admin/ReportManagement';
 import Blacklist from '../pages/Blacklist';
@@ -140,6 +141,11 @@ export const adminRoutes = [
     {
         path: config.routes.adminDashboard,
         component: AdminDashboard,
+        layout: AdminLayout
+    },
+    {
+        path: config.routes.adminStatistics,
+        component: StatisticsManagement,
         layout: AdminLayout
     },
     {

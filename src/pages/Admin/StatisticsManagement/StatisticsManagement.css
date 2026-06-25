@@ -1,0 +1,145 @@
+/* Khung giao diện chính */
+.statistics-management-wrapper {
+    background-color: #f8f9fc;
+    min-height: 85vh;
+}
+
+.text-dark-blue {
+    color: #4e73df;
+}
+
+.sub-title {
+    font-size: 14px;
+}
+
+/* Custom các nút pill và thanh menu nhộng viên thuốc */
+.custom-statistics-pills {
+    border: none;
+    background-color: #ffffff;
+}
+
+.custom-statistics-pills .nav-link {
+    color: #5a5c69;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none !important;
+}
+
+.custom-statistics-pills .nav-link:hover {
+    color: #4e73df;
+    background-color: rgba(78, 115, 223, 0.05);
+}
+
+.custom-statistics-pills .active-pill {
+    background-color: #4e73df !important;
+    color: white !important;
+    box-shadow: 0 4px 15px rgba(78, 115, 223, 0.3);
+}
+
+/* Biểu đồ và Thẻ chứa */
+.custom-chart-card, .custom-table-card {
+    border: none;
+    border-radius: 15px;
+    background: #ffffff;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1) !important;
+}
+
+.chart-container {
+    position: relative;
+    height: 320px;
+    width: 100%;
+}
+
+/* Thẻ trạng thái mini với màu Gradient sinh động */
+.mini-status-card {
+    border: none;
+    border-radius: 12px;
+}
+.bg-gradient-blue {
+    background: linear-gradient(135deg, #4e73df, #224abe);
+}
+.bg-gradient-yellow {
+    background: linear-gradient(135deg, #f6c23e, #f4b619);
+}
+.bg-gradient-red {
+    background: linear-gradient(135deg, #e74a3b, #be2617);
+}
+.bg-gradient-purple {
+    background: linear-gradient(135deg, #6f42c1, #4e2694);
+}
+.bg-gradient-info {
+    background: linear-gradient(135deg, #36b9cc, #1a8a99);
+}
+
+/* Trang trí bảng và ẩn ID rác */
+.custom-table th {
+    background-color: #f8f9fc;
+    color: #4e73df;
+    font-weight: 700;
+}
+
+.text-truncate-custom {
+    max-width: 350px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Các huy chương xếp hạng thay vì chuỗi ID */
+.badge-rank {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    line-height: 25px;
+    text-align: center;
+    border-radius: 50%;
+    font-weight: bold;
+    color: white;
+}
+.rank-1 { background-color: #dfad05; }
+.rank-2 { background-color: #a0a0a0; }
+.rank-3 { background-color: #bd733b; }
+
+/* Nhãn Voucher và Báo cáo vi phạm */
+.voucher-code-badge {
+    background-color: #eaecf4;
+    color: #2e59d9;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+}
+
+.bg-danger-light { background-color: rgba(231, 74, 59, 0.1); }
+.bg-success-light { background-color: rgba(28, 200, 138, 0.1); }
+.italic-reason { font-style: italic; }
+
+.btn-refresh-custom {
+    background-color: white;
+    border: 1px solid #d1d3e2;
+    color: #4e73df;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+}
+.btn-refresh-custom:hover {
+    background-color: #4e73df;
+    color: white;
+    box-shadow: 0 4px 12px rgba(78,115,223,0.2);
+}
+
+/* Tinh chỉnh thanh Tabs cuộn mượt khi giao diện hẹp */
+.custom-admin-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    padding-bottom: 5px;
+}
+.custom-admin-tabs::-webkit-scrollbar {
+    height: 4px;
+}
+.custom-admin-tabs::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
