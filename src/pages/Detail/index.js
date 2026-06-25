@@ -257,15 +257,35 @@ function Detail() {
                         </div>
                     </section>
 
-                    <section className="detail-section">
-                        <div className="detail-section-title"><span className="detail-title-line"></span> Nội dung bài đăng</div>
+                    <div className="detail-mobile-hero-info">
+                        <h1 className="detail-mobile-title">{post.title}</h1>
+                        <div className="detail-mobile-address">
+                            <IconLocation width="16" />
+                            <span>{post.address}</span>
+                        </div>
+                        <div className="detail-mobile-price-row">
+                            <span className="detail-mobile-price">{post.price?.toLocaleString()}đ<small>/tháng</small></span>
+                        </div>
+                        <div className="detail-mobile-stats">
+                            <div className="detail-mobile-stat-box">
+                                <span className="detail-mobile-stat-lbl">Diện tích</span>
+                                <span className="detail-mobile-stat-val">{post.area} m²</span>
+                            </div>
+                            <div className="detail-mobile-stat-box">
+                                <span className="detail-mobile-stat-lbl">Lượt xem</span>
+                                <span className="detail-mobile-stat-val">{post.views}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <section className="detail-section detail-section-content">
+                        <div className="detail-section-title"><span className="detail-title-line"></span> Thông tin chi tiết</div>
                         <div className="detail-description-text">
-                            <h3>{post.title}</h3>
                             <p style={{ whiteSpace: 'pre-line' }}>{post.content}</p>
                         </div>
                     </section>
 
-                    <section className="detail-section">
+                    <section className="detail-section detail-section-amenities">
                         <div className="detail-section-title"><span className="detail-title-line"></span> Tiện ích phòng</div>
                         <div className="detail-amenities-grid">
                             {post.amenities && post.amenities.length > 0 ? (
@@ -275,16 +295,36 @@ function Detail() {
                                     </div>
                                 ))
                             ) : (
-                                <p>Chưa cập nhật tiện ích.</p>
+                                <p className="detail-empty-text">Chưa cập nhật tiện ích.</p>
                             )}
                         </div>
                     </section>
 
-                    <section className="detail-section">
-                        <div className="detail-section-title">
-                            <span className="detail-title-line"></span> Vị trí
+                    <div className="detail-mobile-landlord-wrapper">
+                        <div className="detail-landlord-card">
+                            <div className="detail-avatar-wrapper">
+                                {landlord?.avatar ? (
+                                    <img src={landlord.avatar} className="detail-avatar-img" alt="Host" />
+                                ) : (
+                                    <div className="detail-avatar-circle">{landlordInitials}</div>
+                                )}
+                            </div>
+                            <div className="detail-landlord-info">
+                                <h4>{landlord?.fullName || landlord?.username || 'Đang tải...'}</h4>
+                                <div className="detail-verified-badge">
+                                    <IconVerified width="12" />
+                                    Chủ trọ
+                                </div>
+                            </div>
+                            <button className="detail-btn-chat" onClick={handleStartChat} disabled={chatLoading}>
+                                {chatLoading ? '...' : 'Nhắn tin'}
+                            </button>
                         </div>
-                        <div className="detail-map-wrapper" style={{ height: '400px', width: '100%', borderRadius: '12px', overflow: 'hidden', marginTop: '15px', border: '1px solid #e0e0e0' }}>
+                    </div>
+
+                    <section className="detail-section detail-section-map">
+                        <div className="detail-section-title"><span className="detail-title-line"></span> Vị trí bản đồ</div>
+                        <div className="detail-map-wrapper">
                             {post.latitude && post.longitude ? (
                                 <MapContainer
                                     center={[post.latitude, post.longitude]}
@@ -297,17 +337,15 @@ function Detail() {
                                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                     />
                                     <Marker position={[post.latitude, post.longitude]}>
-                                        <Popup>
-                                            {post.address}
-                                        </Popup>
+                                        <Popup>{post.address}</Popup>
                                     </Marker>
                                 </MapContainer>
                             ) : (
                                 <div className="detail-no-map">Thông tin vị trí chưa được cập nhật</div>
                             )}
                         </div>
-                        <p className="detail-map-address-text" style={{ marginTop: '10px', color: '#666', fontSize: '14px' }}>
-                            <IconLocation width="14" style={{ marginRight: '5px' }} />
+                        <p className="detail-map-address-text">
+                            <IconLocation width="14" />
                             {post.address}
                         </p>
                     </section>
@@ -317,14 +355,14 @@ function Detail() {
                     <div className="detail-sticky-box">
                         <div className="detail-post-header-sidebar">
                             <h1 className="detail-post-title">{post.title}</h1>
-                            <div className="detail-address-row" style={{ display: 'flex', gap: '6px', color: '#747780', marginTop: '10px' }}>
+                            <div className="detail-address-row">
                                 <IconLocation width="18" />
                                 <span>{post.address}</span>
                             </div>
                         </div>
 
                         <div className="detail-price-card">
-                            <p className="detail-label">Giá thuê</p>
+                            <p className="detail-label">Giá thuê niêm yết</p>
                             <h2 className="detail-price-value">{post.price?.toLocaleString()}đ <small>/ tháng</small></h2>
 
                             <div className="detail-stats-row">
@@ -338,14 +376,13 @@ function Detail() {
                                 </div>
                             </div>
 
-                            <button className="detail-btn-primary" onClick={() => setIsBookingOpen(true)}>Đặt lịch ngay</button>
+                            <button className="detail-btn-primary" onClick={() => setIsBookingOpen(true)}>Đặt lịch xem phòng</button>
 
                             <div className="detail-action-buttons">
                                 <button
                                     className={`detail-btn-outline detail-btn-favorite ${isFav ? 'detail-favorited' : ''}`}
                                     onClick={handleToggleFavorite}
                                     disabled={favLoading}
-                                    title={isFav ? 'Bỏ yêu thích' : 'Thêm yêu thích'}
                                 >
                                     <IconFavorite style={{ color: isFav ? '#ef4444' : undefined }} />
                                     {favLoading ? '...' : isFav ? 'Đã lưu' : 'Yêu thích'}
@@ -364,81 +401,67 @@ function Detail() {
                             </div>
                         </div>
 
-                        <div className="detail-landlord-card">
-                            <div className="detail-avatar-wrapper">
-                                {landlord?.avatar ? (
-                                    <img
-                                        src={landlord.avatar}
-                                        className="detail-avatar-img"
-                                        alt="Host"
-                                    />
-                                ) : (
-                                    <div className="detail-avatar-circle">
-                                        {landlordInitials}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="detail-landlord-info">
-                                <h4>{landlord?.fullName || landlord?.username || 'Đang tải...'}</h4>
-                                <div className="detail-verified-badge">
-                                    <IconVerified width="14" />
-                                    Chủ trọ
+                        <div className="detail-desktop-landlord-wrapper">
+                            <div className="detail-landlord-card">
+                                <div className="detail-avatar-wrapper">
+                                    {landlord?.avatar ? (
+                                        <img src={landlord.avatar} className="detail-avatar-img" alt="Host" />
+                                    ) : (
+                                        <div className="detail-avatar-circle">{landlordInitials}</div>
+                                    )}
                                 </div>
+                                <div className="detail-landlord-info">
+                                    <h4>{landlord?.fullName || landlord?.username || 'Đang tải...'}</h4>
+                                    <div className="detail-verified-badge">
+                                        <IconVerified width="14" />
+                                        Chủ trọ
+                                    </div>
+                                </div>
+                                <button className="detail-btn-chat" onClick={handleStartChat} disabled={chatLoading}>
+                                    {chatLoading ? 'Đang kết nối...' : 'Nhắn tin'}
+                                </button>
                             </div>
-                            <button
-                                className="detail-btn-chat"
-                                onClick={handleStartChat}
-                                disabled={chatLoading}
-                            >
-                                {chatLoading ? 'Đang kết nối...' : 'Nhắn tin'}
-                            </button>
                         </div>
 
-                        {/* --- KHU VỰC ĐÁNH GIÁ CHỦ TRỌ ĐÃ ĐƯỢC TỐI ƯU UX/UI --- */}
-                        <section className="detail-section" style={{ marginTop: '24px', borderTop: '1px solid #edf2f7', paddingTop: '20px' }}>
-                            <div className="detail-section-title" style={{ marginBottom: '16px' }}>
+                        <section className="detail-section detail-section-reviews">
+                            <div className="detail-section-title">
                                 <span className="detail-title-line"></span> Đánh giá chủ trọ
                             </div>
 
-                            <div className="detail-reviews-list" style={{ maxBoundedHeight: '280px', maxHeight: '280px', overflowY: 'auto', paddingRight: '4px' }}>
+                            <div className="detail-reviews-list">
                                 {reviewLoading ? (
-                                    <p style={{ color: '#718096', fontSize: '14px' }}>Đang tải đánh giá...</p>
+                                    <p className="detail-review-status">Đang tải đánh giá...</p>
                                 ) : reviews.length > 0 ? (
                                     reviews.map((rv) => (
-                                        <div key={rv.id} className="detail-review-card" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px', marginBottom: '10px' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                                        <div key={rv.id} className="detail-review-card">
+                                            <div className="detail-review-header">
                                                 <div>
-                                                    <div style={{ fontWeight: '600', color: '#1a202c', fontSize: '14px', lineHeight: '1.2', marginBottom: '2px' }}>
+                                                    <div className="detail-review-user">
                                                         {rv.user?.fullName || rv.user?.username || 'Người dùng'}
                                                     </div>
-                                                    <div style={{ color: '#ecc94b', fontSize: '13px', letterSpacing: '1px' }}>
+                                                    <div className="detail-review-stars">
                                                         {"★".repeat(rv.rating)}{"☆".repeat(5 - rv.rating)}
                                                     </div>
                                                 </div>
                                                 {rv.createdAt && (
-                                                    <span style={{ fontSize: '11px', color: '#a0aec0' }}>
+                                                    <span className="detail-review-date">
                                                 {new Date(rv.createdAt).toLocaleDateString('vi-VN')}
                                             </span>
                                                 )}
                                             </div>
-                                            <p style={{ margin: 0, color: '#4a5568', fontSize: '13px', lineHeight: '1.4', whiteSpace: 'pre-line' }}>{rv.comment}</p>
+                                            <p className="detail-review-body">{rv.comment}</p>
                                         </div>
                                     ))
                                 ) : (
-                                    <p style={{ color: '#718096', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>Chưa có đánh giá nào.</p>
+                                    <p className="detail-review-empty">Chưa có đánh giá nào.</p>
                                 )}
                             </div>
 
                             {user ? (
-                                <form onSubmit={handleSubmitReview} className="detail-review-form" style={{ marginTop: '16px', padding: '14px', backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                                    <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        <label style={{ fontWeight: '500', fontSize: '13px', color: '#4a5568' }}>Chất lượng:</label>
-                                        <select
-                                            value={newRating}
-                                            onChange={(e) => setNewRating(Number(e.target.value))}
-                                            style={{ padding: '4px 8px', borderRadius: '6px', border: '1px solid #cbd5e0', fontSize: '13px', color: '#2d3748', outline: 'none' }}
-                                        >
+                                <form onSubmit={handleSubmitReview} className="detail-review-form">
+                                    <div className="detail-review-form-row">
+                                        <label>Chất lượng:</label>
+                                        <select value={newRating} onChange={(e) => setNewRating(Number(e.target.value))}>
                                             <option value={5}>⭐⭐⭐⭐⭐</option>
                                             <option value={4}>⭐⭐⭐⭐</option>
                                             <option value={3}>⭐⭐⭐</option>
@@ -450,27 +473,34 @@ function Detail() {
                                         value={newComment}
                                         onChange={(e) => setNewComment(e.target.value)}
                                         placeholder="Viết phản hồi của bạn về chủ trọ..."
-                                        style={{ width: '100%', minHeight: '65px', maxHeight: '120px', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e0', marginBottom: '10px', boxSizing: 'border-box', fontFamily: 'inherit', fontSize: '13px', resize: 'vertical', outline: 'none' }}
                                         required
                                     />
-                                    <button
-                                        type="submit"
-                                        className="detail-btn-primary"
-                                        disabled={submitReviewLoading}
-                                        style={{ width: '100%', padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: '500' }}
-                                    >
+                                    <button type="submit" className="detail-btn-primary detail-btn-review-submit" disabled={submitReviewLoading}>
                                         {submitReviewLoading ? 'Đang gửi...' : 'Gửi đánh giá'}
                                     </button>
                                 </form>
                             ) : (
-                                <div style={{ marginTop: '16px', padding: '12px 16px', textAlign: 'center', backgroundColor: '#f0f7ff', borderRadius: '8px', border: '1px solid #e1f0ff' }}>
-                                    <p style={{ margin: 0, color: '#4a5568', fontSize: '13px' }}>
-                                        Vui lòng <span style={{ color: '#2b6cb0', cursor: 'pointer', fontWeight: '600', textDecoration: 'underline' }} onClick={() => navigate('/login')}>đăng nhập</span> để để lại đánh giá.
+                                <div className="detail-review-login-prompt">
+                                    <p>
+                                        Vui lòng <span onClick={() => navigate('/login')}>đăng nhập</span> để để lại đánh giá.
                                     </p>
                                 </div>
                             )}
                         </section>
                     </div>
+                </div>
+            </div>
+
+            <div className="detail-mobile-sticky-footer">
+                <div className="detail-mobile-footer-price">
+                    <span className="detail-mobile-footer-val">{post.price?.toLocaleString()}đ</span>
+                    <span className="detail-mobile-footer-lbl">/ tháng</span>
+                </div>
+                <div className="detail-mobile-footer-actions">
+                    <button className="detail-mobile-footer-btn-fav" onClick={handleToggleFavorite} disabled={favLoading}>
+                        <IconFavorite style={{ color: isFav ? '#ef4444' : '#64748b' }} />
+                    </button>
+                    <button className="detail-mobile-footer-btn-main" onClick={() => setIsBookingOpen(true)}>Đặt lịch ngay</button>
                 </div>
             </div>
 
@@ -514,25 +544,29 @@ function Detail() {
                                         }
                                     }}
                                 >
-                                    <label className="detail-form-label">Ngày xem phòng</label>
-                                    <input
-                                        type="date"
-                                        required
-                                        className="detail-form-input"
-                                        value={bookingDate}
-                                        onChange={e => setBookingDate(e.target.value)}
-                                        min={new Date().toISOString().split('T')[0]}
-                                    />
-                                    <label className="detail-form-label">Giờ xem phòng</label>
-                                    <select
-                                        className="detail-form-input"
-                                        value={bookingTime}
-                                        onChange={e => setBookingTime(e.target.value)}
-                                    >
-                                        {['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00','18:00'].map(t => (
-                                            <option key={t} value={t}>{t}</option>
-                                        ))}
-                                    </select>
+                                    <div className="detail-form-group">
+                                        <label className="detail-form-label">Ngày xem phòng</label>
+                                        <input
+                                            type="date"
+                                            required
+                                            className="detail-form-input"
+                                            value={bookingDate}
+                                            onChange={e => setBookingDate(e.target.value)}
+                                            min={new Date().toISOString().split('T')[0]}
+                                        />
+                                    </div>
+                                    <div className="detail-form-group">
+                                        <label className="detail-form-label">Giờ xem phòng</label>
+                                        <select
+                                            className="detail-form-input"
+                                            value={bookingTime}
+                                            onChange={e => setBookingTime(e.target.value)}
+                                        >
+                                            {['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00','18:00'].map(t => (
+                                                <option key={t} value={t}>{t}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                     <button type="submit" className="detail-btn-submit" disabled={bookingLoading}>
                                         {bookingLoading ? 'Đang gửi...' : 'Xác nhận đặt lịch'}
                                     </button>
