@@ -87,11 +87,11 @@ const StatisticsManagement = () => {
                     setVouchers(resVouchers?.data || []);
                 }
                 else if (activeTab === 'users') {
-                    const resUsers = await UserService.getUsers(); // Giả định API lấy danh sách user
+                    const resUsers = await UserService.getAllUsers(); // Giả định API lấy danh sách user
                     setUsers(resUsers?.data || []);
                 }
                 else if (activeTab === 'reports') {
-                    const resReports = await ReportService.getReports(); // Giả định API lấy danh sách báo cáo vi phạm
+                    const resReports = await ReportService.getAllReports(); // Giả định API lấy danh sách báo cáo vi phạm
                     setReports(resReports?.data || []);
                 }
             } catch (error) {
@@ -216,65 +216,87 @@ const StatisticsManagement = () => {
     // TAB 3: ĐƠN HÀNG DỊCH VỤ (DOUGHNUT CHART)
     // ==========================================
     const renderOrdersChart = () => {
-        const orderStatuses = orders.reduce((acc, curr) => {
-            const status = curr.status || 'PENDING';
-            acc[status] = (acc[status] || 0) + 1;
-            return acc;
-        }, {});
+    const orderStatuses = orders.reduce((acc, curr) => {
+        const status = curr.status || 'PENDING';
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+    }, {});
 
-        const dataDoughnut = {
-            labels: Object.keys(orderStatuses),
-            datasets: [
-                {
-                    data: Object.values(orderStatuses),
-                    backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
-                    borderWidth: 1,
+    const dataDoughnut = {
+        labels: Object.keys(orderStatuses),
+        datasets: [
+            {
+                data: Object.values(orderStatuses),
+                backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                borderWidth: 1,
+            }
+        ]
+    };
+
+    // Thêm cấu hình Options ở đây để kiểm soát kích thước biểu đồ
+    const optionsDoughnut = {
+        maintainAspectRatio: false, // Cho phép chart tuân thủ height của div cha
+        plugins: {
+            legend: {
+                position: 'bottom', // Đẩy chú thích xuống dưới để dồn không gian cho hình tròn
+                labels: {
+                    boxWidth: 12,
+                    font: { size: 12 }
                 }
-            ]
-        };
+            }
+        },
+        layout: {
+            padding: 20 // Tạo khoảng cách đệm bao quanh để thu nhỏ vòng tròn lại
+        }
+    };
 
-        return (
-            <div className="row">
-                <div className="col-md-6 mb-4">
-                    <div className="card shadow-sm p-4 text-center custom-chart-card">
-                        <h5 className="card-title fw-bold mb-3 text-start text-dark-blue">Tỷ Lệ Trạng Thái Đơn Hàng</h5>
-                        <div className="d-flex justify-content-center" style={{ height: '280px' }}>
-                            {orders.length > 0 ? <Doughnut data={dataDoughnut} /> : <p className="text-muted py-5">Không có dữ liệu đơn hàng</p>}
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-6 mb-4">
-                    <div className="card shadow-sm p-4 h-100 custom-table-card">
-                        <h5 className="card-title fw-bold mb-3 text-dark-blue">Danh Sách Đơn Mới Nhất</h5>
-                        <div className="table-responsive" style={{ maxHeight: '280px' }}>
-                            <table className="table table-hover align-middle small custom-table">
-                                <thead className="table-light sticky-top">
-                                    <tr>
-                                        <th>Mã Đơn</th>
-                                        <th>Tổng Giá</th>
-                                        <th>Trạng Thái</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {orders.slice(0, 6).map(order => (
-                                        <tr key={order.id}>
-                                            <td className="text-truncate" style={{ maxWidth: '100px' }}>{order.id}</td>
-                                            <td className="fw-bold text-primary">{order.totalPrice?.toLocaleString()} đ</td>
-                                            <td>
-                                                <span className={`badge ${order.status === 'SUCCESS' ? 'bg-success' : order.status === 'PENDING' ? 'bg-warning' : 'bg-danger'}`}>
-                                                    {order.status}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {orders.length === 0 && <tr><td colSpan="3" className="text-center text-muted">Trống</td></tr>}
-                                </tbody>
-                            </table>
-                        </div>
+    return (
+        <div className="row">
+            <div className="col-md-6 mb-4">
+                <div className="card shadow-sm p-4 text-center custom-chart-card">
+                    <h5 className="card-title fw-bold mb-3 text-start text-dark-blue">Tỷ Lệ Trạng Thái Đơn Hàng</h5>
+                    {/* Bọc thêm một lớp wrapper div có chiều cao cố định và nhỏ gọn hơn */}
+                    <div className="d-flex justify-content-center align-items-center" style={{ height: '300px', position: 'relative' }}>
+                        {orders.length > 0 ? (
+                            <Doughnut data={dataDoughnut} options={optionsDoughnut} />
+                        ) : (
+                            <p className="text-muted py-5">Không có dữ liệu đơn hàng</p>
+                        )}
                     </div>
                 </div>
             </div>
-        );
+            <div className="col-md-6 mb-4">
+                <div className="card shadow-sm p-4 h-100 custom-table-card">
+                    <h5 className="card-title fw-bold mb-3 text-dark-blue">Danh Sách Đơn Mới Nhất</h5>
+                    <div className="table-responsive" style={{ maxHeight: '240px' }}>
+                        <table className="table table-hover align-middle small custom-table">
+                            <thead className="table-light sticky-top">
+                                <tr>
+                                    <th>Mã Đơn</th>
+                                    <th>Tổng Giá</th>
+                                    <th>Trạng Thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {orders.slice(0, 6).map(order => (
+                                    <tr key={order.id}>
+                                        <td className="text-truncate" style={{ maxWidth: '100px' }}>{order.id}</td>
+                                        <td className="fw-bold text-primary">{order.totalPrice?.toLocaleString()} đ</td>
+                                        <td>
+                                            <span className={`badge ${order.status === 'SUCCESS' ? 'bg-success' : order.status === 'PENDING' ? 'bg-warning' : 'bg-danger'}`}>
+                                                {order.status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {orders.length === 0 && <tr><td colSpan="3" className="text-center text-muted">Trống</td></tr>}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
     };
 
     // ==========================================
@@ -340,61 +362,219 @@ const StatisticsManagement = () => {
         );
     };
 
-    // ==========================================
-    // TAB MỚI 5: THỐNG KÊ NGƯỜI DÙNG (USERS)
-    // ==========================================
+    // =========================================================================
+    // TAB 5: THỐNG KÊ NGƯỜI DÙNG (USERS)
+    // =========================================================================
     const renderUsersChart = () => {
-        // Gom nhóm theo Role (Ví dụ: ROLE_USER là sinh viên, ROLE_LANDLORD là chủ nhà)
+        // 1. Phân nhóm theo Role dựa trên RoleEnum (ADMIN, LANDLORD, USER)
         const roleCounts = users.reduce((acc, curr) => {
-            const role = curr.role === 'ROLE_LANDLORD' ? 'Chủ nhà' : 'Sinh viên/Khách';
-            acc[role] = (acc[role] || 0) + 1;
+            let roleLabel = 'Sinh viên / Khách';
+            if (curr.role === 'LANDLORD') {
+                roleLabel = 'Chủ nhà (Landlord)';
+            } else if (curr.role === 'ADMIN') {
+                roleLabel = 'Quản trị viên (Admin)';
+            }
+            
+            acc[roleLabel] = (acc[roleLabel] || 0) + 1;
             return acc;
         }, {});
 
-        const activeCounts = users.filter(u => u.active !== false).length;
+        // 2. Tính toán trạng thái hoạt động dựa trên thuộc tính @JsonProperty("isActive")
+        const activeCounts = users.filter(u => u.isActive === true).length;
         const blockedCounts = users.length - activeCounts;
 
+        // 3. Tính toán số lượng người dùng đã định danh / xác thực dựa trên @JsonProperty("isVerified")
+        const verifiedCounts = users.filter(u => u.isVerified === true).length;
+
+        // 4. Cấu hình dữ liệu biểu đồ Pie Chart
         const dataUsersPie = {
-            labels: Object.keys(roleCounts).length > 0 ? Object.keys(roleCounts) : ['Sinh viên', 'Chủ nhà'],
+            labels: Object.keys(roleCounts).length > 0 ? Object.keys(roleCounts) : ['Sinh viên / Khách', 'Chủ nhà (Landlord)', 'Quản trị viên'],
             datasets: [
                 {
-                    data: Object.keys(roleCounts).length > 0 ? Object.values(roleCounts) : [0, 0],
-                    backgroundColor: ['#4e73df', '#36b9cc'],
+                    data: Object.keys(roleCounts).length > 0 ? Object.values(roleCounts) : [0, 0, 0],
+                    backgroundColor: ['#4e73df', '#1cc88a', '#f6c23e'],
+                    hoverBackgroundColor: ['#2e59d9', '#17a673', '#dda20a'],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
                 }
             ]
         };
 
+        const pieOptions = {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 15,
+                        font: { size: 12, weight: '500' }
+                    }
+                }
+            }
+        };
+
         return (
-            <div className="row">
-                <div className="col-md-5 mb-4">
-                    <div className="card shadow-sm p-4 h-100 custom-chart-card">
-                        <h5 className="card-title fw-bold mb-3 text-dark-blue">Phân Hệ Vai Trò Thành Viên</h5>
-                        <div className="d-flex justify-content-center align-items-center" style={{ height: '280px' }}>
-                            {users.length > 0 ? <Pie data={dataUsersPie} /> : <p className="text-muted">Chưa có dữ liệu thành viên</p>}
+            <div className="fade-in-element">
+                {/* --- SECTION 1: MINI CARDS & BIỂU ĐỒ TRÒN --- */}
+                <div className="row mb-4">
+                    {/* Biểu đồ phân hệ vai trò */}
+                    <div className="col-xl-5 col-lg-6 mb-4">
+                        <div className="card shadow-sm p-4 h-100 custom-chart-card">
+                            <div className="d-flex align-items-center justify-content-between mb-3">
+                                <h5 className="card-title fw-bold mb-0 text-dark-blue">Phân Hệ Vai Trò Thành Viên</h5>
+                            </div>
+                            <div className="d-flex justify-content-center align-items-center" style={{ height: '260px', position: 'relative' }}>
+                                {users.length > 0 ? (
+                                    <Pie data={dataUsersPie} options={pieOptions} />
+                                ) : (
+                                    <div className="text-center py-5">
+                                        <div className="spinner-border text-primary mb-2" role="status"></div>
+                                        <p className="text-muted small mb-0">Đang đồng bộ dữ liệu tài khoản...</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Khu vực thẻ thống kê trạng thái nhanh */}
+                    <div className="col-xl-7 col-lg-6 mb-4">
+                        <div className="card shadow-sm p-4 h-100 custom-table-card">
+                            <h5 className="card-title fw-bold mb-3 text-dark-blue">Trạng Thái Hệ Thống Tài Khoản</h5>
+                            
+                            <div className="row g-3 mb-4">
+                                <div className="col-sm-4 col-6">
+                                    <div className="card mini-status-card bg-gradient-blue text-white p-3 text-center border-0 shadow-xs">
+                                        <h3 className="fw-bold mb-0">{users.length}</h3>
+                                        <span className="small text-white-50">Tổng tài khoản</span>
+                                    </div>
+                                </div>
+                                <div className="col-sm-4 col-6">
+                                    <div className="card mini-status-card bg-gradient-success text-white p-3 text-center border-0 shadow-xs">
+                                        <h3 className="fw-bold mb-0">{activeCounts}</h3>
+                                        <span className="small text-white-50">Đang hoạt động</span>
+                                    </div>
+                                </div>
+                                <div className="col-sm-4 col-12">
+                                    <div className="card mini-status-card bg-gradient-warning text-white p-3 text-center border-0 shadow-xs">
+                                        <h3 className="fw-bold mb-0">{verifiedCounts}</h3>
+                                        <span className="small text-white-50">Đã xác minh</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6 className="fw-bold text-secondary mb-2 small uppercase-tracking">Kiểm soát rủi ro vi phạm:</h6>
+                            <div className="p-3 bg-danger-light rounded-3 d-flex justify-content-between align-items-center border border-danger-subtle">
+                                <div className="d-flex align-items-center">
+                                    <span className="material-icons text-danger me-2">block</span>
+                                    <span className="text-danger small fw-semibold">Tài khoản đang bị vô hiệu hóa / Khóa tạm thời (Banned):</span>
+                                </div>
+                                <span className="badge bg-danger fs-6 px-3 rounded-pill shadow-sm">{blockedCounts}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div className="col-md-7 mb-4">
-                    <div className="card shadow-sm p-4 h-100 custom-table-card">
-                        <h5 className="card-title fw-bold mb-3 text-dark-blue">Trạng Thái & Quản Lý Tài Khoản</h5>
-                        <div className="row g-3 mb-4">
-                            <div className="col-6">
-                                <div className="card mini-status-card bg-gradient-blue text-white p-3 text-center">
-                                    <h4 className="fw-bold mb-0">{users.length}</h4>
-                                    <span className="small text-white-50">Tổng tài khoản</span>
-                                </div>
+
+                {/* --- SECTION 2: BẢNG CHI TIẾT NGHIỆP VỤ RỘNG 100% --- */}
+                <div className="row">
+                    <div className="col-12">
+                        <div className="card shadow-sm p-4 custom-table-card">
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <h5 className="card-title fw-bold mb-0 text-dark-blue">Danh Sách Quản Lý Cơ Sở Dữ Liệu Thành Viên</h5>
+                                <span className="badge bg-light text-dark border small px-2 py-1">Thời gian thực</span>
                             </div>
-                            <div className="col-6">
-                                <div className="card mini-status-card bg-gradient-purple text-white p-3 text-center">
-                                    <h4 className="fw-bold mb-0">{activeCounts}</h4>
-                                    <span className="small text-white-50">Đang hoạt động</span>
-                                </div>
+                            
+                            <div className="table-responsive" style={{ maxHeight: '420px', overflowY: 'auto' }}>
+                                <table className="table table-hover align-middle custom-data-table mb-0">
+                                    <thead className="table-light sticky-top">
+                                        <tr>
+                                            <th scope="col" style={{ width: '60px' }}>Thành viên</th>
+                                            <th scope="col">Thông tin tài khoản</th>
+                                            <th scope="col">Liên hệ (Phone)</th>
+                                            <th scope="col" className="text-center">Vai trò</th>
+                                            <th scope="col" className="text-center">Xác minh</th>
+                                            <th scope="col" className="text-center">Trạng thái</th>
+                                            <th scope="col" className="text-center" style={{ width: '100px' }}>Hành động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {users.length > 0 ? (
+                                            users.map((userItem) => (
+                                                <tr key={userItem.id}>
+                                                    <td>
+                                                        <img 
+                                                            src={userItem.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80"} 
+                                                            alt={userItem.username} 
+                                                            className="rounded-circle border border-2 object-cover"
+                                                            style={{ width: '45px', height: '45px' }}
+                                                            onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80" }}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <div className="fw-bold text-dark">{userItem.username}</div>
+                                                        <div className="text-muted small">{userItem.email}</div>
+                                                        {userItem.rating > 0 && (
+                                                            <div className="d-flex align-items-center text-warning small mt-1">
+                                                                <span className="material-icons fs-6 me-1">star</span>
+                                                                <span className="fw-semibold">{userItem.rating?.toFixed(1)}</span>
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                    <td>
+                                                        <span className="text-secondary font-monospace small">
+                                                            {userItem.phone || "--- Chưa cập nhật ---"}
+                                                        </span>
+                                                    </td>
+                                                    <td className="text-center">
+                                                        {userItem.role === 'ADMIN' ? (
+                                                            <span className="badge bg-warning-light text-warning px-3 py-2 rounded-pill fw-bold">ADMIN</span>
+                                                        ) : userItem.role === 'LANDLORD' ? (
+                                                            <span className="badge bg-success-light text-success px-3 py-2 rounded-pill fw-bold">CHỦ NHÀ</span>
+                                                        ) : (
+                                                            <span className="badge bg-info-light text-primary px-3 py-2 rounded-pill fw-bold">SINH VIÊN</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="text-center">
+                                                        {userItem.isVerified ? (
+                                                            <span className="material-icons text-success" title="Đã đối soát căn cước/KYC">verified</span>
+                                                        ) : (
+                                                            <span className="material-icons text-muted" title="Tài khoản thường">gpp_maybe</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="text-center">
+                                                        {userItem.isActive ? (
+                                                            <span className="badge bg-success px-2.5 py-1.5 rounded-pill text-white small d-inline-flex align-items-center">
+                                                                <span className="spinner-grow spinner-grow-sm me-1" style={{ animationDuration: '3s' }} role="status"></span>
+                                                                Active
+                                                            </span>
+                                                        ) : (
+                                                            <span className="badge bg-danger px-2.5 py-1.5 rounded-pill text-white small">
+                                                                Banned
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                    <td className="text-center">
+                                                        <button 
+                                                            className={`btn btn-sm btn-action d-inline-flex align-items-center justify-content-center rounded-circle ${userItem.isActive ? 'btn-outline-danger' : 'btn-outline-success'}`}
+                                                            style={{ width: '32px', height: '32px', p: 0 }}
+                                                            title={userItem.isActive ? "Khóa tài khoản" : "Mở khóa tài khoản"}
+                                                            onClick={() => {
+                                                                alert(`Tính năng thay đổi trạng thái cho tài khoản: ${userItem.username}\nID: ${userItem.id}\n(Sẽ kết nối API cập nhật trạng thái hoạt động)`);
+                                                            }}
+                                                        >
+                                                            <span className="material-icons fs-5">{userItem.isActive ? 'block' : 'check_circle'}</span>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="7" className="text-center py-4 text-muted small">
+                                                    Không có dữ liệu thành viên nào được trả về từ máy chủ.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
-                        </div>
-                        <h6 className="fw-bold text-secondary mb-2 small">Tài khoản vi phạm/bị khóa tạm thời:</h6>
-                        <div className="p-3 bg-danger-light rounded d-flex justify-content-between align-items-center">
-                            <span className="text-danger small fw-semibold">Tài khoản đang bị vô hiệu hóa (Banned):</span>
-                            <span className="badge bg-danger fs-6 rounded-pill">{blockedCounts}</span>
                         </div>
                     </div>
                 </div>
@@ -403,70 +583,225 @@ const StatisticsManagement = () => {
     };
 
     // ==========================================
-    // TAB MỚI 6: BÁO CÁO VI PHẠM (REPORTS)
+    // TAB MỚI 6: QUẢN LÝ BÁO CÁO VI PHẠM (REPORTS)
     // ==========================================
+    const handleResolveReport = async (reportId) => {
+        if (window.confirm("Bạn có chắc chắn muốn đánh dấu báo cáo này là ĐÃ XỬ LÝ?")) {
+            try {
+                // Gọi API resolve từ ReportService hệ thống
+                await ReportService.resolveReport(reportId);
+                alert("Đã xử lý và cập nhật trạng thái báo cáo thành công!");
+                
+                // Cập nhật State cục bộ ngay lập tức để đồng bộ UI không cần reload lại trang
+                setReports(prevReports => 
+                    prevReports.map(report => 
+                        report.id === reportId ? { ...report, status: 'RESOLVED' } : report
+                    )
+                );
+            } catch (error) {
+                console.error("Lỗi khi xử lý báo cáo vi phạm:", error);
+                alert("Xử lý báo cáo thất bại, vui lòng kiểm tra lại hệ thống!");
+            }
+        }
+    };
+
     const renderReportsChart = () => {
-        // Gom nhóm lý do báo cáo (Fake dữ liệu mẫu nếu API trả rỗng)
-        const reasonCounts = reports.reduce((acc, curr) => {
-            const reason = curr.reason || 'Khác';
-            acc[reason] = (acc[reason] || 0) + 1;
-            return acc;
-        }, {});
+        // --- Xử lý dữ liệu thống kê dựa trên cấu trúc Enums chính xác ---
+        const totalReports = reports.length;
+        const pendingCount = reports.filter(r => r.status === 'PENDING').length;
+        const resolvedCount = reports.filter(r => r.status === 'RESOLVED').length;
 
-        const pendingReports = reports.filter(r => r.status === 'PENDING' || !r.status).length;
+        // Đếm số lượng loại báo cáo (ROOM vs USER) để đưa vào biểu đồ tỷ lệ trực quan
+        const roomTypeCount = reports.filter(r => r.type === 'ROOM').length;
+        const userTypeCount = reports.filter(r => r.type === 'USER').length;
 
-        const dataReportsBar = {
-            labels: Object.keys(reasonCounts).length > 0 ? Object.keys(reasonCounts).slice(0, 5) : ['Tin giả', 'Sai giá', 'Phòng đã cho thuê', 'Chủ nhà lừa đảo'],
+        // Cấu hình dữ liệu cho biểu đồ hình khuyên (Doughnut Chart)
+        const typeDoughnutData = {
+            labels: ['Báo cáo Phòng trọ', 'Báo cáo Tài khoản'],
             datasets: [
                 {
-                    label: 'Số lượt báo cáo',
-                    data: Object.keys(reasonCounts).length > 0 ? Object.values(reasonCounts).slice(0, 5) : [12, 5, 8, 2],
-                    backgroundColor: '#e74a3b',
+                    data: totalReports > 0 ? [roomTypeCount, userTypeCount] : [1, 1], // Tránh biểu đồ trống nếu data rỗng
+                    backgroundColor: ['#f6c23e', '#4e73df'], // Vàng cho ROOM, Xanh cho USER
+                    hoverBackgroundColor: ['#f4b619', '#2e59d9'],
+                    borderWidth: 1,
                 }
             ]
         };
 
         return (
-            <div className="row">
-                <div className="col-md-7 mb-4">
-                    <div className="card shadow-sm p-4 custom-chart-card">
-                        <h5 className="card-title fw-bold mb-3 text-dark-blue">Phân Tích Nội Dung Báo Cáo Phổ Biến</h5>
-                        <div style={{ height: '280px' }}>
-                            <Bar data={dataReportsBar} options={{ responsive: true, maintainAspectRatio: false }} />
+            <div className="reports-tab-container">
+                {/* HÀNG 1: THẺ THỐNG KÊ NHANH & BIỂU ĐỒ TỶ LỆ ĐỐI TƯỢNG */}
+                <div className="row mb-4">
+                    {/* 3 Thẻ trạng thái báo cáo */}
+                    <div className="col-xl-7 col-lg-7">
+                        <div className="row h-100 align-content-between">
+                            {/* Thẻ 1: Tổng số phiếu */}
+                            <div className="col-md-4 mb-3">
+                                <div className="card shadow-sm border-left-primary p-3 bg-white h-100">
+                                    <span className="text-xs font-weight-bold text-primary text-uppercase d-block mb-1">
+                                        Tổng lượng báo cáo
+                                    </span>
+                                    <h3 className="h3 mb-0 font-weight-bold text-gray-800">{totalReports}</h3>
+                                </div>
+                            </div>
+                            {/* Thẻ 2: Đang chờ duyệt (PENDING) */}
+                            <div className="col-md-4 mb-3">
+                                <div className="card shadow-sm border-left-danger p-3 bg-white h-100">
+                                    <span className="text-xs font-weight-bold text-danger text-uppercase d-block mb-1">
+                                        Chờ xử lý (Pending)
+                                    </span>
+                                    <h3 className="h3 mb-0 font-weight-bold text-gray-800">{pendingCount}</h3>
+                                </div>
+                            </div>
+                            {/* Thẻ 3: Đã giải quyết (RESOLVED) */}
+                            <div className="col-md-4 mb-3">
+                                <div className="card shadow-sm border-left-success p-3 bg-white h-100">
+                                    <span className="text-xs font-weight-bold text-success text-uppercase d-block mb-1">
+                                        Đã giải quyết (Resolved)
+                                    </span>
+                                    <h3 className="h3 mb-0 font-weight-bold text-gray-800">{resolvedCount}</h3>
+                                </div>
+                            </div>
+
+                            {/* Thẻ mô tả ngắn gọn vai trò của Admin */}
+                            <div className="col-12 mt-2">
+                                <div className="card bg-light border-0 p-3 text-muted small">
+                                    💡 <strong>Ghi chú dành cho quản trị viên:</strong> Hệ thống tiếp nhận thông tin tố cáo từ 
+                                    người dùng đối với các bài đăng tin phòng trọ không chính xác hoặc hành vi gian lận tài khoản. 
+                                    Vui lòng ấn nút <strong>"Xử lý"</strong> sau khi đã kiểm tra thực tế để chuyển trạng thái phiếu sang 
+                                    <span className="text-success fw-bold"> RESOLVED</span>.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Biểu đồ tròn phân tích loại đối tượng bị tố cáo */}
+                    <div className="col-xl-5 col-lg-5">
+                        <div className="card shadow-sm p-4 bg-white h-100 custom-chart-card">
+                            <h6 className="card-title fw-bold mb-2 text-dark-blue">Phân Hệ Đối Tượng Bị Báo Cáo</h6>
+                            <div style={{ height: '160px', position: 'relative' }} className="d-flex justify-content-center">
+                                {totalReports > 0 ? (
+                                    <Doughnut 
+                                        data={typeDoughnutData} 
+                                        options={{ 
+                                            responsive: true, 
+                                            maintainAspectRatio: false,
+                                            plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } } }
+                                        }} 
+                                    />
+                                ) : (
+                                    <div className="text-muted d-flex align-items-center small">Chưa có dữ liệu phân tích</div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div className="col-md-5 mb-4">
-                    <div className="card shadow-sm p-4 h-100 custom-table-card">
-                        <h5 className="card-title fw-bold mb-3 text-dark-blue">Phiếu Báo Cáo Chờ Xử Lý</h5>
-                        <div className="card mini-status-card bg-gradient-red text-white p-3 text-center mb-3">
-                            <h4 className="fw-bold mb-0">{pendingReports || reports.length}</h4>
-                            <span className="small text-white-50">Báo cáo vi phạm chưa xử lý</span>
-                        </div>
-                        <div className="table-responsive" style={{ maxHeight: '180px' }}>
-                            <table className="table table-hover align-middle small custom-table">
-                                <thead className="table-light sticky-top">
-                                    <tr>
-                                        <th>Lý do</th>
-                                        <th>Trạng thái</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {reports.slice(0, 4).map((report, idx) => (
-                                        <tr key={report.id || idx}>
-                                            <td className="text-truncate-custom italic-reason">{report.reason || "Nội dung không hợp lệ"}</td>
-                                            <td>
-                                                <span className="badge bg-light text-danger border border-danger">Pending</span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {reports.length === 0 && (
+
+                {/* HÀNG 2: BẢNG CHI TIẾT TẤT CẢ CÁC BÁO CÁO HỆ THỐNG */}
+                <div className="row">
+                    <div className="col-12">
+                        <div className="card shadow-sm p-4 bg-white custom-table-card">
+                            <h5 className="card-title fw-bold mb-3 text-dark-blue">Danh Sách Chi Tiết Phiếu Tố Cáo & Vi Phạm</h5>
+                            
+                            <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                <table className="table table-hover align-middle small custom-table mb-0">
+                                    <thead className="table-light sticky-top" style={{ top: 0, zIndex: 5 }}>
                                         <tr>
-                                            <td colSpan="2" className="text-center text-muted py-3">Hệ thống sạch, chưa có báo cáo vi phạm nào!</td>
+                                            <th style={{ width: '22%' }}>Người gửi báo cáo</th>
+                                            <th style={{ width: '28%' }}>Đối tượng bị báo cáo</th>
+                                            <th style={{ width: '25%' }}>Lý do vi phạm</th>
+                                            <th style={{ width: '13%' }}>Ngày tạo</th>
+                                            <th style={{ width: '12%', textAlign: 'center' }}>Trạng thái / Thao tác</th>
                                         </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {reports.length > 0 ? (
+                                            reports.map((report, idx) => (
+                                                <tr key={report.id || idx}>
+                                                    
+                                                    {/* 1. NGƯỜI BÁO CÁO */}
+                                                    <td>
+                                                        <div className="fw-bold text-dark">{report.reporterUsername || "Ẩn danh"}</div>
+                                                        <span className={`badge mt-1 ${
+                                                            report.reporterRole === 'LANDLORD' ? 'bg-info' : 
+                                                            report.reporterRole === 'ADMIN' ? 'bg-danger' : 'bg-secondary'
+                                                        } xsmall-badge`}>
+                                                            {report.reporterRole || 'USER'}
+                                                        </span>
+                                                    </td>
+
+                                                    {/* 2. ĐỐI TƯỢNG BỊ BÁO CÁO (ROOM HOẶC USER) */}
+                                                    <td>
+                                                        <div className="d-flex flex-column">
+                                                            {/* Phân loại Type thẻ Tag */}
+                                                            <span className={`badge mb-1 w-fit-content ${
+                                                                report.type === 'ROOM' ? 'bg-warning text-dark' : 'bg-dark text-white'
+                                                            }`}>
+                                                                {report.type === 'ROOM' ? '📍 PHÒNG TRỌ' : '👤 TÀI KHOẢN'}
+                                                            </span>
+                                                            
+                                                            {/* Hiển thị Target Name tương ứng */}
+                                                            {report.type === 'ROOM' ? (
+                                                                <>
+                                                                    <span className="fw-medium text-primary text-truncate-custom" title={report.targetTitle}>
+                                                                        {report.targetTitle || "Tin đăng phòng trọ"}
+                                                                    </span>
+                                                                    <span className="text-muted xsmall-text">Mã phòng: {report.targetId}</span>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <span className="fw-medium text-dark">
+                                                                        @{report.targetUsername || "username_hidden"}
+                                                                    </span>
+                                                                    <span className="text-muted xsmall-text">Role: {report.targetRole || "USER"}</span>
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    </td>
+
+                                                    {/* 3. LÝ DO VI PHẠM (HIỂN THỊ TEXT TỰ DO) */}
+                                                    <td>
+                                                        <div className="p-2 bg-light rounded text-secondary border-start border-3 border-secondary italic-reason-box text-wrap-custom">
+                                                            {report.reason || "Không để lại lý do chi tiết."}
+                                                        </div>
+                                                    </td>
+
+                                                    {/* 4. NGÀY TẠO */}
+                                                    <td className="text-muted">
+                                                        {report.createdAt ? new Date(report.createdAt).toLocaleString('vi-VN', {
+                                                            year: 'numeric', month: '2-digit', day: '2-digit',
+                                                            hour: '2-digit', minute: '2-digit'
+                                                        }) : 'N/A'}
+                                                    </td>
+
+                                                    {/* 5. THAO TÁC ADMIN */}
+                                                    <td className="text-center">
+                                                        {report.status === 'RESOLVED' ? (
+                                                            <span className="badge bg-success-soft text-success border border-success px-3 py-2 rounded-pill fw-bold">
+                                                                ✓ Đã xử lý
+                                                            </span>
+                                                        ) : (
+                                                            <button 
+                                                                className="btn btn-sm btn-danger px-3 py-1.5 shadow-sm font-weight-bold"
+                                                                onClick={() => handleResolveReport(report.id)}
+                                                            >
+                                                                Xử lý
+                                                            </button>
+                                                        )}
+                                                    </td>
+
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="5" className="text-center text-muted py-5 fs-6 fw-medium">
+                                                    🎉 Không có báo cáo vi phạm nào trên hệ thống!
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
