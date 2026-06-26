@@ -53,6 +53,7 @@ const StatisticsManagement = () => {
     const [amenities, setAmenities] = useState([]);
     const [users, setUsers] = useState([]);
     const [reports, setReports] = useState([]);
+    const [usersCache, setUsersCache] = useState({});
 
     // --- Fetch dữ liệu tương ứng với từng Tab để tối ưu hiệu năng ---
     useEffect(() => {
@@ -80,19 +81,29 @@ const StatisticsManagement = () => {
                 } 
                 else if (activeTab === 'bookings') {
                     const [resBookings, resVouchers] = await Promise.all([
-                        BookingService.getLandlordBookings(), 
+                        BookingService.getBookings(), 
                         VoucherService.getVouchers()
                     ]);
                     setBookings(resBookings?.data || []);
                     setVouchers(resVouchers?.data || []);
                 }
                 else if (activeTab === 'users') {
-                    const resUsers = await UserService.getAllUsers(); // Giả định API lấy danh sách user
+                    const resUsers = await UserService.getAllUsers();
                     setUsers(resUsers?.data || []);
                 }
                 else if (activeTab === 'reports') {
-                    const resReports = await ReportService.getAllReports(); // Giả định API lấy danh sách báo cáo vi phạm
+                    const resReports = await ReportService.getAllReports();
                     setReports(resReports?.data || []);
+                }
+                // --- BỔ SUNG FETCH CHO TAB 7 ---
+                else if (activeTab === 'rentals') {
+                    // Tải song song cả danh sách lịch đặt và danh sách users để map tên chủ trọ
+                    const [resBookings, resUsers] = await Promise.all([
+                        BookingService.getBookings(),
+                        UserService.getAllUsers() // 🌟 Thêm dòng này để lấy toàn bộ thông tin User/Landlord
+                    ]);
+                    setBookings(resBookings?.data || []);
+                    setUsers(resUsers?.data || []); // Đổ vào state users có sẵn của bạn
                 }
             } catch (error) {
                 console.error("Lỗi khi tải dữ liệu thống kê:", error);
@@ -103,6 +114,42 @@ const StatisticsManagement = () => {
 
         fetchTabData();
     }, [activeTab, financePeriod]);
+
+    useEffect(() => {
+        if (!Array.isArray(bookings) || bookings.length === 0) return;
+
+        const userIdsToFetch = new Set();
+        bookings.forEach(b => {
+            if (b?.userId && !usersCache[b.userId]) userIdsToFetch.add(b.userId);
+            if (b?.landlordId && !usersCache[b.landlordId]) userIdsToFetch.add(b.landlordId);
+        });
+
+        if (userIdsToFetch.size === 0) return;
+
+        const fetchUserData = async () => {
+            const fetchPromises = Array.from(userIdsToFetch).map(async (id) => {
+                try {
+                    const userData = await UserService.getUserById(id); 
+                    return { id, data: userData };
+                } catch (error) {
+                    console.error(`Không thể lấy thông tin user ${id}:`, error);
+                    return { id, data: null };
+                }
+            });
+
+            const results = await Promise.all(fetchPromises);
+            
+            setUsersCache(prev => {
+                const newCache = { ...prev };
+                results.forEach(res => {
+                    if (res.data) newCache[res.id] = res.data;
+                });
+                return newCache;
+            });
+        };
+
+        fetchUserData();
+    }, [bookings]);
 
     // ==========================================
     // TAB 1: TÀI CHÍNH (LINE CHART)
@@ -809,6 +856,274 @@ const StatisticsManagement = () => {
         );
     };
 
+    // ==========================================
+    // TAB 7: THỐNG KÊ TỶ LỆ THUÊ PHÒNG (RENTALS) - ĐÃ CẬP NHẬT THÊM THÔNG TIN CHỦ NHÀ & THỜI GIAN
+    // ==========================================
+    const renderRentalsChart = () => {
+        // 1. Khởi tạo bộ đếm mặc định khớp với BookingStatus Enum từ Backend
+        const statusCounts = { PENDING: 0, APPROVED: 0, REJECTED: 0, CANCELLED: 0 };
+
+        // Helper định dạng hiển thị LocalDateTime từ Backend
+        const formatDateTime = (dateTimeString) => {
+            if (!dateTimeString) return "---";
+            try {
+                const date = new Date(dateTimeString);
+                if (isNaN(date.getTime())) return dateTimeString;
+                
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                
+                return `${day}/${month}/${year} ${hours}:${minutes}`;
+            } catch (error) {
+                return "---";
+            }
+        };
+
+        // 2. Gom nhóm an toàn dữ liệu từ mảng bookings thực tế
+        if (Array.isArray(bookings)) {
+            bookings.forEach(b => {
+                const currentStatus = b?.status;
+                if (currentStatus && statusCounts[currentStatus] !== undefined) {
+                    statusCounts[currentStatus]++;
+                }
+            });
+        }
+
+        const totalBookings = Array.isArray(bookings) ? bookings.length : 0;
+        
+        const getRate = (count) => {
+            return totalBookings > 0 ? ((count / totalBookings) * 100).toFixed(1) : "0.0";
+        };
+
+        const pendingRate = getRate(statusCounts.PENDING);
+        const approvedRate = getRate(statusCounts.APPROVED);
+        const rejectedRate = getRate(statusCounts.REJECTED);
+        const cancelledRate = getRate(statusCounts.CANCELLED);
+
+        // 3. Cấu hình Data cho Biểu đồ Doughnut
+        const dataRentalsPie = {
+            labels: ['Chờ duyệt (Pending)', 'Thành công (Approved)', 'Từ chối (Rejected)', 'Đã hủy (Cancelled)'],
+            datasets: [{
+                data: [statusCounts.PENDING, statusCounts.APPROVED, statusCounts.REJECTED, statusCounts.CANCELLED],
+                backgroundColor: [
+                    'rgba(255, 193, 7, 0.85)',   // PENDING
+                    'rgba(40, 167, 69, 0.85)',    // APPROVED
+                    'rgba(220, 53, 69, 0.85)',    // REJECTED
+                    'rgba(108, 117, 125, 0.85)'   // CANCELLED
+                ],
+                borderColor: ['#fff', '#fff', '#fff', '#fff'],
+                borderWidth: 2,
+            }],
+        };
+
+        const optionsRentalsPie = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 12, font: { size: 11, weight: '600' }, padding: 12 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const value = context.raw || 0;
+                            const percentage = totalBookings > 0 ? ((value / totalBookings) * 100).toFixed(1) : 0;
+                            return ` ${context.label}: ${value} lượt (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            cutout: '72%'
+        };
+
+        return (
+            <div className="d-flex flex-column gap-4">
+                {/* DÒNG 1: CHỈ SỐ KPI VÀ BIỂU ĐỒ TRÒN KHUYÊN */}
+                <div className="row g-4">
+                    <div className="col-xl-6 col-lg-6">
+                        <div className="card shadow-sm border-0 rounded-4 h-100 p-3">
+                            <div className="card-body d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 className="fw-bold text-dark mb-1">Hiệu Suất Tương Tác Lịch</h5>
+                                    <p className="text-muted small mb-3">Phân tích sâu tỷ lệ chuyển đổi dòng hành vi kết nối Sinh viên - Chủ nhà.</p>
+                                </div>
+
+                                <div className="row g-3 my-2 text-center">
+                                    <div className="col-6">
+                                        <div className="p-3 rounded-3 bg-warning-subtle" style={{ minHeight: '85px' }}>
+                                            <span className="fs-3 fw-bold text-warning d-block">{pendingRate}%</span>
+                                            <span className="text-dark small fw-medium" style={{ fontSize: '12px' }}>Tỷ lệ Chờ duyệt</span>
+                                        </div>
+                                    </div>
+                                    <div className="col-6">
+                                        <div className="p-3 rounded-3 bg-success-subtle" style={{ minHeight: '85px' }}>
+                                            <span className="fs-3 fw-bold text-success d-block">{approvedRate}%</span>
+                                            <span className="text-dark small fw-medium" style={{ fontSize: '12px' }}>Tỷ lệ Thuê thành công</span>
+                                        </div>
+                                    </div>
+                                    <div className="col-6">
+                                        <div className="p-3 rounded-3 bg-danger-subtle" style={{ minHeight: '85px' }}>
+                                            <span className="fs-3 fw-bold text-danger d-block">{rejectedRate}%</span>
+                                            <span className="text-dark small fw-medium" style={{ fontSize: '12px' }}>Tỷ lệ Từ chối</span>
+                                        </div>
+                                    </div>
+                                    <div className="col-6">
+                                        <div className="p-3 rounded-3 bg-secondary-subtle" style={{ minHeight: '85px' }}>
+                                            <span className="fs-3 fw-bold text-secondary d-block">{cancelledRate}%</span>
+                                            <span className="text-dark small fw-medium" style={{ fontSize: '12px' }}>Tỷ lệ Hủy lịch</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-3">
+                                    <div className="d-flex justify-content-between align-items-center py-2 border-bottom border-light">
+                                        <span className="text-secondary small"><i className="bi bi-circle-fill text-warning me-2" style={{fontSize: '8px'}}></i>Chờ xử lý (Pending):</span>
+                                        <span className="fw-bold text-dark">{statusCounts.PENDING} <small className="text-muted fw-normal">({pendingRate}%)</small></span>
+                                    </div>
+                                    <div className="d-flex justify-content-between align-items-center py-2 border-bottom border-light">
+                                        <span className="text-secondary small"><i className="bi bi-circle-fill text-success me-2" style={{fontSize: '8px'}}></i>Đã thuê phòng (Approved):</span>
+                                        <span className="fw-bold text-success">{statusCounts.APPROVED} <small className="text-success fw-normal">({approvedRate}%)</small></span>
+                                    </div>
+                                    <div className="d-flex justify-content-between align-items-center py-2 border-bottom border-light">
+                                        <span className="text-secondary small"><i className="bi bi-circle-fill text-danger me-2" style={{fontSize: '8px'}}></i>Từ chối lịch (Rejected):</span>
+                                        <span className="fw-bold text-dark">{statusCounts.REJECTED} <small className="text-muted fw-normal">({rejectedRate}%)</small></span>
+                                    </div>
+                                    <div className="d-flex justify-content-between align-items-center py-2">
+                                        <span className="text-secondary small"><i className="bi bi-circle-fill text-secondary me-2" style={{fontSize: '8px'}}></i>Người dùng hủy (Cancelled):</span>
+                                        <span className="fw-bold text-dark">{statusCounts.CANCELLED} <small className="text-muted fw-normal">({cancelledRate}%)</small></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="col-xl-6 col-lg-6">
+                        <div className="card shadow-sm border-0 rounded-4 h-100 p-3">
+                            <div className="card-body d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 className="fw-bold text-dark mb-1">Cấu Trúc Trạng Thái Lịch Hẹn</h5>
+                                    <p className="text-muted small mb-4">Biểu đồ phân bổ tổng quan tỷ lệ trực quan hóa cấu trúc tương tác hệ thống.</p>
+                                </div>
+                                <div style={{ height: '280px', width: '100%' }} className="position-relative my-auto">
+                                    <Doughnut data={dataRentalsPie} options={optionsRentalsPie} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* DÒNG 2: DANH SÁCH LỊCH HẸN VỪA PHÁT SINH */}
+                <div className="row">
+                    <div className="col-12">
+                        <div className="card shadow-sm border-0 rounded-4 p-3">
+                            <div className="card-body">
+                                <div className="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <h5 className="fw-bold text-dark mb-1">Dòng Nghiệp Vụ Vừa Phát Sinh</h5>
+                                        <p className="text-muted small mb-0">Danh sách các lịch hẹn xem phòng thời gian thực vừa được ghi nhận trên hệ thống.</p>
+                                    </div>
+                                    <span className="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-semibold">
+                                        Mới cập nhật
+                                    </span>
+                                </div>
+                                
+                                <div className="table-responsive mt-3" style={{ maxHeight: '380px', overflowY: 'auto' }}>
+                                    {!bookings || bookings.length === 0 ? (
+                                        <div className="text-center text-muted py-5 small">
+                                            <i className="bi bi-calendar-x d-block fs-3 mb-2 text-black-50"></i>
+                                            Chưa có dữ liệu lịch hẹn trên hệ thống.
+                                        </div>
+                                    ) : (
+                                        <table className="table table-hover align-middle table-borderless mb-0">
+                                            <thead className="table-light sticky-top" style={{ top: 0, zIndex: 10 }}>
+                                                <tr className="small text-muted text-uppercase fw-bold">
+                                                    <th style={{ minWidth: '180px' }}>Khách hàng</th>
+                                                    <th style={{ minWidth: '180px' }}>Chủ nhà</th>
+                                                    <th style={{ minWidth: '260px' }}>Bài đăng yêu cầu xem phòng</th>
+                                                    <th style={{ minWidth: '150px' }}>Hẹn xem lúc</th>
+                                                    <th style={{ minWidth: '150px' }}>Ngày đặt lịch</th>
+                                                    <th style={{ minWidth: '130px' }} className="text-center">Trạng thái</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {bookings.slice(0, 10).map((b) => {
+                                                    // 🌟 ĐOẠN FIX: Khớp trực tiếp thông tin từ mảng `users` tổng
+                                                    const tenantInfo = Array.isArray(users) ? users.find(u => u.id === b.userId) : null;
+                                                    const landlordInfo = Array.isArray(users) ? users.find(u => u.id === b.landlordId) : null;
+
+                                                    const finalTenantName = tenantInfo?.username || b.tenantName || 'Ẩn danh';
+                                                    const finalTenantAvatar = tenantInfo?.avatar || b.tenantAvatar;
+                                                    
+                                                    // Nếu tìm thấy chủ trọ trong danh sách users thì hiển thị, ngược lại hiển thị "Chủ trọ ẩn danh" thay vì "Đang tải" liên tục
+                                                    const finalLandlordName = landlordInfo?.username || `Chủ trọ (ID: ${b.landlordId || '---'})`;
+                                                    const finalLandlordAvatar = landlordInfo?.avatar;
+
+                                                    return (
+                                                        <tr key={b.id || Math.random().toString()} className="small border-bottom border-light">
+                                                            {/* Khách hàng */}
+                                                            <td>
+                                                                <div className="d-flex align-items-center gap-2 py-1">
+                                                                    {finalTenantAvatar ? (
+                                                                        <img src={finalTenantAvatar} alt="avatar" className="rounded-circle shadow-sm" style={{ width: '26px', height: '26px', objectFit: 'cover' }} />
+                                                                    ) : (
+                                                                        <div className="bg-secondary-subtle rounded-circle d-flex align-items-center justify-content-center text-secondary fw-bold shadow-sm" style={{ width: '26px', height: '26px', fontSize: '10px' }}>{finalTenantName.charAt(0).toUpperCase()}</div>
+                                                                    )}
+                                                                    <div className="fw-semibold text-dark text-truncate" style={{ maxWidth: '140px' }} title={finalTenantName}>{finalTenantName}</div>
+                                                                </div>
+                                                            </td>
+
+                                                            {/* Chủ nhà */}
+                                                            <td>
+                                                                <div className="d-flex align-items-center gap-2 py-1">
+                                                                    {finalLandlordAvatar ? (
+                                                                        <img src={finalLandlordAvatar} alt="landlord avatar" className="rounded-circle shadow-sm" style={{ width: '26px', height: '26px', objectFit: 'cover' }} />
+                                                                    ) : (
+                                                                        <div className="bg-info-subtle rounded-circle d-flex align-items-center justify-content-center text-info fw-bold shadow-sm" style={{ width: '26px', height: '26px', fontSize: '10px' }}>{finalLandlordName.charAt(0).toUpperCase()}</div>
+                                                                    )}
+                                                                    <div className="text-dark text-truncate" style={{ maxWidth: '140px' }} title={finalLandlordName}>
+                                                                        <span className="fw-medium">{finalLandlordName}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+
+                                                            {/* Bài đăng yêu cầu */}
+                                                            <td>
+                                                                <div className="text-dark fw-medium text-truncate" style={{ maxWidth: '250px' }} title={b.post?.title || `ID: ${b.postId}`}>{b.post?.title || <span className="text-muted italic">Mã phòng: {b.postId}</span>}</div>
+                                                            </td>
+
+                                                            {/* Thời gian hẹn xem */}
+                                                            <td className="text-dark font-medium"><i className="bi bi-calendar-event text-primary me-1"></i>{formatDateTime(b.bookingTime)}</td>
+                                                            
+                                                            {/* Ngày khởi tạo */}
+                                                            <td className="text-muted"><i className="bi bi-clock-history me-1"></i>{formatDateTime(b.createdAt)}</td>
+                                                            
+                                                            {/* Trạng thái */}
+                                                            <td className="text-center">
+                                                                <span className={`badge rounded-pill px-2.5 py-1.5 fw-bold ${
+                                                                    b.status === 'APPROVED' ? 'bg-success-subtle text-success' :
+                                                                    b.status === 'PENDING' ? 'bg-warning-subtle text-warning' :
+                                                                    b.status === 'REJECTED' ? 'bg-danger-subtle text-danger' : 'bg-secondary-subtle text-secondary'
+                                                                }`}>{b.status || 'UNKNOWN'}</span>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="container-fluid py-4 statistics-management-wrapper">
             {/* Header trang */}
@@ -851,6 +1166,11 @@ const StatisticsManagement = () => {
                         ⚠️ Báo Cáo Vi Phạm
                     </button>
                 </li>
+                <li className="nav-item mb-2">
+                    <button onClick={() => setActiveTab('rentals')} className={`nav-link border-0 px-4 py-2 rounded-pill fw-semibold ${activeTab === 'rentals' ? 'bg-primary text-white shadow-sm' : 'text-secondary bg-light'}`}>
+                        📈 Tỉ Lệ Thuê Phòng
+                    </button>
+                </li>
             </ul>
 
             {/* Hiệu ứng loading */}
@@ -869,6 +1189,7 @@ const StatisticsManagement = () => {
                     {activeTab === 'bookings' && renderBookingsChart()}
                     {activeTab === 'users' && renderUsersChart()}
                     {activeTab === 'reports' && renderReportsChart()}
+                    {activeTab === 'rentals' && renderRentalsChart()}
                 </div>
             )}
         </div>

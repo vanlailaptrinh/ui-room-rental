@@ -72,6 +72,11 @@ const BookingService = {
         const response = await api.get(`${ENDPOINT}/${id}`);
         return response.data;
     },
+
+    getBookings: async () => {
+        const response = await api.get(ENDPOINT);
+        return response.data;
+    },
 };
 
 export default BookingService;
