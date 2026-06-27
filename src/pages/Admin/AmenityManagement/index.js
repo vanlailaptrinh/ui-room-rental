@@ -165,7 +165,6 @@ const AmenityManagement = () => {
           </div>
           <div className="amenity-header-actions-group">
             <div className="amenity-search-box-wrapper">
-              <span className="material-symbols-outlined amenity-search-icon">search</span>
               <input 
                 type="text" 
                 placeholder="Tìm tên tiện nghi..." 

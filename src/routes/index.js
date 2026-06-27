@@ -35,7 +35,7 @@ import PostManagement from '../pages/Admin/PostManagement';
 import StatisticsManagement from '../pages/Admin/StatisticsManagement';
 import VoucherManagement from '../pages/Admin/VoucherManagement';
 import ReportManagement from '../pages/Admin/ReportManagement';
-import Blacklist from '../pages/Blacklist';
+import Blacklist from '../pages/Admin/BlacklistManagement';
 
 export const publicRoutes = [
     {

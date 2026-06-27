@@ -153,7 +153,6 @@ const AccountManagement = () => {
             <p className="account-page-desc">Giám sát số lượng phân quyền thành viên, trạng thái hoạt động và thực thi kỷ luật hệ thống.</p>
           </div>
           <div className="account-search-box-wrapper">
-            <span className="material-symbols-outlined account-search-icon">search</span>
             <input 
               type="text" 
               placeholder="Tìm tên, email, sđt..." 

@@ -14,6 +14,17 @@ const UserService = {
         }
     },
 
+    // [GET] /users/banned - Lấy danh sách người dùng bị khóa (ADMIN)
+    getBannedUsers: async () => {
+        try {
+            const response = await api.get(`${ENDPOINT}/banned`);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching banned users:", error);
+            throw error;
+        }
+    },
+
     // [GET] /users/profile - Lấy thông tin profile cá nhân
     getUserProfile: async () => {
         try {

@@ -511,7 +511,7 @@ const StatisticsManagement = () => {
                             <h6 className="fw-bold text-secondary mb-2 small uppercase-tracking">Kiểm soát rủi ro vi phạm:</h6>
                             <div className="p-3 bg-danger-light rounded-3 d-flex justify-content-between align-items-center border border-danger-subtle">
                                 <div className="d-flex align-items-center">
-                                    <span className="material-icons text-danger me-2">block</span>
+                                    <span className="material-icons text-danger me-2">Khóa</span>
                                     <span className="text-danger small fw-semibold">Tài khoản đang bị vô hiệu hóa / Khóa tạm thời (Banned):</span>
                                 </div>
                                 <span className="badge bg-danger fs-6 px-3 rounded-pill shadow-sm">{blockedCounts}</span>
@@ -539,7 +539,6 @@ const StatisticsManagement = () => {
                                             <th scope="col" className="text-center">Vai trò</th>
                                             <th scope="col" className="text-center">Xác minh</th>
                                             <th scope="col" className="text-center">Trạng thái</th>
-                                            <th scope="col" className="text-center" style={{ width: '100px' }}>Hành động</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -581,34 +580,22 @@ const StatisticsManagement = () => {
                                                     </td>
                                                     <td className="text-center">
                                                         {userItem.isVerified ? (
-                                                            <span className="material-icons text-success" title="Đã đối soát căn cước/KYC">verified</span>
+                                                            <span className="material-icons text-success" title="Đã đối soát căn cước/KYC">Đã xác thực</span>
                                                         ) : (
-                                                            <span className="material-icons text-muted" title="Tài khoản thường">gpp_maybe</span>
+                                                            <span className="material-icons text-muted" title="Tài khoản thường">Chưa xác thực</span>
                                                         )}
                                                     </td>
                                                     <td className="text-center">
                                                         {userItem.isActive ? (
                                                             <span className="badge bg-success px-2.5 py-1.5 rounded-pill text-white small d-inline-flex align-items-center">
                                                                 <span className="spinner-grow spinner-grow-sm me-1" style={{ animationDuration: '3s' }} role="status"></span>
-                                                                Active
+                                                                Hoạt động
                                                             </span>
                                                         ) : (
                                                             <span className="badge bg-danger px-2.5 py-1.5 rounded-pill text-white small">
-                                                                Banned
+                                                                Khóa
                                                             </span>
                                                         )}
-                                                    </td>
-                                                    <td className="text-center">
-                                                        <button 
-                                                            className={`btn btn-sm btn-action d-inline-flex align-items-center justify-content-center rounded-circle ${userItem.isActive ? 'btn-outline-danger' : 'btn-outline-success'}`}
-                                                            style={{ width: '32px', height: '32px', p: 0 }}
-                                                            title={userItem.isActive ? "Khóa tài khoản" : "Mở khóa tài khoản"}
-                                                            onClick={() => {
-                                                                alert(`Tính năng thay đổi trạng thái cho tài khoản: ${userItem.username}\nID: ${userItem.id}\n(Sẽ kết nối API cập nhật trạng thái hoạt động)`);
-                                                            }}
-                                                        >
-                                                            <span className="material-icons fs-5">{userItem.isActive ? 'block' : 'check_circle'}</span>
-                                                        </button>
                                                     </td>
                                                 </tr>
                                             ))

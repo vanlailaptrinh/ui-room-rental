@@ -287,7 +287,7 @@ const AdminDashboard = () => {
                                             usersList.map((u) => (
                                                 <tr key={u.id}>
                                                     <td>
-                                                        <img src={u.avatar || 'https://via.placeholder.com/40'} alt="avatar" className="rounded-circle shadow-sm" width="40" height="40" style={{objectFit: 'cover'}}/>
+                                                        <img src={u.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80'} alt="avatar" className="rounded-circle shadow-sm" width="40" height="40" style={{objectFit: 'cover'}}/>
                                                     </td>
                                                     <td>
                                                         <div className="fw-bold text-dark">{u.username}</div>
