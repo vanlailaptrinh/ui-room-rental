@@ -11,6 +11,7 @@ function Header() {
     const navigate = useNavigate();
     const location = useLocation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [roomTypes, setRoomTypes] = useState([]);
 
     const searchParams = new URLSearchParams(location.search);
@@ -31,7 +32,6 @@ function Header() {
     }, []);
 
     const handleRoomTypeClick = (type) => {
-        // Lấy trường "value" (ví dụ: APARTMENT, SINGLE) để truyền lên URL
         const typeValue = type && typeof type === 'object' ? type.value : type;
 
         if (typeValue) {
@@ -40,7 +40,10 @@ function Header() {
             navigate(`/postlist`);
         }
         setIsMenuOpen(false);
+        setIsDropdownOpen(false);
     };
+
+    const isRoomPageActive = location.pathname === '/postlist';
 
     return (
         <nav className="header-nav">
@@ -53,28 +56,54 @@ function Header() {
                         </span>
                     </button>
 
-                    <Link to="/" className="header-logo">TroSinhVien</Link>
+                    <Link to="/" className="header-logo" onClick={() => { setIsMenuOpen(false); setIsDropdownOpen(false); }}>
+                        TroSinhVien
+                    </Link>
 
                     <div className={`header-nav-links ${isMenuOpen ? 'open' : ''}`}>
-                        {roomTypes.map((type, index) => {
-                            const currentEncoding = type && typeof type === 'object' ? type.value : type;
-                            const displayName = type && typeof type === 'object' ? type.name : type;
+                        <Link
+                            to="/"
+                            className={location.pathname === '/' ? "nav-link-active" : "nav-link"}
+                            onClick={() => setIsMenuOpen(false)}
+                        >
+                            Trang chủ
+                        </Link>
 
-                            // So sánh khớp chính xác chữ viết hoa/thường (ví dụ: APARTMENT)
-                            const isActive = location.pathname === '/postlist' &&
-                                activeTypeValue &&
-                                decodeURIComponent(activeTypeValue).toUpperCase() === String(currentEncoding).toUpperCase();
+                        <div
+                            className="header-dropdown"
+                            onMouseEnter={() => setIsDropdownOpen(true)}
+                            onMouseLeave={() => setIsDropdownOpen(false)}
+                        >
+                            <button
+                                className={isRoomPageActive ? "nav-link-active" : "nav-link"}
+                                onClick={() => handleRoomTypeClick(null)}
+                            >
+                                Phòng
+                            </button>
 
-                            return (
-                                <button
-                                    key={currentEncoding || index}
-                                    className={isActive ? "nav-link-active" : "nav-link"}
-                                    onClick={() => handleRoomTypeClick(type)}
-                                >
-                                    {displayName}
-                                </button>
-                            );
-                        })}
+                            {isDropdownOpen && roomTypes.length > 0 && (
+                                <div className="dropdown-menu">
+                                    {roomTypes.map((type, index) => {
+                                        const currentEncoding = type && typeof type === 'object' ? type.value : type;
+                                        const displayName = type && typeof type === 'object' ? type.name : type;
+
+                                        const isActive = isRoomPageActive &&
+                                            activeTypeValue &&
+                                            decodeURIComponent(activeTypeValue).toUpperCase() === String(currentEncoding).toUpperCase();
+
+                                        return (
+                                            <button
+                                                key={currentEncoding || index}
+                                                className={isActive ? "dropdown-item active" : "dropdown-item"}
+                                                onClick={() => handleRoomTypeClick(type)}
+                                            >
+                                                {displayName}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
