@@ -1,0 +1,58 @@
+.rental-feedback-locked {
+    padding: 14px 16px;
+    border: 1px solid #dbeafe;
+    border-radius: 12px;
+    background: #eff6ff;
+    color: #1e40af;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.rental-feedback-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.rental-feedback-actions button,
+.rental-feedback-cancel {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #334155;
+    padding: 6px 12px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.rental-feedback-actions button:hover,
+.rental-feedback-cancel:hover {
+    background: #f8fafc;
+}
+
+.rental-feedback-actions .rental-feedback-danger {
+    border-color: #fecaca;
+    color: #dc2626;
+}
+
+.rental-feedback-actions .rental-feedback-danger:hover {
+    background: #fef2f2;
+}
+
+.rental-feedback-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.rental-feedback-form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: -8px 0 12px;
+    color: #94a3b8;
+    font-size: 12px;
+}

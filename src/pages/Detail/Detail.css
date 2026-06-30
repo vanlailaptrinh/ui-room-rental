@@ -311,6 +311,15 @@
     background: #1d4ed8;
 }
 
+.detail-btn-confirm-rented {
+    margin-top: 12px;
+    background: #059669;
+}
+
+.detail-btn-confirm-rented:hover {
+    background: #047857;
+}
+
 .detail-action-buttons {
     display: flex;
     gap: 12px;

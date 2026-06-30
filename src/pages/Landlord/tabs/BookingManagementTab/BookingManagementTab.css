@@ -196,6 +196,7 @@
 
 .landlord-sb-pending { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
 .landlord-sb-approved { background: #ecfdf5; color: #047857; border: 1px solid #d1fae5; }
+.landlord-sb-rented { background: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
 .landlord-sb-rejected { background: #fef2f2; color: #b91c1c; border: 1px solid #fee2e2; }
 .landlord-sb-cancelled { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
 
@@ -211,6 +212,7 @@
 }
 .landlord-ld-item-pending::after { background: #f59e0b; }
 .landlord-ld-item-approved::after { background: #10b981; }
+.landlord-ld-item-rented::after { background: #0ea5e9; }
 .landlord-ld-item-rejected::after { background: #ef4444; }
 .landlord-ld-item-cancelled::after { background: #64748b; }
 

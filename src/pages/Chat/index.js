@@ -57,12 +57,16 @@ function Chat() {
         try {
             setLoading(true);
             setError('');
-            const res = await UserService.getAllUsers();
+            const res = user?.role === 'LANDLORD'
+                ? await ChatService.getContacts()
+                : await UserService.getAllUsers();
             // getAllUsers trả về ApiResponse: { code, message, data: [...] }
             const all = res?.data || res || [];
-            const filtered = (Array.isArray(all) ? all : []).filter(
-                (u) => u.role === targetRole && String(u.id) !== String(user?.id)
-            );
+            const filtered = user?.role === 'LANDLORD'
+                ? (Array.isArray(all) ? all : [])
+                : (Array.isArray(all) ? all : []).filter(
+                    (u) => u.role === targetRole && String(u.id) !== String(user?.id)
+                );
             setContacts(filtered);
         } catch (err) {
             setError(err?.response?.data?.message || err.message || 'Không thể tải danh sách');

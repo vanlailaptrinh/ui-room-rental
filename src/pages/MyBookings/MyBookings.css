@@ -144,6 +144,7 @@
 }
 
 .booking-card.approved  { border-left: 4px solid #22c55e; }
+.booking-card.rented    { border-left: 4px solid #0ea5e9; }
 .booking-card.pending   { border-left: 4px solid #f59e0b; }
 .booking-card.rejected  { border-left: 4px solid #ef4444; }
 .booking-card.cancelled { border-left: 4px solid #9ca3af; }
@@ -223,6 +224,7 @@
 
 .badge-pending   { background: #fef3c7; color: #92400e; }
 .badge-approved  { background: #dcfce7; color: #166534; }
+.badge-rented    { background: #e0f2fe; color: #075985; }
 .badge-rejected  { background: #fee2e2; color: #991b1b; }
 .badge-cancelled { background: #f3f4f6; color: #4b5563; }
 
@@ -274,6 +276,47 @@
 }
 
 .btn-cancel:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-confirm-rented,
+.btn-report {
+    padding: 9px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-confirm-rented {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1.5px solid #a7f3d0;
+}
+
+.btn-confirm-rented:hover:not(:disabled) {
+    background: #059669;
+    color: #fff;
+    border-color: #059669;
+}
+
+.btn-report {
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1.5px solid #fed7aa;
+}
+
+.btn-report:hover:not(:disabled) {
+    background: #ea580c;
+    color: #fff;
+    border-color: #ea580c;
+}
+
+.btn-confirm-rented:disabled,
+.btn-report:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }

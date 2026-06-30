@@ -3,7 +3,6 @@ import { db } from '../../../../services/firebase';
 import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, getDocs, limit } from 'firebase/firestore';
 import { useAuth } from '../../../../context/authContext';
 import ChatService from '../../../../services/chatService';
-import UserService from '../../../../services/userService';
 import './MessageTab.css'
 
 /* ─── Chat helpers ─── */
@@ -58,11 +57,11 @@ const MessageTab = ({ activeTab, locationState }) => {
         try {
             setChatLoading(true);
             setChatError('');
-            const res = await UserService.getAllUsers();
+            const res = await ChatService.getContacts();
             const all = res?.data || res || [];
 
             // LANDLORD chỉ thấy USER (người thuê)
-            const tenants = (Array.isArray(all) ? all : []).filter(u => u.role === 'USER' && String(u.id) !== String(user?.id));
+            const tenants = Array.isArray(all) ? all : [];
 
             // Lấy tin nhắn cuối cùng cho mỗi contact từ Firestore
             const contactsWithLastMsg = await Promise.all(
@@ -126,9 +125,9 @@ const MessageTab = ({ activeTab, locationState }) => {
             } else {
                 (async () => {
                     try {
-                        const res = await UserService.getAllUsers();
+                        const res = await ChatService.getContacts();
                         const all = res?.data || res || [];
-                        const tenants = (Array.isArray(all) ? all : []).filter(u => u.role === 'USER' && String(u.id) !== String(user?.id));
+                        const tenants = Array.isArray(all) ? all : [];
                         tryOpenContact(tenants);
                     } catch (e) {
                         console.warn('Auto-open chat contact failed:', e);

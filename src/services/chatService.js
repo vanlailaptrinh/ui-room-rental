@@ -3,6 +3,16 @@ import api from './axios'; // Sử dụng instance 'api' đồng bộ toàn hệ
 const ENDPOINT = '/chat';
 
 const ChatService = {
+    getContacts: async () => {
+        try {
+            const response = await api.get(`${ENDPOINT}/contacts`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching chat contacts:', error);
+            throw error;
+        }
+    },
+
     // [POST] /chat/room - Lấy hoặc khởi tạo phòng chat với một user cụ thể
     getOrCreateChatRoom: async (targetUserId) => {
         try {

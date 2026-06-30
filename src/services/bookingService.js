@@ -33,6 +33,15 @@ const BookingService = {
         return response.data;
     },
 
+    /**
+     * PUT /bookings/{id}/confirm-rented
+     * USER xác nhận đã thuê trọ sau khi booking được APPROVED.
+     */
+    confirmRented: async (id) => {
+        const response = await api.put(`${ENDPOINT}/${id}/confirm-rented`);
+        return response.data;
+    },
+
     // ===================== LANDLORD / ADMIN =====================
 
     /**

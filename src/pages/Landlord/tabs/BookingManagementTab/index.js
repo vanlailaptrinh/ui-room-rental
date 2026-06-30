@@ -16,6 +16,7 @@ const fmtDate = (iso) => {
 
 const StatusBadge = ({ status }) => {
     const map = {
+        RENTED:    { label: 'Đã thuê',          cls: 'landlord-sb-rented' },
         PENDING:   { label: 'Chờ duyệt',    cls: 'landlord-sb-pending' },
         APPROVED:  { label: 'Đã duyệt',     cls: 'landlord-sb-approved' },
         REJECTED:  { label: 'Từ chối',       cls: 'landlord-sb-rejected' },
@@ -39,6 +40,7 @@ const BookingManagementTab = ({ activeTab }) => {
         { value: 'ALL', label: 'Tất cả lịch hẹn' },
         { value: 'PENDING', label: '⏳ Chờ duyệt' },
         { value: 'APPROVED', label: '✅ Đã duyệt' },
+        { value: 'RENTED', label: 'Đã thuê' },
         { value: 'REJECTED', label: '❌ Từ chối' },
         { value: 'CANCELLED', label: '🚫 Đã hủy' },
     ];
@@ -174,7 +176,7 @@ const BookingManagementTab = ({ activeTab }) => {
                                             </div>
                                         ) : (
                                             <span className={`status-text-final status-${b.status?.toLowerCase()}`}>
-                                                {b.status === 'APPROVED' ? '✓ Đã đồng ý' : b.status === 'REJECTED' ? '✕ Đã từ chối' : '🚫 Đã hủy'}
+                                                {b.status === 'APPROVED' ? '✓ Đã đồng ý' : b.status === 'RENTED' ? 'Đã thuê' : b.status === 'REJECTED' ? '✕ Đã từ chối' : '🚫 Đã hủy'}
                                             </span>
                                         )}
                                     </div>

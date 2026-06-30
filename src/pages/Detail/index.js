@@ -11,6 +11,7 @@ import ChatService from '../../services/chatService';
 import FavoriteService from '../../services/favoriteService';
 import UserService from '../../services/userService';
 import ReviewService from '../../services/reviewService';
+import RentalFeedbackPanel from '../../components/RentalFeedbackPanel';
 import { useAuth } from '../../context/authContext';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -46,6 +47,8 @@ function Detail() {
     const [newRating, setNewRating] = useState(5);
     const [newComment, setNewComment] = useState('');
     const [submitReviewLoading, setSubmitReviewLoading] = useState(false);
+    const [myBookings, setMyBookings] = useState([]);
+    const [confirmRentedLoading, setConfirmRentedLoading] = useState(false);
 
     useEffect(() => {
         const fetchFullData = async () => {
@@ -83,6 +86,17 @@ function Detail() {
             .then(isFavorited => setIsFav(isFavorited))
             .catch(() => {});
     }, [id, user]);
+
+    useEffect(() => {
+        if (!user || user.role !== 'USER') {
+            setMyBookings([]);
+            return;
+        }
+
+        BookingService.getMyBookings()
+            .then((res) => setMyBookings(res.data || []))
+            .catch(() => setMyBookings([]));
+    }, [user]);
 
     useEffect(() => {
         if (!landlord?.id) return;
@@ -178,6 +192,7 @@ function Detail() {
         }
     };
 
+    // eslint-disable-next-line no-unused-vars
     const handleSubmitReview = async (e) => {
         e.preventDefault();
         if (!user) {
@@ -228,6 +243,35 @@ function Detail() {
         if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
         return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }, [landlord]);
+
+    const currentPostBooking = useMemo(() => {
+        const postBookings = myBookings.filter((booking) =>
+            String(booking.post?.id || booking.postId || '') === String(post?.id || id)
+        );
+        return postBookings.find((booking) => booking.status === 'RENTED')
+            || postBookings.find((booking) => booking.status === 'APPROVED')
+            || postBookings[0];
+    }, [myBookings, post?.id, id]);
+
+    const canUseRentalFeatures = currentPostBooking?.status === 'RENTED';
+
+    const handleConfirmRented = async () => {
+        if (!currentPostBooking?.id || confirmRentedLoading) return;
+        if (!window.confirm('Xác nhận bạn đã thuê trọ ở đây? Sau khi xác nhận, bạn có thể đánh giá và báo cáo phòng này.')) return;
+
+        try {
+            setConfirmRentedLoading(true);
+            const response = await BookingService.confirmRented(currentPostBooking.id);
+            const updatedBooking = response.data || { ...currentPostBooking, status: 'RENTED' };
+            setMyBookings((current) => current.map((booking) =>
+                booking.id === currentPostBooking.id ? { ...booking, ...updatedBooking, status: 'RENTED' } : booking
+            ));
+        } catch (error) {
+            alert(error?.response?.data?.message || 'Không thể xác nhận đã thuê. Vui lòng thử lại.');
+        } finally {
+            setConfirmRentedLoading(false);
+        }
+    };
 
     if (loading) return <div className="detail-loading-spinner">Đang tải dữ liệu...</div>;
     if (!post) return <div className="detail-error">Không tìm thấy bài đăng này.</div>;
@@ -378,6 +422,16 @@ function Detail() {
 
                             <button className="detail-btn-primary" onClick={() => setIsBookingOpen(true)}>Đặt lịch xem phòng</button>
 
+                            {user?.role === 'USER' && currentPostBooking?.status === 'APPROVED' && (
+                                <button
+                                    className="detail-btn-primary detail-btn-confirm-rented"
+                                    onClick={handleConfirmRented}
+                                    disabled={confirmRentedLoading}
+                                >
+                                    {confirmRentedLoading ? 'Đang xác nhận...' : 'Tôi đã thuê trọ ở đây'}
+                                </button>
+                            )}
+
                             <div className="detail-action-buttons">
                                 <button
                                     className={`detail-btn-outline detail-btn-favorite ${isFav ? 'detail-favorited' : ''}`}
@@ -387,7 +441,7 @@ function Detail() {
                                     <IconFavorite style={{ color: isFav ? '#ef4444' : undefined }} />
                                     {favLoading ? '...' : isFav ? 'Đã lưu' : 'Yêu thích'}
                                 </button>
-                                {user?.role !== 'LANDLORD' && user?.role !== 'ADMIN' && (
+                                {user?.role === 'USER' && canUseRentalFeatures && (
                                     <button className="detail-btn-outline" onClick={() => {
                                         if (!user) {
                                             navigate('/login');
@@ -423,70 +477,15 @@ function Detail() {
                             </div>
                         </div>
 
-                        <section className="detail-section detail-section-reviews">
-                            <div className="detail-section-title">
-                                <span className="detail-title-line"></span> Đánh giá chủ trọ
-                            </div>
-
-                            <div className="detail-reviews-list">
-                                {reviewLoading ? (
-                                    <p className="detail-review-status">Đang tải đánh giá...</p>
-                                ) : reviews.length > 0 ? (
-                                    reviews.map((rv) => (
-                                        <div key={rv.id} className="detail-review-card">
-                                            <div className="detail-review-header">
-                                                <div>
-                                                    <div className="detail-review-user">
-                                                        {rv.user?.fullName || rv.user?.username || 'Người dùng'}
-                                                    </div>
-                                                    <div className="detail-review-stars">
-                                                        {"★".repeat(rv.rating)}{"☆".repeat(5 - rv.rating)}
-                                                    </div>
-                                                </div>
-                                                {rv.createdAt && (
-                                                    <span className="detail-review-date">
-                                                {new Date(rv.createdAt).toLocaleDateString('vi-VN')}
-                                            </span>
-                                                )}
-                                            </div>
-                                            <p className="detail-review-body">{rv.comment}</p>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="detail-review-empty">Chưa có đánh giá nào.</p>
-                                )}
-                            </div>
-
-                            {user ? (
-                                <form onSubmit={handleSubmitReview} className="detail-review-form">
-                                    <div className="detail-review-form-row">
-                                        <label>Chất lượng:</label>
-                                        <select value={newRating} onChange={(e) => setNewRating(Number(e.target.value))}>
-                                            <option value={5}>⭐⭐⭐⭐⭐</option>
-                                            <option value={4}>⭐⭐⭐⭐</option>
-                                            <option value={3}>⭐⭐⭐</option>
-                                            <option value={2}>⭐⭐</option>
-                                            <option value={1}>⭐</option>
-                                        </select>
-                                    </div>
-                                    <textarea
-                                        value={newComment}
-                                        onChange={(e) => setNewComment(e.target.value)}
-                                        placeholder="Viết phản hồi của bạn về chủ trọ..."
-                                        required
-                                    />
-                                    <button type="submit" className="detail-btn-primary detail-btn-review-submit" disabled={submitReviewLoading}>
-                                        {submitReviewLoading ? 'Đang gửi...' : 'Gửi đánh giá'}
-                                    </button>
-                                </form>
-                            ) : (
-                                <div className="detail-review-login-prompt">
-                                    <p>
-                                        Vui lòng <span onClick={() => navigate('/login')}>đăng nhập</span> để để lại đánh giá.
-                                    </p>
-                                </div>
-                            )}
-                        </section>
+                        <RentalFeedbackPanel
+                            user={user}
+                            landlord={landlord}
+                            reviews={reviews}
+                            loading={reviewLoading}
+                            canReview={canUseRentalFeatures}
+                            onLogin={() => navigate('/login')}
+                            onReviewsChange={setReviews}
+                        />
                     </div>
                 </div>
             </div>

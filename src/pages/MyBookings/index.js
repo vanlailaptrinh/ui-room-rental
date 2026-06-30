@@ -17,6 +17,7 @@ const formatDateTime = (isoStr) => {
 // Helper: trạng thái badge
 const StatusBadge = ({ status }) => {
     const map = {
+        RENTED:    { label: 'Đã thuê',          cls: 'badge-rented' },
         PENDING:   { label: 'Chờ xác nhận', cls: 'badge-pending' },
         APPROVED:  { label: 'Đã duyệt',     cls: 'badge-approved' },
         REJECTED:  { label: 'Từ chối',       cls: 'badge-rejected' },
@@ -33,6 +34,7 @@ function MyBookings() {
     const [bookings, setBookings]   = useState([]);
     const [loading, setLoading]     = useState(true);
     const [error, setError]         = useState(null);
+    const [confirmingRented, setConfirmingRented] = useState(null);
     const [cancelling, setCancelling] = useState(null); // id đang hủy
 
     const fetchBookings = useCallback(async () => {
@@ -71,6 +73,23 @@ function MyBookings() {
             alert('Không thể hủy lịch hẹn. Có thể lịch hẹn đã được xử lý rồi.');
         } finally {
             setCancelling(null);
+        }
+    };
+
+    const handleConfirmRented = async (id) => {
+        if (!window.confirm('Xác nhận bạn đã thuê trọ ở đây?')) return;
+        try {
+            setConfirmingRented(id);
+            const response = await BookingService.confirmRented(id);
+            const updatedBooking = response.data || {};
+            setBookings(prev =>
+                prev.map(b => b.id === id ? { ...b, ...updatedBooking, status: 'RENTED' } : b)
+            );
+        } catch (err) {
+            console.error('Lỗi xác nhận đã thuê:', err);
+            alert(err?.response?.data?.message || 'Không thể xác nhận đã thuê. Vui lòng thử lại.');
+        } finally {
+            setConfirmingRented(null);
         }
     };
 
@@ -176,6 +195,32 @@ function MyBookings() {
                                     >
                                         {cancelling === booking.id ? 'Đang hủy...' : 'Hủy lịch'}
                                     </button>
+                                )}
+                                {booking.status === 'APPROVED' && (
+                                    <button
+                                        className="btn-confirm-rented"
+                                        onClick={() => handleConfirmRented(booking.id)}
+                                        disabled={confirmingRented === booking.id}
+                                    >
+                                        {confirmingRented === booking.id ? 'Đang xác nhận...' : 'Tôi đã thuê'}
+                                    </button>
+                                )}
+                                {booking.status === 'RENTED' && (
+                                    <>
+                                        <button
+                                            className="btn-detail"
+                                            onClick={() => booking.post?.id && navigate(`/detail/${booking.post.id}`)}
+                                        >
+                                            Đánh giá
+                                        </button>
+                                        <button
+                                            className="btn-report"
+                                            onClick={() => navigate('/reports', { state: { targetId: booking.post?.id } })}
+                                            disabled={!booking.post?.id}
+                                        >
+                                            Báo cáo
+                                        </button>
+                                    </>
                                 )}
                             </div>
                         </div>
