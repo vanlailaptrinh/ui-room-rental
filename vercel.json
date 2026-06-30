@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://api-room-rental.vantrandigital.id.vn/room-rental/api/:path*"
+    }
+  ]
+}
