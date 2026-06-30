@@ -118,6 +118,48 @@
     color: #2563eb;
 }
 
+.apt-renter-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 2px 0 7px;
+}
+
+.apt-renter-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.apt-renter-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.apt-renter-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.25;
+}
+
+.apt-renter-contact {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
 .apt-address-row {
     margin: 0 0 4px 0 !important;
     font-size: 13px !important;

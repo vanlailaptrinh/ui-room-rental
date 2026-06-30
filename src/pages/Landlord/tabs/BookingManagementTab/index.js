@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import BookingService from '../../../../services/bookingService';
+import UserService from '../../../../services/userService';
 import './BookingManagementTab.css';
 import LandlordFilterBar from '../../components/LandlordFilterBar';
 
@@ -24,6 +25,45 @@ const StatusBadge = ({ status }) => {
     };
     const { label, cls } = map[status] || { label: status, cls: '' };
     return <span className={`landlord-ld-status-badge ${cls}`}>{label}</span>;
+};
+
+const getBookingUser = (booking) => (
+    booking.user
+    || booking.tenant
+    || booking.customer
+    || booking.renter
+    || booking.booker
+    || booking.createdBy
+    || booking.userInfo
+    || null
+);
+
+const getBookingUserId = (booking) => (
+    booking.userId
+    || booking.tenantId
+    || booking.customerId
+    || booking.renterId
+    || booking.bookerId
+    || getBookingUser(booking)?.id
+);
+
+const getDisplayName = (user) => (
+    user?.fullName
+    || user?.name
+    || user?.username
+    || user?.email
+    || 'Khách thuê'
+);
+
+const getUserSearchText = (booking) => {
+    const user = getBookingUser(booking);
+    return [
+        getDisplayName(user),
+        user?.email,
+        user?.phone,
+        user?.phoneNumber,
+        getBookingUserId(booking),
+    ].filter(Boolean).join(' ').toLowerCase();
 };
 
 const BookingManagementTab = ({ activeTab }) => {
@@ -54,7 +94,37 @@ const BookingManagementTab = ({ activeTab }) => {
         try {
             setLoading(true); setError(null);
             const res = await BookingService.getLandlordBookings();
-            setBookings(res.data || []);
+            const bookingList = res.data || [];
+            const missingUserIds = [
+                ...new Set(
+                    bookingList
+                        .filter((booking) => !getBookingUser(booking))
+                        .map(getBookingUserId)
+                        .filter(Boolean)
+                        .map(String)
+                ),
+            ];
+
+            if (missingUserIds.length === 0) {
+                setBookings(bookingList);
+                return;
+            }
+
+            const userEntries = await Promise.all(
+                missingUserIds.map((userId) =>
+                    UserService.getUserById(userId)
+                        .then((userRes) => [userId, userRes.data])
+                        .catch(() => [userId, null])
+                )
+            );
+            const userMap = Object.fromEntries(userEntries.filter(([, user]) => user));
+
+            setBookings(bookingList.map((booking) => {
+                const userId = getBookingUserId(booking);
+                return userId && userMap[String(userId)]
+                    ? { ...booking, user: userMap[String(userId)] }
+                    : booking;
+            }));
         } catch (err) {
             setError('Không thể tải danh sách. Vui lòng thử lại.');
         } finally {
@@ -97,8 +167,9 @@ const BookingManagementTab = ({ activeTab }) => {
                 const matchStatus = filterStatus === 'ALL' || b.status === filterStatus;
                 const title = b.post?.title?.toLowerCase() || '';
                 const address = b.post?.address?.toLowerCase() || '';
+                const renter = getUserSearchText(b);
                 const keyword = searchTerm.toLowerCase().trim();
-                return matchStatus && (title.includes(keyword) || address.includes(keyword));
+                return matchStatus && (title.includes(keyword) || address.includes(keyword) || renter.includes(keyword));
             })
             .sort((a, b) => {
                 const timeA = new Date(a.bookingTime || 0).getTime();
@@ -122,7 +193,7 @@ const BookingManagementTab = ({ activeTab }) => {
                 <LandlordFilterBar
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
-                    searchPlaceholder="🔍 Tìm theo tiêu đề lịch hẹn, địa chỉ..."
+                    searchPlaceholder="🔍 Tìm theo phòng, địa chỉ, người đặt..."
                     filterStatus={filterStatus}
                     setFilterStatus={setFilterStatus}
                     statusOptions={statusOptions}
@@ -143,6 +214,11 @@ const BookingManagementTab = ({ activeTab }) => {
                     <div className="landlord-appointment-list">
                         {filteredAndSortedBookings.map((b) => {
                             const dt = b.bookingTime ? new Date(b.bookingTime) : null;
+                            const renter = getBookingUser(b);
+                            const renterName = getDisplayName(renter);
+                            const renterPhone = renter?.phone || renter?.phoneNumber;
+                            const renterEmail = renter?.email;
+                            const renterId = getBookingUserId(b);
                             return (
                                 <div key={b.id} className={`landlord-appointment-item landlord-ld-item-${b.status?.toLowerCase()}`}>
 
@@ -158,6 +234,17 @@ const BookingManagementTab = ({ activeTab }) => {
                                         <div className="apt-time-row">
                                             <span className="time-highlight">⏰ {dt ? dt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : ''}</span>
                                             <StatusBadge status={b.status} />
+                                        </div>
+                                        <div className="apt-renter-row">
+                                            <span className="apt-renter-avatar">
+                                                {renterName.trim().slice(0, 1).toUpperCase()}
+                                            </span>
+                                            <div className="apt-renter-info">
+                                                <span className="apt-renter-name">{renterName}</span>
+                                                <span className="apt-renter-contact">
+                                                    {[renterPhone, renterEmail].filter(Boolean).join(' • ') || (renterId ? `Mã người đặt: ${renterId}` : 'Chưa có thông tin liên hệ')}
+                                                </span>
+                                            </div>
                                         </div>
                                         <p className="apt-address-row">📍 {b.post?.address || '—'}</p>
                                         <p className="apt-created-row">Đặt lúc: {fmtDate(b.createdAt)}</p>
